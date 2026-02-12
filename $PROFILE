@@ -1,0 +1,5 @@
+# Manually load VS Code Shell Integration
+if ($env:TERM_PROGRAM -eq "vscode") {
+    $integrationPath = code --locate-shell-integration-path pwsh
+    if ($integrationPath) { . $integrationPath }
+}
