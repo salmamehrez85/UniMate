@@ -29,17 +29,21 @@ const STATS_DATA = [
 
 export function StatsCards() {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
       {STATS_DATA.map((stat, index) => (
         <div
           key={index}
-          className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          className="bg-white rounded-lg p-7 shadow-sm border border-gray-200 hover:shadow-lg hover:border-gray-300 transition-all duration-300 cursor-pointer">
           <div
-            className={`w-12 h-12 rounded-lg ${stat.color} flex items-center justify-center mb-3`}>
-            <stat.Icon className="w-6 h-6" />
+            className={`w-14 h-14 rounded-lg ${stat.color} flex items-center justify-center mb-5`}>
+            <stat.Icon className="w-7 h-7" />
           </div>
-          <p className="text-2xl font-bold text-primary-900">{stat.value}</p>
-          <p className="text-sm text-gray-600 mt-1 font-medium">{stat.label}</p>
+          <p className="text-3xl font-bold text-primary-900 mb-1">
+            {stat.value}
+          </p>
+          <p className="text-xs text-gray-600 mt-2 font-semibold uppercase tracking-wide">
+            {stat.label}
+          </p>
         </div>
       ))}
     </div>
