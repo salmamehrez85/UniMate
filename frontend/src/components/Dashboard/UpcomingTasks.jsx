@@ -1,24 +1,24 @@
 const UPCOMING_TASKS = [
   {
     id: 1,
-    title: 'Submit Math Assignment',
-    course: 'Mathematics',
-    dueDate: 'Today',
-    priority: 'high',
+    title: "Submit Math Assignment",
+    course: "Mathematics",
+    dueDate: "Today",
+    priority: "high",
   },
   {
     id: 2,
-    title: 'Read Chapter 5',
-    course: 'Physics',
-    dueDate: 'Tomorrow',
-    priority: 'medium',
+    title: "Read Chapter 5",
+    course: "Physics",
+    dueDate: "Tomorrow",
+    priority: "medium",
   },
   {
     id: 3,
-    title: 'Prepare Presentation',
-    course: 'Computer Science',
-    dueDate: 'Feb 15',
-    priority: 'high',
+    title: "Prepare Presentation",
+    course: "Computer Science",
+    dueDate: "Feb 15",
+    priority: "high",
   },
 ];
 
@@ -35,7 +35,9 @@ function TaskItem({ task }) {
         <div className="flex items-center gap-2 mt-2.5">
           <span
             className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-              task.priority === 'high' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
+              task.priority === "high"
+                ? "bg-red-100 text-red-700"
+                : "bg-amber-100 text-amber-700"
             }`}>
             {task.priority}
           </span>

@@ -1,8 +1,8 @@
-import { WelcomeSection } from '../components/Dashboard/WelcomeSection';
-import { StatsCards } from '../components/Dashboard/StatsCards';
-import { UpcomingTasks } from '../components/Dashboard/UpcomingTasks';
-import { CourseProgress } from '../components/Dashboard/CourseProgress';
-import { RecentActivity } from '../components/Dashboard/RecentActivity';
+import { WelcomeSection } from "../components/Dashboard/WelcomeSection";
+import { StatsCards } from "../components/Dashboard/StatsCards";
+import { UpcomingTasks } from "../components/Dashboard/UpcomingTasks";
+import { CourseProgress } from "../components/Dashboard/CourseProgress";
+import { RecentActivity } from "../components/Dashboard/RecentActivity";
 
 export function Dashboard() {
   return (

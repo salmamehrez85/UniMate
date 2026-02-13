@@ -1,8 +1,8 @@
 const COURSES_DATA = [
-  { id: 1, name: 'Mathematics', progress: 75, color: 'bg-primary-500' },
-  { id: 2, name: 'Physics', progress: 60, color: 'bg-teal-500' },
-  { id: 3, name: 'Computer Science', progress: 80, color: 'bg-primary-600' },
-  { id: 4, name: 'Chemistry', progress: 45, color: 'bg-primary-400' },
+  { id: 1, name: "Mathematics", progress: 75, color: "bg-primary-500" },
+  { id: 2, name: "Physics", progress: 60, color: "bg-teal-500" },
+  { id: 3, name: "Computer Science", progress: 80, color: "bg-primary-600" },
+  { id: 4, name: "Chemistry", progress: 45, color: "bg-primary-400" },
 ];
 
 function CourseItem({ course }) {
@@ -10,7 +10,9 @@ function CourseItem({ course }) {
     <div>
       <div className="flex items-center justify-between mb-2">
         <span className="font-semibold text-primary-900">{course.name}</span>
-        <span className="text-sm font-bold text-primary-600">{course.progress}%</span>
+        <span className="text-sm font-bold text-primary-600">
+          {course.progress}%
+        </span>
       </div>
       <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
         <div
