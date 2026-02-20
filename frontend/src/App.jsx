@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Dashboard } from "./pages/Dashboard";
 import { Courses } from "./pages/Courses";
 import { Performance } from "./pages/Performance";
+import { Login } from "./pages/Login";
+import { Register } from "./pages/Register";
 import { Tasks } from "./components/Tasks";
 import { AIChat } from "./components/AIChat";
 import { Settings } from "./components/Settings";
@@ -11,7 +13,44 @@ import { Header } from "./components/Header";
 import "./App.css";
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authView, setAuthView] = useState("login"); // 'login' or 'register'
   const [activeView, setActiveView] = useState("dashboard");
+
+  const handleLoginSuccess = () => {
+    setIsAuthenticated(true);
+    // TODO: Store auth token in localStorage
+  };
+
+  const handleRegisterSuccess = () => {
+    setIsAuthenticated(true);
+    // TODO: Store auth token in localStorage
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setActiveView("dashboard");
+    // TODO: Clear auth token from localStorage
+  };
+
+  // Show authentication pages if not logged in
+  if (!isAuthenticated) {
+    if (authView === "login") {
+      return (
+        <Login
+          onSwitchToRegister={() => setAuthView("register")}
+          onLoginSuccess={handleLoginSuccess}
+        />
+      );
+    } else {
+      return (
+        <Register
+          onSwitchToLogin={() => setAuthView("login")}
+          onRegisterSuccess={handleRegisterSuccess}
+        />
+      );
+    }
+  }
 
   const renderView = () => {
     switch (activeView) {
@@ -32,7 +71,7 @@ export default function App() {
       case "schedule":
         return <WeeklySchedule />;
       case "settings":
-        return <Settings />;
+        return <Settings onLogout={handleLogout} />;
       default:
         return <Dashboard />;
     }
