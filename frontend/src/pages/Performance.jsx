@@ -1,5 +1,6 @@
 import { PerformanceHeader } from "../components/Performance/PerformanceHeader";
 import { AIRecommendations } from "../components/Performance/AIRecommendations";
+import { GPATrendChart } from "../components/Performance/GPATrendChart";
 import { CoursePerformanceCard } from "../components/Performance/CoursePerformanceCard";
 
 const PERFORMANCE_DATA = [
@@ -63,6 +64,9 @@ export function Performance() {
 
       {/* GPA Cards */}
       <PerformanceHeader />
+
+      {/* GPA Trend Chart */}
+      <GPATrendChart />
 
       {/* AI Recommendations */}
       <AIRecommendations />
