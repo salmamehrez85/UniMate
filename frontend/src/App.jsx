@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { Dashboard } from "./pages/Dashboard";
 import { Courses } from "./pages/Courses";
+import { Performance } from "./pages/Performance";
 import { Tasks } from "./components/Tasks";
-import { Summarizer } from "./components/Summarizer";
-import { Quizzes } from "./components/Quizzes";
-import { Performance } from "./components/Performance";
 import { AIChat } from "./components/AIChat";
 import { Settings } from "./components/Settings";
 import { WeeklySchedule } from "./components/WeeklySchedule";
