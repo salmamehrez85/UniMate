@@ -1,5 +1,10 @@
 import { useState } from "react";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import {
+  loginUser,
+  setAuthToken,
+  setUserData,
+} from "../../services/authService";
 
 export function LoginForm({ onSwitchToRegister, onLoginSuccess }) {
   const [email, setEmail] = useState("");
@@ -21,23 +26,20 @@ export function LoginForm({ onSwitchToRegister, onLoginSuccess }) {
     }
 
     try {
-      // TODO: Replace with actual API call to backend
-      // const response = await fetch('http://localhost:3000/api/auth/login', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email, password })
-      // });
+      // Call the actual login API
+      const response = await loginUser({ email, password });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Store token and user data
+      setAuthToken(response.token);
+      setUserData(response.user);
 
-      // For now, just call the success callback
+      // Call success callback
       if (onLoginSuccess) {
         onLoginSuccess();
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError("Invalid email or password");
+      setError(err.message || "Invalid email or password");
     } finally {
       setLoading(false);
     }

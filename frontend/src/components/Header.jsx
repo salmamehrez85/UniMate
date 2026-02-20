@@ -1,6 +1,6 @@
-import { Bell } from "lucide-react";
+import { Bell, LogOut } from "lucide-react";
 
-export function Header({ activeView }) {
+export function Header({ activeView, onLogout }) {
   const getTitle = () => {
     switch (activeView) {
       case "dashboard":
@@ -36,6 +36,12 @@ export function Header({ activeView }) {
           <div className="flex items-center gap-4">
             <button className="p-2.5 hover:bg-gray-50 rounded-lg transition-colors text-primary-600">
               <Bell className="w-5 h-5" />
+            </button>
+            <button
+              onClick={onLogout}
+              className="p-2.5 hover:bg-red-50 rounded-lg transition-colors text-red-600"
+              title="Logout">
+              <LogOut className="w-5 h-5" />
             </button>
           </div>
         </div>

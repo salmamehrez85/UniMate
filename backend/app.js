@@ -14,9 +14,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-// Import your routes here
-// const exampleRoute = require('./route/exampleRoute');
-// app.use('/api/example', exampleRoute);
+const authRoutes = require("./routes/authRoutes");
+app.use("/api/auth", authRoutes);
 
 // Health check endpoint
 app.get("/health", (req, res) => {

@@ -1,5 +1,10 @@
 import { useState } from "react";
 import { Mail, Lock, User, Eye, EyeOff, GraduationCap } from "lucide-react";
+import {
+  registerUser,
+  setAuthToken,
+  setUserData,
+} from "../../services/authService";
 
 export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
   const [formData, setFormData] = useState({
@@ -52,28 +57,25 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
     }
 
     try {
-      // TODO: Replace with actual API call to backend
-      // const response = await fetch('http://localhost:3000/api/auth/register', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     fullName: formData.fullName,
-      //     email: formData.email,
-      //     password: formData.password,
-      //     university: formData.university
-      //   })
-      // });
+      // Call the actual register API
+      const response = await registerUser({
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        university: formData.university,
+      });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Store token and user data
+      setAuthToken(response.token);
+      setUserData(response.user);
 
-      // For now, just call the success callback
+      // Call success callback
       if (onRegisterSuccess) {
         onRegisterSuccess();
       }
     } catch (err) {
       console.error("Registration error:", err);
-      setError("Failed to create account. Please try again.");
+      setError(err.message || "Failed to create account. Please try again.");
     } finally {
       setLoading(false);
     }
