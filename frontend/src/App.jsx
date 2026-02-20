@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Dashboard } from "./pages/Dashboard";
-import { Courses } from "./components/Courses";
+import { Courses } from "./pages/Courses";
 import { Tasks } from "./components/Tasks";
 import { Summarizer } from "./components/Summarizer";
 import { Quizzes } from "./components/Quizzes";
