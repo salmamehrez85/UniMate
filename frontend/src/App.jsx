@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { Dashboard } from "./pages/Dashboard";
 import { Courses } from "./pages/Courses";
 import { Performance } from "./pages/Performance";
+import { Quizzes } from "./pages/Quizzes";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 import { Tasks } from "./components/Tasks";
 import { AIChat } from "./components/AIChat";
+import { Summarizer } from "./components/Summarizer";
 import { Settings } from "./components/Settings";
 import { WeeklySchedule } from "./components/WeeklySchedule";
 import { Navigation } from "./components/Navigation";
@@ -31,7 +33,10 @@ export default function App() {
   };
 
   const handleRegisterSuccess = () => {
-    setIsAuthenticated(true);
+    // After registration, redirect to login instead of dashboard
+    logoutService();
+    setIsAuthenticated(false);
+    setAuthView("login");
   };
 
   const handleLogout = () => {
