@@ -250,7 +250,7 @@ export function SettingsTab({
 
       {/* Delete Confirmation Dialog */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6">
             <h3 className="text-lg font-bold text-primary-900 mb-2">
               Delete Course?

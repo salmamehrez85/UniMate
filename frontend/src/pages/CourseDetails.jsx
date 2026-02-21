@@ -24,31 +24,39 @@ export function CourseDetails({
     { id: "settings", label: "Settings" },
   ];
 
+  // Handler to update both local courseData and parent state
+  const handleCourseUpdate = (updatedCourse) => {
+    setCourseData(updatedCourse);
+    onCourseUpdate(updatedCourse);
+  };
+
   const renderTab = () => {
     switch (activeTab) {
       case "overview":
         return <OverviewTab course={courseData} />;
       case "assessments":
         return (
-          <AssessmentsTab course={courseData} onCourseUpdate={onCourseUpdate} />
+          <AssessmentsTab
+            course={courseData}
+            onCourseUpdate={handleCourseUpdate}
+          />
         );
       case "tasks":
-        return <TasksTab course={courseData} onCourseUpdate={onCourseUpdate} />;
+        return (
+          <TasksTab course={courseData} onCourseUpdate={handleCourseUpdate} />
+        );
       case "phases":
         return (
           <ProjectPhasesTab
             course={courseData}
-            onCourseUpdate={onCourseUpdate}
+            onCourseUpdate={handleCourseUpdate}
           />
         );
       case "settings":
         return (
           <SettingsTab
             course={courseData}
-            onCourseUpdate={(updatedCourse) => {
-              setCourseData(updatedCourse);
-              onCourseUpdate(updatedCourse);
-            }}
+            onCourseUpdate={handleCourseUpdate}
             onCourseDelete={onCourseDelete}
             onBack={onBack}
           />
@@ -81,7 +89,7 @@ export function CourseDetails({
         </div>
 
         {/* Tabs Navigation */}
-        <div className="flex gap-2 border-b border-gray-200 overflow-x-auto">
+        <div className="flex gap-2 border-b border-gray-200">
           {tabs.map((tab) => (
             <button
               key={tab.id}
