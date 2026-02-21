@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Dashboard } from "./pages/Dashboard";
 import { Courses } from "./pages/Courses";
+import { CourseDetails } from "./pages/CourseDetails";
 import { Performance } from "./pages/Performance";
 import { Quizzes } from "./pages/Quizzes";
 import { Login } from "./pages/Login";
@@ -19,6 +20,7 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authView, setAuthView] = useState("login"); // 'login' or 'register'
   const [activeView, setActiveView] = useState("dashboard");
+  const [selectedCourse, setSelectedCourse] = useState(null);
 
   // Check for existing auth token on mount
   useEffect(() => {
@@ -69,7 +71,29 @@ export default function App() {
       case "dashboard":
         return <Dashboard />;
       case "courses":
-        return <Courses />;
+        return (
+          <Courses
+            onSelectCourse={(course) => {
+              setSelectedCourse(course);
+              setActiveView("courseDetails");
+            }}
+          />
+        );
+      case "courseDetails":
+        return (
+          <CourseDetails
+            courseId={selectedCourse?.id}
+            course={selectedCourse}
+            onBack={() => setActiveView("courses")}
+            onCourseUpdate={(updatedCourse) => {
+              setSelectedCourse(updatedCourse);
+            }}
+            onCourseDelete={(courseId) => {
+              setSelectedCourse(null);
+              setActiveView("courses");
+            }}
+          />
+        );
       case "tasks":
         return <Tasks />;
       case "summarizer":

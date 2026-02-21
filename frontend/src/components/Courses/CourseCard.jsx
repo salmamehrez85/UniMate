@@ -1,6 +1,6 @@
 import { Calendar, Mail } from "lucide-react";
 
-export function CourseCard({ course }) {
+export function CourseCard({ course, onManage }) {
   const getCodeBgColor = (code) => {
     // Generate a consistent color based on the course code
     const colors = [
@@ -23,6 +23,8 @@ export function CourseCard({ course }) {
     return colors[hash % colors.length];
   };
 
+  const tasksCount = (course.tasks || []).length;
+
   return (
     <div className="bg-white rounded-lg border border-gray-100 hover:shadow-md transition-shadow overflow-hidden">
       {/* Header with code badge and task count */}
@@ -34,28 +36,32 @@ export function CourseCard({ course }) {
           {course.code}
         </span>
         <span className="text-gray-500 text-sm font-medium">
-          {course.tasks} tasks
+          {tasksCount} tasks
         </span>
       </div>
 
       {/* Course details */}
       <div className="p-5 space-y-3">
-        <h3 className="text-lg font-bold text-gray-900">{course.title}</h3>
+        <h3 className="text-lg font-bold text-gray-900">{course.name}</h3>
 
-        <p className="text-gray-600 text-sm">Dr. {course.instructor}</p>
+        <p className="text-gray-600 text-sm">
+          {course.instructor || "Not specified"}
+        </p>
 
         <div className="flex items-center gap-2 text-gray-600 text-sm">
           <Calendar className="w-4 h-4" />
-          {course.schedule}
+          {course.schedule || "N/A"}
         </div>
       </div>
 
       {/* Footer with actions */}
-      <div className="px-5 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-        <button className="text-primary-600 hover:text-primary-700 font-medium text-sm transition-colors">
-          View Details
+      <div className="px-5 py-4 bg-white border-t border-gray-100 flex items-center gap-2">
+        <button
+          onClick={onManage}
+          className="flex-1 text-center px-4 py-2 bg-gray-100 border border-gray-200 text-primary-600 hover:text-primary-700 hover:bg-gray-200 hover:border-gray-300 font-medium text-sm transition-colors rounded">
+          Manage Course
         </button>
-        <button className="text-gray-400 hover:text-gray-600 transition-colors">
+        <button className="px-3 py-2 bg-gray-100 border border-gray-200 text-gray-600 hover:text-primary-600 hover:bg-gray-200 hover:border-gray-300 transition-colors rounded">
           <Mail className="w-5 h-5" />
         </button>
       </div>

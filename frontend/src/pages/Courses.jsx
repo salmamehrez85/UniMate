@@ -4,7 +4,7 @@ import { CourseCard } from "../components/Courses/CourseCard";
 import { AddCourseModal } from "../components/Courses/AddCourseModal";
 import { getCourses, createCourse } from "../services/courseService";
 
-export function Courses() {
+export function Courses({ onSelectCourse }) {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -18,8 +18,23 @@ export function Courses() {
   const fetchCourses = async () => {
     try {
       setLoading(true);
-      const data = await getCourses();
-      setCourses(data.courses);
+      // Mock data for demonstration
+      const mockCourses = [
+        {
+          id: "1",
+          _id: "1",
+          code: "CS101",
+          name: "Introduction to Computer Science",
+          instructor: "Dr. John Doe",
+          schedule: "Mon & Wed 10:00 AM",
+          credits: "3",
+          semester: "Spring 2024",
+          assessments: [],
+          tasks: [],
+          phases: [],
+        },
+      ];
+      setCourses(mockCourses);
       setError("");
     } catch (err) {
       console.error("Error fetching courses:", err);
@@ -31,12 +46,30 @@ export function Courses() {
 
   const handleAddCourse = async (courseData) => {
     try {
-      const response = await createCourse(courseData);
-      // Add new course to the list
-      setCourses([response.course, ...courses]);
+      // Mock course creation
+      const newCourse = {
+        id: Date.now().toString(),
+        _id: Date.now().toString(),
+        ...courseData,
+        assessments: [],
+        tasks: [],
+        phases: [],
+      };
+      setCourses([newCourse, ...courses]);
+      return newCourse;
     } catch (err) {
       throw err; // Let modal handle the error
     }
+  };
+
+  const handleCourseUpdate = (updatedCourse) => {
+    setCourses(
+      courses.map((c) => (c.id === updatedCourse.id ? updatedCourse : c)),
+    );
+  };
+
+  const handleCourseDelete = (courseId) => {
+    setCourses(courses.filter((c) => c.id !== courseId));
   };
 
   if (loading) {
@@ -75,7 +108,11 @@ export function Courses() {
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.map((course) => (
-            <CourseCard key={course._id} course={course} />
+            <CourseCard
+              key={course._id}
+              course={course}
+              onManage={() => onSelectCourse(course)}
+            />
           ))}
         </div>
       )}
