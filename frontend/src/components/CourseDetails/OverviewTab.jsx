@@ -82,7 +82,7 @@ export function OverviewTab({ course }) {
               Course Name
             </p>
             <p className="text-lg font-semibold text-primary-900">
-              {course.name}
+              {course.name || course.title}
             </p>
           </div>
 

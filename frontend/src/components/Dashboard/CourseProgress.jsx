@@ -12,7 +12,7 @@ function CourseItem({ course }) {
     <div className="pb-1">
       <div className="flex items-center justify-between mb-3">
         <span className="font-semibold text-gray-900 text-base">
-          {course.name}
+          {course.name || course.title}
         </span>
         <span className="text-sm font-bold text-primary-600 bg-primary-50 px-3 py-1.5 rounded-full">
           {course.progress}%

@@ -18,23 +18,8 @@ export function Courses({ onSelectCourse }) {
   const fetchCourses = async () => {
     try {
       setLoading(true);
-      // Mock data for demonstration
-      const mockCourses = [
-        {
-          id: "1",
-          _id: "1",
-          code: "CS101",
-          name: "Introduction to Computer Science",
-          instructor: "Dr. John Doe",
-          schedule: "Mon & Wed 10:00 AM",
-          credits: "3",
-          semester: "Spring 2024",
-          assessments: [],
-          tasks: [],
-          phases: [],
-        },
-      ];
-      setCourses(mockCourses);
+      const data = await getCourses();
+      setCourses(data.courses || []);
       setError("");
     } catch (err) {
       console.error("Error fetching courses:", err);
@@ -46,17 +31,9 @@ export function Courses({ onSelectCourse }) {
 
   const handleAddCourse = async (courseData) => {
     try {
-      // Mock course creation
-      const newCourse = {
-        id: Date.now().toString(),
-        _id: Date.now().toString(),
-        ...courseData,
-        assessments: [],
-        tasks: [],
-        phases: [],
-      };
-      setCourses([newCourse, ...courses]);
-      return newCourse;
+      const response = await createCourse(courseData);
+      setCourses([response.course, ...courses]);
+      return response.course;
     } catch (err) {
       throw err; // Let modal handle the error
     }
@@ -64,12 +41,12 @@ export function Courses({ onSelectCourse }) {
 
   const handleCourseUpdate = (updatedCourse) => {
     setCourses(
-      courses.map((c) => (c.id === updatedCourse.id ? updatedCourse : c)),
+      courses.map((c) => (c._id === updatedCourse._id ? updatedCourse : c)),
     );
   };
 
   const handleCourseDelete = (courseId) => {
-    setCourses(courses.filter((c) => c.id !== courseId));
+    setCourses(courses.filter((c) => c._id !== courseId));
   };
 
   if (loading) {

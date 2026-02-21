@@ -42,7 +42,9 @@ export function CourseCard({ course, onManage }) {
 
       {/* Course details */}
       <div className="p-5 space-y-3">
-        <h3 className="text-lg font-bold text-gray-900">{course.name}</h3>
+        <h3 className="text-lg font-bold text-gray-900">
+          {course.name || course.title}
+        </h3>
 
         <p className="text-gray-600 text-sm">
           {course.instructor || "Not specified"}

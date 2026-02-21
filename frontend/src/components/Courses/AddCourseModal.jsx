@@ -4,10 +4,11 @@ import { X } from "lucide-react";
 export function AddCourseModal({ isOpen, onClose, onAdd }) {
   const [formData, setFormData] = useState({
     code: "",
-    title: "",
+    name: "",
     instructor: "",
     schedule: "",
-    tasks: 0,
+    credits: "",
+    semester: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -16,7 +17,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: name === "tasks" ? parseInt(value) || 0 : value,
+      [name]: value,
     });
   };
 
@@ -25,13 +26,8 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
     setError("");
 
     // Validation
-    if (
-      !formData.code ||
-      !formData.title ||
-      !formData.instructor ||
-      !formData.schedule
-    ) {
-      setError("Please fill in all required fields");
+    if (!formData.code || !formData.name) {
+      setError("Course code and name are required");
       return;
     }
 
@@ -42,10 +38,11 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
       // Reset form
       setFormData({
         code: "",
-        title: "",
+        name: "",
         instructor: "",
         schedule: "",
-        tasks: 0,
+        credits: "",
+        semester: "",
       });
       onClose();
     } catch (err) {
@@ -92,18 +89,18 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
             />
           </div>
 
-          {/* Course Title */}
+          {/* Course Name */}
           <div>
             <label
-              htmlFor="title"
+              htmlFor="name"
               className="block text-sm font-medium text-gray-700 mb-2">
-              Course Title <span className="text-red-500">*</span>
+              Course Name <span className="text-red-500">*</span>
             </label>
             <input
-              id="title"
-              name="title"
+              id="name"
+              name="name"
               type="text"
-              value={formData.title}
+              value={formData.name}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
               placeholder="e.g., Data Structures"
@@ -116,7 +113,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
             <label
               htmlFor="instructor"
               className="block text-sm font-medium text-gray-700 mb-2">
-              Instructor <span className="text-red-500">*</span>
+              Instructor
             </label>
             <input
               id="instructor"
@@ -135,47 +132,54 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
             <label
               htmlFor="schedule"
               className="block text-sm font-medium text-gray-700 mb-2">
-              Schedule <span className="text-red-500">*</span>
+              Schedule
             </label>
             <input
               id="schedule"
               name="schedule"
               type="text"
-              list="schedule-options"
               value={formData.schedule}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-              placeholder="Select or type a schedule"
+              placeholder="e.g., Mon & Wed 10:00 AM"
               disabled={loading}
             />
-            <datalist id="schedule-options">
-              <option value="Sun, Tue 10:00 AM" />
-              <option value="Sun, Tue 12:00 PM" />
-              <option value="Mon, Wed 10:00 AM" />
-              <option value="Mon, Wed 2:00 PM" />
-              <option value="Tue, Thu 1:00 PM" />
-              <option value="Tue, Thu 3:00 PM" />
-              <option value="Thu 9:00 AM" />
-              <option value="Sat 11:00 AM" />
-            </datalist>
           </div>
 
-          {/* Tasks (Optional) */}
+          {/* Credits */}
           <div>
             <label
-              htmlFor="tasks"
+              htmlFor="credits"
               className="block text-sm font-medium text-gray-700 mb-2">
-              Number of Tasks (Optional)
+              Credits
             </label>
             <input
-              id="tasks"
-              name="tasks"
-              type="number"
-              min="0"
-              value={formData.tasks}
+              id="credits"
+              name="credits"
+              type="text"
+              value={formData.credits}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-              placeholder="0"
+              placeholder="e.g., 3"
+              disabled={loading}
+            />
+          </div>
+
+          {/* Semester */}
+          <div>
+            <label
+              htmlFor="semester"
+              className="block text-sm font-medium text-gray-700 mb-2">
+              Semester
+            </label>
+            <input
+              id="semester"
+              name="semester"
+              type="text"
+              value={formData.semester}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+              placeholder="e.g., Spring 2024"
               disabled={loading}
             />
           </div>

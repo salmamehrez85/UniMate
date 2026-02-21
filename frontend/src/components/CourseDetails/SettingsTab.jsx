@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Save, X } from "lucide-react";
+import { deleteCourse } from "../../services/courseService";
 
 export function SettingsTab({
   course,
@@ -11,7 +12,7 @@ export function SettingsTab({
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [formData, setFormData] = useState({
     code: course.code || "",
-    name: course.name || "",
+    name: course.name || course.title || "",
     instructor: course.instructor || "",
     schedule: course.schedule || "",
     credits: course.credits || "",
@@ -45,9 +46,15 @@ export function SettingsTab({
     setIsEditing(false);
   };
 
-  const handleDelete = () => {
-    onCourseDelete(course._id || course.id);
-    onBack();
+  const handleDelete = async () => {
+    try {
+      await deleteCourse(course._id);
+      onCourseDelete(course._id);
+      onBack();
+    } catch (error) {
+      console.error("Error deleting course:", error);
+      alert("Failed to delete course: " + error.message);
+    }
   };
 
   return (
@@ -172,7 +179,7 @@ export function SettingsTab({
                   setIsEditing(false);
                   setFormData({
                     code: course.code || "",
-                    name: course.name || "",
+                    name: course.name || course.title || "",
                     instructor: course.instructor || "",
                     schedule: course.schedule || "",
                     credits: course.credits || "",
@@ -201,7 +208,7 @@ export function SettingsTab({
                 Course Name
               </p>
               <p className="text-lg font-semibold text-primary-900">
-                {course.name}
+                {course.name || course.title}
               </p>
             </div>
             <div>
@@ -256,9 +263,9 @@ export function SettingsTab({
               Delete Course?
             </h3>
             <p className="text-gray-600 mb-4">
-              Are you sure you want to delete "{course.name}"? This action will
-              also delete all assessments, tasks, and project phases associated
-              with this course. This cannot be undone.
+              Are you sure you want to delete "{course.name || course.title}"?
+              This action will also delete all assessments, tasks, and project
+              phases associated with this course. This cannot be undone.
             </p>
 
             <div className="flex gap-3">

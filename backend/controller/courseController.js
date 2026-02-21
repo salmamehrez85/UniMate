@@ -58,16 +58,20 @@ exports.getCourse = async (req, res) => {
 // @access  Private
 exports.createCourse = async (req, res) => {
   try {
-    const { code, title, instructor, schedule, tasks } = req.body;
+    const { code, name, instructor, schedule, credits, semester } = req.body;
 
     // Add userId to course data
     const courseData = {
       userId: req.user._id,
       code,
-      title,
-      instructor,
-      schedule,
-      tasks: tasks || 0,
+      name,
+      instructor: instructor || "",
+      schedule: schedule || "",
+      credits: credits || "",
+      semester: semester || "",
+      assessments: [],
+      tasks: [],
+      phases: [],
     };
 
     const course = await Course.create(courseData);
@@ -105,7 +109,7 @@ exports.updateCourse = async (req, res) => {
 
     course = await Course.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
-      runValidators: true,
+      runValidators: false,
     });
 
     res.status(200).json({

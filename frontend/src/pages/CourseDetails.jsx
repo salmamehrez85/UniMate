@@ -5,6 +5,7 @@ import { AssessmentsTab } from "../components/CourseDetails/AssessmentsTab";
 import { TasksTab } from "../components/CourseDetails/TasksTab";
 import { ProjectPhasesTab } from "../components/CourseDetails/ProjectPhasesTab";
 import { SettingsTab } from "../components/CourseDetails/SettingsTab";
+import { updateCourse, deleteCourse } from "../services/courseService";
 
 export function CourseDetails({
   courseId,
@@ -24,10 +25,18 @@ export function CourseDetails({
     { id: "settings", label: "Settings" },
   ];
 
-  // Handler to update both local courseData and parent state
-  const handleCourseUpdate = (updatedCourse) => {
-    setCourseData(updatedCourse);
-    onCourseUpdate(updatedCourse);
+  // Handler to update both local courseData and parent state + API
+  const handleCourseUpdate = async (updatedCourse) => {
+    try {
+      setCourseData(updatedCourse);
+      const response = await updateCourse(updatedCourse._id, updatedCourse);
+      setCourseData(response.course);
+      onCourseUpdate(response.course);
+    } catch (error) {
+      console.error("Error updating course:", error);
+      // Revert to previous state on error
+      setCourseData(courseData);
+    }
   };
 
   const renderTab = () => {
@@ -82,7 +91,7 @@ export function CourseDetails({
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold text-primary-900 mb-2">
-              {courseData.name}
+              {courseData.name || courseData.title}
             </h1>
             <p className="text-gray-600">Course Code: {courseData.code}</p>
           </div>

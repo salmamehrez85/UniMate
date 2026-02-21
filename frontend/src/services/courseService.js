@@ -27,6 +27,22 @@ export const getCourses = async () => {
   return data;
 };
 
+// Get single course by ID
+export const getSingleCourse = async (id) => {
+  const response = await fetch(`${API_BASE_URL}/courses/${id}`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to fetch course");
+  }
+
+  return data;
+};
+
 // Create new course
 export const createCourse = async (courseData) => {
   const response = await fetch(`${API_BASE_URL}/courses`, {
