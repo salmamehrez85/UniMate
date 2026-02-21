@@ -20,7 +20,7 @@ function getCurrentSemester() {
   return `${semester} ${year} Semester`;
 }
 
-export function CoursesHeader({ totalCourses }) {
+export function CoursesHeader({ totalCourses, onAddCourse }) {
   const currentSemester = getCurrentSemester();
 
   return (
@@ -37,7 +37,9 @@ export function CoursesHeader({ totalCourses }) {
           <Calendar className="w-5 h-5" />
           Import
         </button>
-        <button className="flex items-center gap-2 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-all font-semibold">
+        <button
+          onClick={onAddCourse}
+          className="flex items-center gap-2 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-all font-semibold">
           <Plus className="w-5 h-5" />
           Add Course
         </button>

@@ -15,7 +15,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 const authRoutes = require("./routes/authRoutes");
+const courseRoutes = require("./routes/courseRoutes");
 app.use("/api/auth", authRoutes);
+app.use("/api/courses", courseRoutes);
 
 // Health check endpoint
 app.get("/health", (req, res) => {
