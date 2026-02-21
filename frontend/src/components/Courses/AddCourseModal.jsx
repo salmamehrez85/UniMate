@@ -58,7 +58,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 backdrop-blur-xs flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
@@ -141,12 +141,23 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
               id="schedule"
               name="schedule"
               type="text"
+              list="schedule-options"
               value={formData.schedule}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-              placeholder="e.g., Sun, Tue 10:00 AM"
+              placeholder="Select or type a schedule"
               disabled={loading}
             />
+            <datalist id="schedule-options">
+              <option value="Sun, Tue 10:00 AM" />
+              <option value="Sun, Tue 12:00 PM" />
+              <option value="Mon, Wed 10:00 AM" />
+              <option value="Mon, Wed 2:00 PM" />
+              <option value="Tue, Thu 1:00 PM" />
+              <option value="Tue, Thu 3:00 PM" />
+              <option value="Thu 9:00 AM" />
+              <option value="Sat 11:00 AM" />
+            </datalist>
           </div>
 
           {/* Tasks (Optional) */}

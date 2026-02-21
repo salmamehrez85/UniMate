@@ -2,15 +2,25 @@ import { Calendar, Mail } from "lucide-react";
 
 export function CourseCard({ course }) {
   const getCodeBgColor = (code) => {
-    const colors = {
-      "CS 301": "bg-blue-500",
-      "CS 302": "bg-purple-500",
-      "MATH 202": "bg-teal-500",
-      "CS 305": "bg-blue-700",
-      "PHYS 101": "bg-orange-500",
-      "MATH 203": "bg-pink-500",
-    };
-    return colors[code] || "bg-primary-500";
+    // Generate a consistent color based on the course code
+    const colors = [
+      "bg-blue-600",
+      "bg-purple-600",
+      "bg-teal-600",
+      "bg-indigo-600",
+      "bg-orange-600",
+      "bg-pink-600",
+      "bg-green-600",
+      "bg-red-600",
+      "bg-yellow-600",
+      "bg-cyan-600",
+    ];
+
+    // Use a simple hash to consistently assign colors
+    const hash = code
+      .split("")
+      .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return colors[hash % colors.length];
   };
 
   return (
