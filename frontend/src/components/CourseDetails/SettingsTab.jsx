@@ -17,6 +17,7 @@ export function SettingsTab({
     schedule: course.schedule || "",
     credits: course.credits || "",
     semester: course.semester || "",
+    outlineText: course.outlineText || "",
   });
   const [error, setError] = useState("");
 
@@ -166,6 +167,25 @@ export function SettingsTab({
               </div>
             </div>
 
+            {/* Course Outline / Syllabus */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Course Outline / Syllabus
+              </label>
+              <textarea
+                name="outlineText"
+                value={formData.outlineText}
+                onChange={handleChange}
+                placeholder="Paste the course syllabus or outline here... (helps AI make better predictions)"
+                rows="6"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                This helps the AI predictor understand course content for better
+                grade forecasts
+              </p>
+            </div>
+
             <div className="flex gap-3 pt-4">
               <button
                 type="submit"
@@ -184,6 +204,7 @@ export function SettingsTab({
                     schedule: course.schedule || "",
                     credits: course.credits || "",
                     semester: course.semester || "",
+                    outlineText: course.outlineText || "",
                   });
                   setError("");
                 }}
@@ -194,48 +215,72 @@ export function SettingsTab({
             </div>
           </form>
         ) : (
-          <div className="grid md:grid-cols-2 gap-8">
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">
-                Course Code
-              </p>
-              <p className="text-lg font-semibold text-primary-900">
-                {course.code}
-              </p>
+          <div>
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">
+                  Course Code
+                </p>
+                <p className="text-lg font-semibold text-primary-900">
+                  {course.code}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">
+                  Course Name
+                </p>
+                <p className="text-lg font-semibold text-primary-900">
+                  {course.name || course.title}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">
+                  Instructor
+                </p>
+                <p className="text-lg font-semibold text-primary-900">
+                  {course.instructor || "Not specified"}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">
+                  Schedule
+                </p>
+                <p className="text-lg font-semibold text-primary-900">
+                  {course.schedule || "Not specified"}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">
+                  Credits
+                </p>
+                <p className="text-lg font-semibold text-primary-900">
+                  {course.credits || "N/A"}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">
+                  Semester
+                </p>
+                <p className="text-lg font-semibold text-primary-900">
+                  {course.semester || "Not specified"}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">
-                Course Name
+
+            {/* Course Outline Display */}
+            <div className="mt-8 pt-8 border-t border-gray-200">
+              <p className="text-sm font-medium text-gray-600 mb-3">
+                Course Outline / Syllabus
               </p>
-              <p className="text-lg font-semibold text-primary-900">
-                {course.name || course.title}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">
-                Instructor
-              </p>
-              <p className="text-lg font-semibold text-primary-900">
-                {course.instructor || "Not specified"}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Schedule</p>
-              <p className="text-lg font-semibold text-primary-900">
-                {course.schedule || "Not specified"}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Credits</p>
-              <p className="text-lg font-semibold text-primary-900">
-                {course.credits || "N/A"}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Semester</p>
-              <p className="text-lg font-semibold text-primary-900">
-                {course.semester || "Not specified"}
-              </p>
+              {course.outlineText ? (
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 max-h-64 overflow-y-auto">
+                  <p className="text-gray-700 whitespace-pre-wrap text-sm leading-relaxed">
+                    {course.outlineText}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-gray-500 italic">No outline provided</p>
+              )}
             </div>
           </div>
         )}

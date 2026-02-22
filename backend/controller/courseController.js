@@ -59,7 +59,8 @@ exports.getCourse = async (req, res) => {
 // @access  Private
 exports.createCourse = async (req, res) => {
   try {
-    const { code, name, instructor, schedule, credits, semester } = req.body;
+    const { code, name, instructor, schedule, credits, semester, outlineText } =
+      req.body;
 
     // Add userId to course data
     const courseData = {
@@ -70,6 +71,7 @@ exports.createCourse = async (req, res) => {
       schedule: schedule || "",
       credits: credits || "",
       semester: semester || "",
+      outlineText: outlineText || "",
       assessments: [],
       tasks: [],
       phases: [],
@@ -285,7 +287,7 @@ exports.getPredictedGPA = async (req, res) => {
         pastCoursesForAI.push({
           code: course.code,
           name: course.name,
-          outline: course.name, // Can be enhanced with actual outline field
+          outline: course.outlineText || course.name, // Use actual outline, fallback to name if not provided
           currentPerformance: currentPerformance || finalGradePercentage, // Fallback to final if no pre-final assessments
           finalGrade: finalGradePercentage,
         });
@@ -311,13 +313,13 @@ exports.getPredictedGPA = async (req, res) => {
             {
               code: course.code,
               name: course.name,
-              outline_text: course.name,
+              outline_text: course.outlineText || course.name,
               current_performance: currentPerformance,
             },
             pastCoursesForAI.map((c) => ({
               code: c.code,
               name: c.name,
-              outline_text: c.outline || c.name,
+              outline_text: c.outline, // Already has proper fallback from pastCoursesForAI setup
               current_performance: c.currentPerformance,
               final_grade: c.finalGrade,
             })),

@@ -9,6 +9,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
     schedule: "",
     credits: "",
     semester: "",
+    outlineText: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -43,6 +44,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
         schedule: "",
         credits: "",
         semester: "",
+        outlineText: "",
       });
       onClose();
     } catch (err) {
@@ -182,6 +184,29 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
               placeholder="e.g., Spring 2024"
               disabled={loading}
             />
+          </div>
+
+          {/* Course Outline / Syllabus */}
+          <div>
+            <label
+              htmlFor="outlineText"
+              className="block text-sm font-medium text-gray-700 mb-2">
+              Course Outline / Syllabus
+            </label>
+            <textarea
+              id="outlineText"
+              name="outlineText"
+              value={formData.outlineText}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition resize-none"
+              placeholder="Paste the course syllabus or outline here... (helps AI make better predictions)"
+              rows="4"
+              disabled={loading}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              This helps the AI predictor understand course content for better
+              grade forecasts
+            </p>
           </div>
 
           {/* Error Message */}

@@ -71,6 +71,11 @@ const courseSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    outlineText: {
+      type: String,
+      trim: true,
+      description: "Course syllabus/outline for AI prediction analysis",
+    },
     assessments: [assessmentSchema],
     tasks: [taskSchema],
     phases: [phaseSchema],
