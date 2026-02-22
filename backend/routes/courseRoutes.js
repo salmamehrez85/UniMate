@@ -11,6 +11,9 @@ router
   .get(courseController.getCourses)
   .post(courseController.createCourse);
 
+// Predicted GPA route (must come before /:id to avoid conflicts)
+router.route("/predicted-gpa").get(courseController.getPredictedGPA);
+
 router
   .route("/:id")
   .get(courseController.getCourse)

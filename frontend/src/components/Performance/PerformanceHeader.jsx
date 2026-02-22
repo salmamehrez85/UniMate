@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { TrendingUp, Award } from "lucide-react";
-import { calculateCurrentGPA } from "../../services/courseService";
+import {
+  calculateCurrentGPA,
+  getPredictedGPA,
+} from "../../services/courseService";
 
 function getCurrentSemester() {
   const now = new Date();
@@ -30,6 +33,12 @@ export function PerformanceHeader() {
     completedCourses: 0,
     isLoading: true,
   });
+  const [predictedData, setPredictedData] = useState({
+    min: 0,
+    max: 0,
+    activeCourses: 0,
+    isLoading: true,
+  });
 
   useEffect(() => {
     const fetchGPA = async () => {
@@ -50,7 +59,28 @@ export function PerformanceHeader() {
       }
     };
 
+    const fetchPredictedGPA = async () => {
+      try {
+        const data = await getPredictedGPA();
+        setPredictedData({
+          min: data.predictedGPA.min,
+          max: data.predictedGPA.max,
+          activeCourses: data.breakdown.activeCourses,
+          isLoading: false,
+        });
+      } catch (error) {
+        console.error("Error fetching predicted GPA:", error);
+        setPredictedData({
+          min: 0,
+          max: 0,
+          activeCourses: 0,
+          isLoading: false,
+        });
+      }
+    };
+
     fetchGPA();
+    fetchPredictedGPA();
   }, []);
 
   return (
@@ -86,8 +116,25 @@ export function PerformanceHeader() {
           <TrendingUp className="w-5 h-5 text-teal-500" />
           <p className="text-sm font-medium text-gray-600">Predicted GPA</p>
         </div>
-        <h2 className="text-4xl font-bold text-teal-500 mb-2">3.52 - 3.71</h2>
-        <p className="text-sm text-gray-600">Based on current performance</p>
+        {predictedData.isLoading ? (
+          <div className="space-y-2">
+            <div className="h-10 bg-gray-200 rounded animate-pulse w-40"></div>
+            <div className="h-4 bg-gray-200 rounded animate-pulse w-48"></div>
+          </div>
+        ) : (
+          <>
+            <h2 className="text-4xl font-bold text-teal-500 mb-2">
+              {predictedData.min > 0 && predictedData.max > 0
+                ? `${predictedData.min.toFixed(2)} - ${predictedData.max.toFixed(2)}`
+                : "N/A"}
+            </h2>
+            <p className="text-sm text-gray-600">
+              {predictedData.activeCourses > 0
+                ? `Based on ${predictedData.activeCourses} active course${predictedData.activeCourses !== 1 ? "s" : ""} and past performance`
+                : "Complete some courses to see predictions"}
+            </p>
+          </>
+        )}
       </div>
     </div>
   );

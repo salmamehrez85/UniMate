@@ -94,6 +94,27 @@ export const calculateCurrentGPA = async () => {
   }
 };
 
+// Get predicted GPA from backend
+export const getPredictedGPA = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/courses/predicted-gpa`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to fetch predicted GPA");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching predicted GPA:", error);
+    throw error;
+  }
+};
+
 // Get single course by ID
 export const getSingleCourse = async (id) => {
   const response = await fetch(`${API_BASE_URL}/courses/${id}`, {
