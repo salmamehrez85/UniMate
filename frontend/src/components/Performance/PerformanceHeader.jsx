@@ -1,4 +1,6 @@
+import { useState, useEffect } from "react";
 import { TrendingUp, Award } from "lucide-react";
+import { calculateCurrentGPA } from "../../services/courseService";
 
 function getCurrentSemester() {
   const now = new Date();
@@ -22,6 +24,34 @@ function getCurrentSemester() {
 
 export function PerformanceHeader() {
   const currentSemester = getCurrentSemester();
+  const [gpaData, setGpaData] = useState({
+    gpa: 0,
+    totalCredits: 0,
+    completedCourses: 0,
+    isLoading: true,
+  });
+
+  useEffect(() => {
+    const fetchGPA = async () => {
+      try {
+        const data = await calculateCurrentGPA();
+        setGpaData({
+          ...data,
+          isLoading: false,
+        });
+      } catch (error) {
+        console.error("Error fetching GPA:", error);
+        setGpaData({
+          gpa: 0,
+          totalCredits: 0,
+          completedCourses: 0,
+          isLoading: false,
+        });
+      }
+    };
+
+    fetchGPA();
+  }, []);
 
   return (
     <div className="grid md:grid-cols-2 gap-6 mb-8">
@@ -31,8 +61,23 @@ export function PerformanceHeader() {
           <Award className="w-5 h-5 text-gray-600" />
           <p className="text-sm font-medium text-gray-600">Current GPA</p>
         </div>
-        <h2 className="text-4xl font-bold text-gray-900 mb-2">3.45</h2>
-        <p className="text-sm text-gray-600">{currentSemester}</p>
+        {gpaData.isLoading ? (
+          <div className="space-y-2">
+            <div className="h-10 bg-gray-200 rounded animate-pulse w-32"></div>
+            <div className="h-4 bg-gray-200 rounded animate-pulse w-40"></div>
+          </div>
+        ) : (
+          <>
+            <h2 className="text-4xl font-bold text-gray-900 mb-2">
+              {gpaData.gpa > 0 ? gpaData.gpa.toFixed(2) : "N/A"}
+            </h2>
+            <p className="text-sm text-gray-600">
+              {gpaData.completedCourses > 0
+                ? `${currentSemester} • ${gpaData.completedCourses} completed course${gpaData.completedCourses !== 1 ? "s" : ""}`
+                : "No completed courses yet"}
+            </p>
+          </>
+        )}
       </div>
 
       {/* Predicted GPA Card */}
