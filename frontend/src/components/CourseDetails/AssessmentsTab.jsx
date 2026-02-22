@@ -206,6 +206,12 @@ export function AssessmentsTab({ course, onCourseUpdate }) {
       ...course,
       assessments: [newAssessment, ...assessments],
     };
+
+    // Mark course as old if adding a final grade assessment
+    if (newAssessment.type === "final") {
+      updated.isOldCourse = true;
+    }
+
     onCourseUpdate(updated);
     setIsModalOpen(false);
   };
@@ -226,6 +232,8 @@ export function AssessmentsTab({ course, onCourseUpdate }) {
 
   return (
     <div className="space-y-6">
+      {course.isOldCourse}
+
       <div className="flex justify-end">
         <button
           onClick={() => setIsModalOpen(true)}

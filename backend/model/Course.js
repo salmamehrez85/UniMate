@@ -74,6 +74,11 @@ const courseSchema = new mongoose.Schema(
     assessments: [assessmentSchema],
     tasks: [taskSchema],
     phases: [phaseSchema],
+    isOldCourse: {
+      type: Boolean,
+      default: false,
+      description: "Marks course as completed with final grade",
+    },
   },
   {
     timestamps: true,

@@ -29,12 +29,19 @@ export function CourseCard({ course, onManage }) {
     <div className="bg-white rounded-lg border border-gray-100 hover:shadow-md transition-shadow overflow-hidden">
       {/* Header with code badge and task count */}
       <div className="p-5 flex items-start justify-between border-b border-gray-100">
-        <span
-          className={`${getCodeBgColor(
-            course.code,
-          )} text-white text-sm font-semibold px-3 py-1 rounded`}>
-          {course.code}
-        </span>
+        <div className="flex items-center gap-2">
+          <span
+            className={`${getCodeBgColor(
+              course.code,
+            )} text-white text-sm font-semibold px-3 py-1 rounded`}>
+            {course.code}
+          </span>
+          {course.isOldCourse && (
+            <span className="bg-gray-400 text-white text-xs font-semibold px-3 py-1 rounded">
+              Old Course
+            </span>
+          )}
+        </div>
         <span className="text-gray-500 text-sm font-medium">
           {tasksCount} tasks
         </span>
