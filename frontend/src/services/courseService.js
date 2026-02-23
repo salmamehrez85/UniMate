@@ -115,6 +115,27 @@ export const getPredictedGPA = async () => {
   }
 };
 
+// Get GPA trend by semester from backend
+export const getGPATrend = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/courses/gpa-trend`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to fetch GPA trend");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching GPA trend:", error);
+    throw error;
+  }
+};
+
 // Get single course by ID
 export const getSingleCourse = async (id) => {
   const response = await fetch(`${API_BASE_URL}/courses/${id}`, {

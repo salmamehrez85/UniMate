@@ -71,6 +71,12 @@ const courseSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    finalGrade: {
+      type: Number,
+      min: 0,
+      max: 100,
+      description: "Final grade percentage for completed courses",
+    },
     outlineText: {
       type: String,
       trim: true,

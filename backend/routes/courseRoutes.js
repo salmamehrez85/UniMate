@@ -14,6 +14,9 @@ router
 // Predicted GPA route (must come before /:id to avoid conflicts)
 router.route("/predicted-gpa").get(courseController.getPredictedGPA);
 
+// GPA Trend route
+router.route("/gpa-trend").get(courseController.getGPATrend);
+
 router
   .route("/:id")
   .get(courseController.getCourse)
