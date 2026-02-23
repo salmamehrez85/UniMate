@@ -1,14 +1,63 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 
+// Helper function to get current semester based on date
+const getCurrentSemester = () => {
+  const month = new Date().getMonth(); // 0-11
+  const year = new Date().getFullYear();
+
+  // Winter: January (0) - February (1)
+  if (month >= 0 && month <= 2) return `Winter ${year}`;
+  // Spring: March (2) - May (4)
+  else if (month >= 3 && month <= 5) return `Spring ${year}`;
+  // Summer: June (5) - August (7)
+  else if (month >= 6 && month <= 8) return `Summer ${year}`;
+  // Fall: 9 - 10 - 11
+  else return `Fall ${year}`;
+};
+
+// Helper function to generate semester options for dropdown
+const generateSemesterOptions = () => {
+  const seasons = ["Winter", "Spring", "Summer", "Fall"];
+  const currentYear = new Date().getFullYear();
+  const currentSemester = getCurrentSemester();
+  const options = [];
+
+  // Generate options for: previous year, current year, and next year
+  for (let yearOffset = -1; yearOffset <= 1; yearOffset++) {
+    const year = currentYear + yearOffset;
+    seasons.forEach((season) => {
+      options.push({
+        value: `${season} ${year}`,
+        label: `${season} ${year}`,
+      });
+    });
+  }
+
+  // Sort by year and season order
+  const seasonOrder = { Winter: 0, Spring: 1, Summer: 2, Fall: 3 };
+  options.sort((a, b) => {
+    const [aSeason, aYear] = a.value.split(" ");
+    const [bSeason, bYear] = b.value.split(" ");
+    const yearDiff = parseInt(aYear) - parseInt(bYear);
+    if (yearDiff !== 0) return yearDiff;
+    return seasonOrder[aSeason] - seasonOrder[bSeason];
+  });
+
+  return options;
+};
+
 export function AddCourseModal({ isOpen, onClose, onAdd }) {
+  const semesterOptions = generateSemesterOptions();
+  const currentSemester = getCurrentSemester();
+
   const [formData, setFormData] = useState({
     code: "",
     name: "",
     instructor: "",
     schedule: "",
     credits: "",
-    semester: "",
+    semester: currentSemester, // Auto-select current semester
     outlineText: "",
   });
   const [error, setError] = useState("");
@@ -43,7 +92,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
         instructor: "",
         schedule: "",
         credits: "",
-        semester: "",
+        semester: currentSemester, // Reset to current semester
         outlineText: "",
       });
       onClose();
@@ -167,23 +216,32 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
             />
           </div>
 
-          {/* Semester */}
+          {/* Semester - Dropdown with validated options */}
           <div>
             <label
               htmlFor="semester"
               className="block text-sm font-medium text-gray-700 mb-2">
-              Semester
+              Semester <span className="text-red-500">*</span>
             </label>
-            <input
+            <select
               id="semester"
               name="semester"
-              type="text"
               value={formData.semester}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-              placeholder="e.g., Spring 2024"
-              disabled={loading}
-            />
+              disabled={loading}>
+              <option value="" disabled>
+                Select a semester...
+              </option>
+              {semesterOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 mt-1">
+              Default: {currentSemester}
+            </p>
           </div>
 
           {/* Course Outline / Syllabus */}

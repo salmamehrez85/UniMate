@@ -6,17 +6,21 @@ const getCurrentSemester = () => {
   const month = new Date().getMonth(); // 0-11
   const year = new Date().getFullYear();
 
-  // Fall: August (7) - December (11)
-  if (month >= 7) {
-    return `Fall ${year}`;
+  // Winter: January (0) - February (1)
+  if (month >= 0 && month <= 2) {
+    return `Winter ${year}`;
   }
-  // Spring: January (0) - April (3)
-  else if (month >= 0 && month <= 3) {
+  // Spring: March (2) - May (4)
+  else if (month >= 3 && month <= 6) {
     return `Spring ${year}`;
   }
-  // Summer: May (4) - July (6)
-  else {
+  // Summer: June (5) - August (7)
+  else if (month >= 7 && month <= 9) {
     return `Summer ${year}`;
+  }
+  // Fall: 10 - 11
+  else {
+    return `Fall ${year}`;
   }
 };
 
