@@ -434,65 +434,66 @@ exports.getGPATrend = async (req, res) => {
       createdAt: 1,
     });
 
-    // Group courses by semester
+    // Separate completed and active courses
+    const completedCourses = courses.filter((c) => c.isOldCourse === true);
+    const activeCourses = courses.filter((c) => c.isOldCourse !== true);
+
+    // Group completed courses by semester
     const coursesBySemester = {};
 
-    courses.forEach((course) => {
-      // For completed courses, calculate their grade
-      if (course.isOldCourse === true) {
-        // Use finalGrade if available, otherwise calculate from final assessment
-        let gradePercentage = course.finalGrade;
+    completedCourses.forEach((course) => {
+      // Use finalGrade if available, otherwise calculate from final assessment
+      let gradePercentage = course.finalGrade;
 
-        if (!gradePercentage) {
-          const finalAssessment = (course.assessments || []).find(
-            (a) => a.type === "final",
-          );
-          if (finalAssessment) {
-            gradePercentage =
-              (finalAssessment.score / finalAssessment.maxScore) * 100;
-          }
+      if (!gradePercentage) {
+        const finalAssessment = (course.assessments || []).find(
+          (a) => a.type === "final",
+        );
+        if (finalAssessment) {
+          gradePercentage =
+            (finalAssessment.score / finalAssessment.maxScore) * 100;
         }
-
-        const semesterKey =
-          course.semester ||
-          (course.createdAt
-            ? (() => {
-                const month = course.createdAt.getMonth();
-                const year = course.createdAt.getFullYear();
-                if (month >= 7) return `Fall ${year}`;
-                else if (month >= 0 && month <= 3) return `Spring ${year}`;
-                else return `Summer ${year}`;
-              })()
-            : "Unknown");
-
-        if (!coursesBySemester[semesterKey]) {
-          coursesBySemester[semesterKey] = {
-            semester: semesterKey,
-            courses: [],
-            totalGradePoints: 0,
-            totalCredits: 0,
-          };
-        }
-
-        const credits = parseFloat(course.credits) || 3;
-        const gpaPoints = gradeToGPA(gradePercentage);
-
-        coursesBySemester[semesterKey].courses.push({
-          code: course.code,
-          name: course.name,
-          grade: Math.round(gradePercentage),
-          gpaPoints,
-          credits,
-        });
-
-        coursesBySemester[semesterKey].totalGradePoints += gpaPoints * credits;
-        coursesBySemester[semesterKey].totalCredits += credits;
       }
+
+      const semesterKey =
+        course.semester ||
+        (course.createdAt
+          ? (() => {
+              const month = course.createdAt.getMonth();
+              const year = course.createdAt.getFullYear();
+              if (month >= 7) return `Fall ${year}`;
+              else if (month >= 0 && month <= 3) return `Spring ${year}`;
+              else return `Summer ${year}`;
+            })()
+          : "Unknown");
+
+      if (!coursesBySemester[semesterKey]) {
+        coursesBySemester[semesterKey] = {
+          semester: semesterKey,
+          courses: [],
+          totalGradePoints: 0,
+          totalCredits: 0,
+        };
+      }
+
+      const credits = parseFloat(course.credits) || 3;
+      const gpaPoints = gradeToGPA(gradePercentage);
+
+      coursesBySemester[semesterKey].courses.push({
+        code: course.code,
+        name: course.name,
+        grade: Math.round(gradePercentage),
+        gpaPoints,
+        credits,
+      });
+
+      coursesBySemester[semesterKey].totalGradePoints += gpaPoints * credits;
+      coursesBySemester[semesterKey].totalCredits += credits;
     });
 
-    // Calculate GPA for each semester and prepare response
-    const gpaTrendData = Object.values(coursesBySemester)
-      .map((semesterData) => ({
+    // Convert completed courses to trend array with isPredicted flag
+    const gpaTrendData = Object.values(coursesBySemester).map(
+      (semesterData) => ({
         semester: semesterData.semester,
         gpa:
           semesterData.totalCredits > 0
@@ -501,33 +502,81 @@ exports.getGPATrend = async (req, res) => {
                   100,
               ) / 100
             : 0,
-        courses: semesterData.courses,
-        courseCount: semesterData.courses.length,
-      }))
-      .sort((a, b) => {
-        // Sort by semester chronologically
-        // Assuming semester format like "Fall 2024", "Spring 2025", etc.
-        const semesterOrder = { fall: 0, spring: 1, summer: 2 };
-        const aYear = parseInt(a.semester.match(/\d{4}/)?.[0] || 0);
-        const bYear = parseInt(b.semester.match(/\d{4}/)?.[0] || 0);
-        const aSeason =
-          semesterOrder[a.semester.toLowerCase().split(" ")[0]] || 0;
-        const bSeason =
-          semesterOrder[b.semester.toLowerCase().split(" ")[0]] || 0;
+        isPredicted: false,
+      }),
+    );
 
-        if (aYear !== bYear) return aYear - bYear;
-        return aSeason - bSeason;
-      });
+    // Get predicted GPA for active courses using internal function call
+    let predictedDataPoint = null;
 
-    // Calculate overall GPA
+    if (activeCourses.length > 0) {
+      try {
+        // Create a mock response object to internally call getPredictedGPA
+        const mockRes = {
+          status: (code) => ({
+            json: (data) => {
+              mockRes.jsonData = data;
+              mockRes.jsonCode = code;
+              return mockRes;
+            },
+          }),
+          jsonData: null,
+          jsonCode: null,
+        };
+
+        // Call getPredictedGPA internally
+        await exports.getPredictedGPA(req, mockRes);
+
+        // Extract the result from mock response
+        if (
+          mockRes.jsonCode === 200 &&
+          mockRes.jsonData &&
+          mockRes.jsonData.success
+        ) {
+          const predictedResult = mockRes.jsonData;
+
+          // Use current semester for prediction (not stored semester from past creation date)
+          const activeSemesterName = getCurrentSemester();
+
+          // Use conservative prediction (min value)
+          const predictedGPA = predictedResult.predictedGPA.min;
+
+          // Add predicted data point to trend array with "(Projected)" suffix to avoid x-axis duplication
+          predictedDataPoint = {
+            semester: `${activeSemesterName} (Projected)`,
+            gpa: predictedGPA,
+            isPredicted: true,
+          };
+
+          gpaTrendData.push(predictedDataPoint);
+        }
+      } catch (error) {
+        console.error("Error fetching predicted GPA for trend:", error);
+        // Continue without predicted data if there's an error
+      }
+    }
+
+    // Sort the combined array chronologically
+    gpaTrendData.sort((a, b) => {
+      const semesterOrder = { winter: 0, spring: 1, summer: 2, fall: 3 };
+      const aYear = parseInt(a.semester.match(/\d{4}/)?.[0] || 0);
+      const bYear = parseInt(b.semester.match(/\d{4}/)?.[0] || 0);
+      const aSeason =
+        semesterOrder[a.semester.toLowerCase().split(" ")[0]] || 0;
+      const bSeason =
+        semesterOrder[b.semester.toLowerCase().split(" ")[0]] || 0;
+
+      if (aYear !== bYear) return aYear - bYear;
+      return aSeason - bSeason;
+    });
+
+    // Calculate overall GPA (from completed courses only)
     let totalGradePoints = 0;
     let totalCredits = 0;
 
-    gpaTrendData.forEach((semester) => {
-      semester.courses.forEach((course) => {
-        totalGradePoints += course.gpaPoints * course.credits;
-        totalCredits += course.credits;
-      });
+    Object.values(coursesBySemester).forEach((semesterData) => {
+      totalGradePoints += semesterData.totalGradePoints;
+      totalCredits += semesterData.totalCredits;
     });
 
     const overallGPA =
@@ -541,6 +590,7 @@ exports.getGPATrend = async (req, res) => {
       totalCredits,
       gpaTrend: gpaTrendData,
       totalSemesters: gpaTrendData.length,
+      hasActiveCoursePrediction: predictedDataPoint !== null,
     });
   } catch (error) {
     console.error("GPA trend error:", error);

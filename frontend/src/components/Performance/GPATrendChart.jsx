@@ -40,6 +40,8 @@ export function GPATrendChart() {
     fetchGPATrend();
   }, []);
 
+  const hasPredictedData = gpaTrendData.some((d) => d.isPredicted);
+
   if (loading) {
     return (
       <div className="bg-white rounded-lg border border-gray-100 p-6 shadow-sm">
@@ -111,25 +113,47 @@ export function GPATrendChart() {
                     <p className="text-gray-700 font-semibold">
                       {data.semester}
                     </p>
-                    <p className="text-cyan-600 font-bold">
+                    <p
+                      className={`font-bold ${
+                        data.isPredicted ? "text-amber-600" : "text-cyan-600"
+                      }`}>
                       GPA: {data.gpa.toFixed(2)}
                     </p>
-                    <p className="text-gray-600 text-sm">
-                      Courses: {data.courseCount}
-                    </p>
+                    {data.isPredicted && (
+                      <p className="text-amber-600 text-sm font-semibold">
+                        (Predicted)
+                      </p>
+                    )}
                   </div>
                 );
               }
               return null;
             }}
           />
+
+          {/* Single line with conditional dot coloring for historical vs predicted */}
           <Line
             type="monotone"
             dataKey="gpa"
             stroke="#0891b2"
             strokeWidth={2}
-            dot={{ fill: "#0891b2", r: 6 }}
+            dot={(props) => {
+              const { cx, cy, payload } = props;
+              // Cyan for historical, amber for predicted
+              const color = payload.isPredicted ? "#f59e0b" : "#0891b2";
+              return (
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r={6}
+                  fill={color}
+                  stroke={color}
+                  strokeWidth={2}
+                />
+              );
+            }}
             activeDot={{ r: 8 }}
+            isAnimationActive={false}
           />
         </LineChart>
       </ResponsiveContainer>
@@ -138,8 +162,16 @@ export function GPATrendChart() {
         <div className="mt-4 pt-4 border-t border-gray-100">
           <p className="text-sm text-gray-600">
             Total Semesters:{" "}
-            <span className="font-semibold">{gpaTrendData.length}</span>
+            <span className="font-semibold">
+              {gpaTrendData.filter((d) => !d.isPredicted).length}
+            </span>
           </p>
+          {hasPredictedData && (
+            <p className="text-sm text-amber-600 mt-2">
+              <span className="font-semibold">Predicted GPA:</span> Based on
+              current semester performance
+            </p>
+          )}
         </div>
       )}
     </div>
