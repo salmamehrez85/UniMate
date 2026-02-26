@@ -89,6 +89,34 @@ const SimilarityRankingSchema = {
   required: ["ranked_past_courses"],
 };
 
+const RecommendationSchema = {
+  type: "object",
+  properties: {
+    recommendations: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          courseCode: { type: "string" },
+          courseName: { type: "string" },
+          status: {
+            type: "string",
+            enum: ["green", "yellow", "red"],
+            description:
+              "green for on-track, yellow for watch, red for at-risk",
+          },
+          advice: {
+            type: "string",
+            description: "1-2 short, highly actionable sentences of advice.",
+          },
+        },
+        required: ["courseCode", "courseName", "status", "advice"],
+      },
+    },
+  },
+  required: ["recommendations"],
+};
+
 // ==========================================
 // LLM CALLS WITH RETRY LOGIC
 // ==========================================
@@ -345,6 +373,161 @@ const calculateAIPrediction = async (activeCourse, pastCourses) => {
   }
 };
 
+const generateActionableRecommendations = async (activeCourses) => {
+  try {
+    if (!activeCourses || activeCourses.length === 0) {
+      return { recommendations: [] };
+    }
+
+    // Build simplified course data for the LLM
+    const coursesData = activeCourses.map((course) => {
+      // Count pending and completed tasks
+      const tasks = course.tasks || [];
+      const completedTasks = tasks.filter((t) => t.completed === true).length;
+      const pendingTasks = tasks.length - completedTasks;
+
+      // Get recent assessment performance
+      const assessments = course.assessments || [];
+      const recentAssessments = assessments.slice(-3).map((a) => ({
+        type: a.type,
+        score: a.score,
+        maxScore: a.maxScore,
+        percentage:
+          a.maxScore > 0 ? Math.round((a.score / a.maxScore) * 100) : 0,
+      }));
+
+      return {
+        courseCode: course.code || "UNKNOWN",
+        courseName: course.name || "Unknown Course",
+        currentGradePercentage: course.currentPerformance || 0,
+        completedTasks,
+        pendingTasks,
+        recentAssessments,
+      };
+    });
+
+    // Check if Gemini API key is available
+    const hasGeminiKey =
+      process.env.GEMINI_API_KEY &&
+      process.env.GEMINI_API_KEY.trim().length > 0;
+
+    if (!hasGeminiKey) {
+      // Use intelligent fallback without Gemini
+      return generateFallbackRecommendations(coursesData);
+    }
+
+    const coursesJson = JSON.stringify(coursesData, null, 2);
+
+    const prompt = `You are a supportive academic advisor. Analyze the following student's active courses and provide ONE specific, actionable piece of advice per course.
+
+STUDENT'S ACTIVE COURSES:
+${coursesJson}
+
+For each course, provide advice that is:
+- Specific to their current performance and tasks
+- Highly actionable (not generic)
+- Encouraging but honest
+- Focused on immediate next steps
+
+Examples of good advice:
+- "Your quiz scores are below 70%. Focus on practicing the problem sets from modules 2-3 before the next quiz."
+- "You have 3 pending assignments. Prioritize the project due Friday—it carries 25% of your grade."
+- "Great start! You're at 88%. Review the recent quiz mistakes to push toward 90%."
+
+Also determine a status for each course:
+- "green": Performance 75%+, tasks on track
+- "yellow": Performance 60-75% OR pending tasks piling up
+- "red": Performance below 60% OR critical deadlines approaching
+
+Return JSON with array of recommendations.`;
+
+    const result = await callLLMWithRetry(prompt, RecommendationSchema);
+
+    if (!result) {
+      return generateFallbackRecommendations(coursesData);
+    }
+
+    // Validate result has recommendations array
+    if (!result.recommendations || !Array.isArray(result.recommendations)) {
+      return generateFallbackRecommendations(coursesData);
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Failed to generate recommendations:", error.message);
+    console.error("Error details:", error);
+    // Fallback to intelligent rule-based recommendations
+    if (activeCourses && activeCourses.length > 0) {
+      const coursesData = activeCourses.map((course) => {
+        const tasks = course.tasks || [];
+        const completedTasks = tasks.filter((t) => t.completed === true).length;
+        const pendingTasks = tasks.length - completedTasks;
+        const assessments = course.assessments || [];
+        const recentAssessments = assessments.slice(-3).map((a) => ({
+          type: a.type,
+          score: a.score,
+          maxScore: a.maxScore,
+          percentage:
+            a.maxScore > 0 ? Math.round((a.score / a.maxScore) * 100) : 0,
+        }));
+        return {
+          courseCode: course.code || "UNKNOWN",
+          courseName: course.name || "Unknown Course",
+          currentGradePercentage: course.currentPerformance || 0,
+          completedTasks,
+          pendingTasks,
+          recentAssessments,
+        };
+      });
+      return generateFallbackRecommendations(coursesData);
+    }
+    return { recommendations: [] };
+  }
+};
+
+/**
+ * Fallback intelligent recommendations generator without Gemini
+ */
+const generateFallbackRecommendations = (coursesData) => {
+  const recommendations = coursesData.map((course) => {
+    const perf = course.currentGradePercentage || 0;
+    let status = "green";
+    let advice = "";
+
+    // Determine status and generate contextual advice
+    if (perf >= 85 && course.pendingTasks <= 2) {
+      status = "green";
+      if (course.recentAssessments.length > 0) {
+        advice = `Excellent work in ${course.courseCode}! You're at ${Math.round(perf)}%. Keep up the momentum and review any recent assessment feedback to maintain this strong performance.`;
+      } else {
+        advice = `Great start in ${course.courseCode}! You're performing at ${Math.round(perf)}%. Stay focused and maintain consistent effort.`;
+      }
+    } else if (perf >= 75 && perf < 85) {
+      status = "green";
+      advice = `Good progress in ${course.courseCode}! You're at ${Math.round(perf)}%. ${course.pendingTasks > 0 ? `Focus on completing your ${course.pendingTasks} pending task${course.pendingTasks > 1 ? "s" : ""} to boost your grade further.` : "Keep consistent with your coursework."}`;
+    } else if (perf >= 65 && perf < 75) {
+      status = "yellow";
+      advice = `${course.courseCode} needs attention. You're at ${Math.round(perf)}%. ${course.pendingTasks > 1 ? `Prioritize your ${course.pendingTasks} pending tasks` : "Complete your pending assignments"} and review challenging concepts to improve your performance.`;
+    } else if (perf >= 50 && perf < 65) {
+      status = "yellow";
+      advice = `${course.courseCode} requires focused effort. Your current performance is ${Math.round(perf)}%. ${course.pendingTasks > 0 ? `Urgent: Complete your ${course.pendingTasks} pending task${course.pendingTasks > 1 ? "s" : ""} immediately.` : "Seek help from your instructor or peers."} Schedule study sessions for weak areas.`;
+    } else {
+      status = "red";
+      advice = `${course.courseCode} is at-risk with ${Math.round(perf)}% performance. ${course.pendingTasks > 0 ? `Critical: Complete all ${course.pendingTasks} pending task${course.pendingTasks > 1 ? "s" : ""} NOW.` : ""} Contact your instructor immediately for support and develop a recovery plan.`;
+    }
+
+    return {
+      courseCode: course.courseCode,
+      courseName: course.courseName,
+      status,
+      advice,
+    };
+  });
+
+  return { recommendations };
+};
+
 module.exports = {
   calculateAIPrediction,
+  generateActionableRecommendations,
 };

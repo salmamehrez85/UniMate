@@ -17,6 +17,9 @@ router.route("/predicted-gpa").get(courseController.getPredictedGPA);
 // GPA Trend route
 router.route("/gpa-trend").get(courseController.getGPATrend);
 
+// AI Recommendations route (must come before /:id to avoid conflicts)
+router.route("/recommendations").get(courseController.getAIRecommendations);
+
 router
   .route("/:id")
   .get(courseController.getCourse)

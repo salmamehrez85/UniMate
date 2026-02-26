@@ -1,5 +1,8 @@
 const Course = require("../model/Course");
-const { calculateAIPrediction } = require("../services/aiPredictor");
+const {
+  calculateAIPrediction,
+  generateActionableRecommendations,
+} = require("../services/aiPredictor");
 
 // Helper function to auto-assign semester based on current month
 const getCurrentSemester = () => {
@@ -601,6 +604,102 @@ exports.getGPATrend = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error fetching GPA trend",
+    });
+  }
+};
+
+// @desc    Get AI recommendations for active courses
+// @route   GET /api/courses/recommendations
+// @access  Private
+exports.getAIRecommendations = async (req, res) => {
+  try {
+    console.log(
+      "📋 AI Recommendations endpoint called for user:",
+      req.user._id,
+    );
+
+    const courses = await Course.find({ userId: req.user._id });
+    console.log(`📚 Total courses found: ${courses.length}`);
+
+    if (courses.length > 0) {
+      console.log(
+        "Courses:",
+        courses.map((c) => ({
+          code: c.code,
+          name: c.name,
+          isOldCourse: c.isOldCourse,
+          hasAssessments: c.assessments && c.assessments.length > 0,
+          assessmentCount: c.assessments ? c.assessments.length : 0,
+        })),
+      );
+    }
+
+    // Filter for active courses only
+    const activeCourses = courses.filter((c) => c.isOldCourse !== true);
+    console.log(`✅ Active courses found: ${activeCourses.length}`);
+
+    if (activeCourses.length === 0) {
+      console.log("⚠️  No active courses to generate recommendations");
+      return res.status(200).json({
+        success: true,
+        data: [],
+        debug: {
+          totalCourses: courses.length,
+          activeCourses: 0,
+          message: "No active courses found",
+        },
+      });
+    }
+
+    // Map active courses with calculated current performance and tasks
+    const mappedActiveCourses = activeCourses.map((course) => {
+      const currentPerf = calculateCurrentPerformance(course.assessments || []);
+      console.log(
+        `  📖 ${course.code}: currentPerformance=${currentPerf}, tasks=${(course.tasks || []).length}, assessments=${(course.assessments || []).length}`,
+      );
+
+      return {
+        code: course.code,
+        name: course.name,
+        currentPerformance: currentPerf,
+        tasks: course.tasks || [],
+        assessments: course.assessments || [],
+      };
+    });
+
+    console.log(
+      "📊 Mapped active courses for AI:",
+      JSON.stringify(mappedActiveCourses, null, 2),
+    );
+
+    // Call AI to generate recommendations
+    console.log("🤖 Calling generateActionableRecommendations...");
+    const aiResult =
+      await generateActionableRecommendations(mappedActiveCourses);
+
+    console.log("🤖 AI Result returned:", aiResult);
+    console.log(
+      "🤖 Recommendations count:",
+      aiResult.recommendations ? aiResult.recommendations.length : 0,
+    );
+
+    res.status(200).json({
+      success: true,
+      data: aiResult.recommendations || [],
+      debug: {
+        activeCourses: activeCourses.length,
+        recommendationsReturned: aiResult.recommendations
+          ? aiResult.recommendations.length
+          : 0,
+      },
+    });
+  } catch (error) {
+    console.error("❌ AI recommendations error:", error);
+    console.error("Stack trace:", error.stack);
+    res.status(500).json({
+      success: false,
+      message: "Error generating recommendations",
+      error: error.message,
     });
   }
 };

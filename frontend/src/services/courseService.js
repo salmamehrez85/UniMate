@@ -136,6 +136,27 @@ export const getGPATrend = async () => {
   }
 };
 
+// Get AI recommendations for active courses
+export const getAIRecommendations = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/courses/recommendations`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to fetch AI recommendations");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching AI recommendations:", error);
+    throw error;
+  }
+};
+
 // Get single course by ID
 export const getSingleCourse = async (id) => {
   const response = await fetch(`${API_BASE_URL}/courses/${id}`, {
