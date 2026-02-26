@@ -348,17 +348,38 @@ export function Performance() {
 
       if (coursePrediction) {
         const course = courses.find((c) => c.id === courseId);
+        const currentPerf = Math.round(
+          coursePrediction.currentPerformance || 0,
+        );
+        const predictedMin = coursePrediction.prediction.min;
+        const predictedMax = coursePrediction.prediction.max;
+        const avgPredicted = (predictedMin + predictedMax) / 2;
+
+        // Determine status based on predicted grade and confidence
+        let status = "On Track";
+        if (predictedMin >= 85 && currentPerf >= 75) {
+          status = "On Track";
+        } else if (predictedMin >= 75 && currentPerf >= 65) {
+          status = "On Track";
+        } else if (predictedMin >= 65 && currentPerf >= 55) {
+          status = "Watch";
+        } else if (predictedMin >= 60 && currentPerf >= 50) {
+          status = "Watch";
+        } else {
+          status = "At Risk";
+        }
+
+        // Override to At Risk if predicted minimum is below 60
+        if (predictedMin < 60) {
+          status = "At Risk";
+        }
+
         const prediction = {
           predictedRange: {
-            min: coursePrediction.prediction.min,
-            max: coursePrediction.prediction.max,
+            min: predictedMin,
+            max: predictedMax,
           },
-          status:
-            coursePrediction.prediction.confidence === "High"
-              ? "On Track"
-              : coursePrediction.prediction.confidence === "Medium"
-                ? "Watch"
-                : "At Risk",
+          status,
           confidence: coursePrediction.prediction.confidence,
           similarCoursesUsed: (
             coursePrediction.prediction.similarCourses || []
@@ -367,7 +388,7 @@ export function Performance() {
             similarity: Math.round(sc.similarity * 100),
             reason: sc.reason,
           })),
-          recommendation: `Based on your current performance of ${Math.round(coursePrediction.currentPerformance)}%, the AI predicts you will score between ${coursePrediction.prediction.min}% and ${coursePrediction.prediction.max}% in this course. Focus on areas where you've had lower scores.`,
+          recommendation: `Based on your current performance of ${currentPerf}%, the AI predicts you will score between ${predictedMin}% and ${predictedMax}% in this course. ${coursePrediction.prediction.reason || "Keep up consistent effort to improve your grade."}`,
         };
 
         setPredictions((prev) => ({

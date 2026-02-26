@@ -241,34 +241,65 @@ const calculateCurrentPerformance = (assessments) => {
 
 // Helper function to predict final grade (fallback if AI fails)
 const predictFinalGradeFallback = (currentAverage) => {
-  if (currentAverage == null) {
-    return { min: 65, max: 75, confidence: "Low" };
+  // Handle courses with no assessment data yet
+  if (currentAverage === null || currentAverage === undefined) {
+    return {
+      min: 70,
+      max: 80,
+      confidence: "Low",
+      reason: "No assessment data yet - prediction based on general patterns",
+    };
   }
 
-  let min, max, confidence;
+  // Handle 0% grade (course just started)
+  if (currentAverage === 0) {
+    return {
+      min: 65,
+      max: 80,
+      confidence: "Low",
+      reason: "Course just started - no grades available yet",
+    };
+  }
 
-  if (currentAverage >= 85) {
-    min = Math.max(currentAverage - 5, 80);
-    max = Math.min(currentAverage + 5, 100);
+  let min, max, confidence, reason;
+
+  if (currentAverage >= 90) {
+    min = Math.max(currentAverage - 3, 87);
+    max = Math.min(currentAverage + 2, 100);
     confidence = "High";
+    reason = "Excellent performance - maintaining high standards";
+  } else if (currentAverage >= 85) {
+    min = Math.max(currentAverage - 4, 81);
+    max = Math.min(currentAverage + 3, 95);
+    confidence = "High";
+    reason = "Strong performance - on track for excellent grade";
+  } else if (currentAverage >= 80) {
+    min = Math.max(currentAverage - 5, 75);
+    max = Math.min(currentAverage + 4, 92);
+    confidence = "High";
+    reason = "Good performance - steady progress";
   } else if (currentAverage >= 75) {
     min = Math.max(currentAverage - 8, 70);
-    max = Math.min(currentAverage + 5, 95);
-    confidence = "High";
+    max = Math.min(currentAverage + 5, 90);
+    confidence = "Medium";
+    reason = "Solid performance - room for improvement";
   } else if (currentAverage >= 65) {
     min = Math.max(currentAverage - 10, 60);
-    max = Math.min(currentAverage + 5, 85);
+    max = Math.min(currentAverage + 8, 85);
     confidence = "Medium";
+    reason = "Passing but needs focus - increase effort";
   } else {
     min = Math.max(currentAverage - 10, 50);
-    max = Math.min(currentAverage + 10, 75);
+    max = Math.min(currentAverage + 15, 75);
     confidence = "Low";
+    reason = "Below expectation - immediate action needed";
   }
 
   return {
     min: Math.round(min),
     max: Math.round(max),
     confidence,
+    reason,
   };
 };
 
