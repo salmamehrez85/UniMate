@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PerformanceHeader } from "../components/Performance/PerformanceHeader";
 import { AIRecommendations } from "../components/Performance/AIRecommendations";
 import { GPATrendChart } from "../components/Performance/GPATrendChart";
@@ -11,121 +11,7 @@ import {
   Zap,
   ChevronDown,
 } from "lucide-react";
-
-const ACTIVE_COURSES = [
-  {
-    id: "C105",
-    name: "Software Engineering",
-    code: "CS 405",
-    currentGrade: 87.0,
-    isPredicted: false,
-  },
-  {
-    id: "C106",
-    name: "Database Systems",
-    code: "CS 305",
-    currentGrade: 81.0,
-    isPredicted: false,
-  },
-  {
-    id: "C107",
-    name: "Machine Learning",
-    code: "CS 401",
-    currentGrade: 75.5,
-    isPredicted: false,
-  },
-];
-
-// Mock prediction data
-const getMockPrediction = (courseId, currentGrade) => {
-  const predictions = {
-    C105: {
-      predictedRange: { min: 84, max: 90 },
-      status: "On Track",
-      confidence: "High",
-      similarCoursesUsed: [
-        {
-          name: "Operating Systems",
-          similarity: 85,
-          reason:
-            "Both require complex system design and architectural patterns.",
-        },
-        {
-          name: "Artificial Intelligence",
-          similarity: 72,
-          reason: "Both involve algorithmic problem solving and optimization.",
-        },
-        {
-          name: "Data Structures",
-          similarity: 68,
-          reason: "Core CS concepts essential to both courses.",
-        },
-      ],
-      recommendation:
-        "Your quiz scores are strong, but you historically drop 5% on finals in design-heavy courses. Focus on practicing past exam papers and system design questions.",
-    },
-    C106: {
-      predictedRange: { min: 78, max: 85 },
-      status: "On Track",
-      confidence: "High",
-      similarCoursesUsed: [
-        {
-          name: "Advanced SQL",
-          similarity: 92,
-          reason: "Direct skill transfer from query optimization.",
-        },
-        {
-          name: "Software Engineering",
-          similarity: 75,
-          reason: "Database design is a key part of system architecture.",
-        },
-        {
-          name: "Web Development",
-          similarity: 70,
-          reason: "Both involve backend database interactions.",
-        },
-      ],
-      recommendation:
-        "You perform well in practical assignments. Practice indexing strategies and transaction handling—areas where you've historically struggled on exams.",
-    },
-    C107: {
-      predictedRange: { min: 72, max: 82 },
-      status: "Watch",
-      confidence: "Medium",
-      similarCoursesUsed: [
-        {
-          name: "Artificial Intelligence",
-          similarity: 88,
-          reason:
-            "ML is a specialization of AI concepts covered in that course.",
-        },
-        {
-          name: "Statistics",
-          similarity: 79,
-          reason: "Probability and statistics are foundational to ML.",
-        },
-        {
-          name: "Data Structures",
-          similarity: 65,
-          reason:
-            "Efficient algorithms are crucial for ML model implementation.",
-        },
-      ],
-      recommendation:
-        "Consider increasing study time on mathematical foundations. Your quiz performance is moderate, and math fundamentals often determine final exam success in this course.",
-    },
-  };
-
-  return (
-    predictions[courseId] || {
-      predictedRange: { min: 75, max: 85 },
-      status: "On Track",
-      confidence: "Medium",
-      similarCoursesUsed: [],
-      recommendation: "Keep up the good work!",
-    }
-  );
-};
+import { getCourses, getPredictedGPA } from "../services/courseService";
 
 function PredictionSkeleton() {
   return (
@@ -390,32 +276,113 @@ function AIInsightsModal({
 }
 
 export function Performance() {
-  const [courses, setCourses] = useState(ACTIVE_COURSES);
+  const [courses, setCourses] = useState([]);
   const [predictions, setPredictions] = useState({});
   const [selectedInsight, setSelectedInsight] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handlePredictClick = (courseId) => {
+  // Fetch active courses from MongoDB on component mount
+  useEffect(() => {
+    const fetchActiveCourses = async () => {
+      try {
+        setLoading(true);
+        const data = await getCourses();
+
+        // Filter only active courses (isOldCourse !== true)
+        const activeCourses = (data.courses || [])
+          .filter((course) => course.isOldCourse !== true)
+          .map((course) => {
+            // Calculate current grade from assessments
+            const assessments = course.assessments || [];
+            const currentAssessments = assessments.filter(
+              (a) =>
+                a.type !== "final" && a.score != null && a.maxScore != null,
+            );
+
+            let currentGrade = 0;
+            if (currentAssessments.length > 0) {
+              const totalPercentage = currentAssessments.reduce((sum, a) => {
+                return sum + (a.score / a.maxScore) * 100;
+              }, 0);
+              currentGrade = totalPercentage / currentAssessments.length;
+            }
+
+            return {
+              id: course._id,
+              name: course.name,
+              code: course.code,
+              currentGrade: currentGrade || 0,
+              isPredicted: false,
+              isLoading: false,
+            };
+          });
+
+        setCourses(activeCourses);
+        setError(null);
+      } catch (err) {
+        console.error(" Error fetching courses:", err);
+        setError(err.message || "Failed to fetch courses");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchActiveCourses();
+  }, []);
+
+  const handlePredictClick = async (courseId) => {
     // Set loading state
     setCourses((prev) =>
       prev.map((c) => (c.id === courseId ? { ...c, isLoading: true } : c)),
     );
 
-    // Simulate API call delay
-    setTimeout(() => {
-      const prediction = getMockPrediction(
-        courseId,
-        courses.find((c) => c.id === courseId)?.currentGrade,
-      );
-      setPredictions((prev) => ({
-        ...prev,
-        [courseId]: prediction,
-      }));
+    try {
+      const response = await getPredictedGPA();
 
+      // Find the prediction data for this specific course
+      const courseActivePredictions = response.activeCoursePredictions || [];
+      const coursePrediction = courseActivePredictions.find(
+        (p) => p.courseId === courseId,
+      );
+
+      if (coursePrediction) {
+        const course = courses.find((c) => c.id === courseId);
+        const prediction = {
+          predictedRange: {
+            min: coursePrediction.prediction.min,
+            max: coursePrediction.prediction.max,
+          },
+          status:
+            coursePrediction.prediction.confidence === "High"
+              ? "On Track"
+              : coursePrediction.prediction.confidence === "Medium"
+                ? "Watch"
+                : "At Risk",
+          confidence: coursePrediction.prediction.confidence,
+          similarCoursesUsed: (
+            coursePrediction.prediction.similarCourses || []
+          ).map((sc) => ({
+            name: sc.name,
+            similarity: Math.round(sc.similarity * 100),
+            reason: sc.reason,
+          })),
+          recommendation: `Based on your current performance of ${Math.round(coursePrediction.currentPerformance)}%, the AI predicts you will score between ${coursePrediction.prediction.min}% and ${coursePrediction.prediction.max}% in this course. Focus on areas where you've had lower scores.`,
+        };
+
+        setPredictions((prev) => ({
+          ...prev,
+          [courseId]: prediction,
+        }));
+      }
+    } catch (err) {
+      console.error(" Error fetching predictions:", err);
+    } finally {
       // Clear loading state
       setCourses((prev) =>
         prev.map((c) => (c.id === courseId ? { ...c, isLoading: false } : c)),
       );
-    }, 2000);
+    }
   };
 
   const handleViewInsights = (courseId, prediction) => {
@@ -453,17 +420,41 @@ export function Performance() {
             Click "Predict Final Grade" to get AI insights
           </span>
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {courses.map((course) => (
-            <ActiveCourseCard
-              key={course.id}
-              course={course}
-              predictions={predictions}
-              onPredictClick={handlePredictClick}
-              onViewInsights={handleViewInsights}
-            />
-          ))}
-        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600 mb-4"></div>
+              <p className="text-gray-600">Loading courses...</p>
+            </div>
+          </div>
+        ) : error ? (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-700 font-semibold">Error loading courses</p>
+            <p className="text-red-600 text-sm">{error}</p>
+          </div>
+        ) : courses.length === 0 ? (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+            <p className="text-blue-700 font-semibold">
+              No active courses found
+            </p>
+            <p className="text-blue-600 text-sm">
+              Add courses to see predictions and recommendations
+            </p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {courses.map((course) => (
+              <ActiveCourseCard
+                key={course.id}
+                course={course}
+                predictions={predictions}
+                onPredictClick={handlePredictClick}
+                onViewInsights={handleViewInsights}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* AI Recommendations */}
