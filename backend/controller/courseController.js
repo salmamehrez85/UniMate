@@ -199,6 +199,35 @@ const gradeToGPA = (percentage) => {
   return 0.0;
 };
 
+// Helper function to calculate confidence based on prediction quality
+const calculateConfidenceFromPrediction = (
+  currentAverage,
+  predictedMin,
+  predictedMax,
+) => {
+  if (
+    currentAverage === null ||
+    currentAverage === undefined ||
+    currentAverage === 0
+  ) {
+    return "Medium"; // New courses get medium confidence
+  }
+
+  const range = predictedMax - predictedMin;
+  const avgPredicted = (predictedMin + predictedMax) / 2;
+
+  // Tight range (≤6%) and good alignment with current = High confidence
+  if (range <= 6 && Math.abs(avgPredicted - currentAverage) <= 5) {
+    return "High";
+  }
+  // Medium range (7-12%) or moderate alignment = Medium confidence
+  if (range <= 12 || Math.abs(avgPredicted - currentAverage) <= 10) {
+    return "Medium";
+  }
+  // Wide range (>12%) or poor alignment = Low confidence
+  return "Low";
+};
+
 // Helper function to calculate current performance from assessments (weighted average)
 const calculateCurrentPerformance = (assessments) => {
   // Filter out final exams, only consider quizzes, assignments, midterms
@@ -246,7 +275,7 @@ const predictFinalGradeFallback = (currentAverage) => {
     return {
       min: 70,
       max: 80,
-      confidence: "Low",
+      confidence: "Medium",
       reason: "No assessment data yet - prediction based on general patterns",
     };
   }
@@ -256,7 +285,7 @@ const predictFinalGradeFallback = (currentAverage) => {
     return {
       min: 65,
       max: 80,
-      confidence: "Low",
+      confidence: "Medium",
       reason: "Course just started - no grades available yet",
     };
   }
@@ -291,7 +320,7 @@ const predictFinalGradeFallback = (currentAverage) => {
   } else {
     min = Math.max(currentAverage - 10, 50);
     max = Math.min(currentAverage + 15, 75);
-    confidence = "Low";
+    confidence = "Medium";
     reason = "Below expectation - immediate action needed";
   }
 
@@ -384,9 +413,12 @@ exports.getPredictedGPA = async (req, res) => {
 
           // Convert AI prediction to min/max range (±3% confidence range)
           const predictedScore = aiResult.predicted_score_pct;
+          const predictionMin = Math.max(Math.round(predictedScore - 3), 0);
+          const predictionMax = Math.min(Math.round(predictedScore + 3), 100);
+
           prediction = {
-            min: Math.max(Math.round(predictedScore - 3), 0),
-            max: Math.min(Math.round(predictedScore + 3), 100),
+            min: predictionMin,
+            max: predictionMax,
             confidence: aiResult.confidence,
             similarCourses: aiResult.similar_courses || [],
             usedAI: !aiResult.error,
@@ -396,11 +428,27 @@ exports.getPredictedGPA = async (req, res) => {
           // Fall back to rule-based prediction
           prediction = predictFinalGradeFallback(currentPerformance);
           prediction.usedAI = false;
+
+          // Recalculate confidence based on fallback prediction quality
+          const qualityConfidence = calculateConfidenceFromPrediction(
+            currentPerformance,
+            prediction.min,
+            prediction.max,
+          );
+          prediction.confidence = qualityConfidence;
         }
       } else {
         // Not enough data for AI, use fallback
         prediction = predictFinalGradeFallback(currentPerformance);
         prediction.usedAI = false;
+
+        // Apply quality-based confidence calculation
+        const qualityConfidence = calculateConfidenceFromPrediction(
+          currentPerformance,
+          prediction.min,
+          prediction.max,
+        );
+        prediction.confidence = qualityConfidence;
       }
 
       activeCoursePredictions.push({
