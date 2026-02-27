@@ -743,6 +743,7 @@ exports.getAIRecommendations = async (req, res) => {
         currentPerformance: currentPerf,
         tasks: course.tasks || [],
         assessments: course.assessments || [],
+        phases: course.phases || [],
       };
     });
 

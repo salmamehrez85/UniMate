@@ -11,7 +11,11 @@ import {
   Zap,
   ChevronDown,
 } from "lucide-react";
-import { getCourses, getPredictedGPA } from "../services/courseService";
+import {
+  getCourses,
+  getPredictedGPA,
+  getAIRecommendations,
+} from "../services/courseService";
 
 function PredictionSkeleton() {
   return (
@@ -221,6 +225,33 @@ function AIInsightsModal({
               <span className="font-bold text-lg">{prediction.confidence}</span>{" "}
               confidence analysis of your historical performance patterns.
             </p>
+            <p className="text-xs text-blue-700 mt-2">
+              Source: {prediction.usedAI ? "AI model" : "Rule-based fallback"}
+            </p>
+          </div>
+
+          {/* Summary */}
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-gray-500">Current Performance</p>
+                <p className="text-xl font-semibold text-gray-900">
+                  {prediction.currentPerformance}%
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-gray-500">Predicted Range</p>
+                <p className="text-xl font-semibold text-teal-700">
+                  {prediction.predictedRange.min}% -{" "}
+                  {prediction.predictedRange.max}%
+                </p>
+              </div>
+            </div>
+            {prediction.predictionReason && (
+              <p className="text-sm text-gray-600 mt-3">
+                {prediction.predictionReason}
+              </p>
+            )}
           </div>
 
           {/* Similar Courses */}
@@ -229,23 +260,32 @@ function AIInsightsModal({
               <Sparkles className="w-5 h-5 text-teal-600" />
               Top Similar Past Courses
             </h3>
-            <div className="space-y-3">
-              {prediction.similarCoursesUsed.map((course, idx) => (
-                <div
-                  key={idx}
-                  className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-lg p-4 border border-teal-200">
-                  <div className="flex items-start justify-between mb-2">
-                    <h4 className="font-semibold text-gray-900">
-                      {idx + 1}. {course.name}
-                    </h4>
-                    <span className="bg-teal-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                      {course.similarity}% Similar
-                    </span>
+            {prediction.similarCoursesUsed.length === 0 ? (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <p className="text-sm text-gray-600">
+                  No similar completed courses found yet. Add more completed
+                  courses to improve AI matching.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {prediction.similarCoursesUsed.map((course, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-lg p-4 border border-teal-200">
+                    <div className="flex items-start justify-between mb-2">
+                      <h4 className="font-semibold text-gray-900">
+                        {idx + 1}. {course.name}
+                      </h4>
+                      <span className="bg-teal-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                        {course.similarity}% Similar
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-700">{course.reason}</p>
                   </div>
-                  <p className="text-sm text-gray-700">{course.reason}</p>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Recommendation */}
@@ -256,7 +296,7 @@ function AIInsightsModal({
                 <h3 className="font-semibold text-amber-900 mb-1">
                   Personalized Recommendation
                 </h3>
-                <p className="text-sm text-amber-800">
+                <p className="text-sm text-amber-800 whitespace-pre-line">
                   {prediction.recommendation}
                 </p>
               </div>
@@ -281,6 +321,7 @@ export function Performance() {
   const [selectedInsight, setSelectedInsight] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [aiAdvice, setAiAdvice] = useState({});
 
   // Fetch active courses from MongoDB on component mount
   useEffect(() => {
@@ -320,6 +361,25 @@ export function Performance() {
 
         setCourses(activeCourses);
         setError(null);
+
+        // Fetch AI recommendations and convert to lookup object
+        try {
+          const recommendationsData = await getAIRecommendations();
+          const recommendationsArray = recommendationsData.data || [];
+
+          // Convert array to object keyed by course code
+          const adviceLookup = {};
+          recommendationsArray.forEach((rec) => {
+            if (rec.courseCode && rec.advice) {
+              adviceLookup[rec.courseCode] = rec.advice;
+            }
+          });
+
+          setAiAdvice(adviceLookup);
+        } catch (recErr) {
+          console.error(" Error fetching AI recommendations:", recErr);
+          // If recommendations fail, we'll use the fallback text in handlePredictClick
+        }
       } catch (err) {
         console.error(" Error fetching courses:", err);
         setError(err.message || "Failed to fetch courses");
@@ -374,6 +434,10 @@ export function Performance() {
           status = "At Risk";
         }
 
+        const adviceText =
+          aiAdvice[course.code] ||
+          "Keep up consistent effort to improve your grade.";
+
         const prediction = {
           predictedRange: {
             min: predictedMin,
@@ -381,6 +445,9 @@ export function Performance() {
           },
           status,
           confidence: coursePrediction.prediction.confidence,
+          usedAI: coursePrediction.prediction.usedAI,
+          currentPerformance: currentPerf,
+          predictionReason: coursePrediction.prediction.reason,
           similarCoursesUsed: (
             coursePrediction.prediction.similarCourses || []
           ).map((sc) => ({
@@ -388,7 +455,7 @@ export function Performance() {
             similarity: Math.round(sc.similarity * 100),
             reason: sc.reason,
           })),
-          recommendation: `Based on your current performance of ${currentPerf}%, the AI predicts you will score between ${predictedMin}% and ${predictedMax}% in this course. ${coursePrediction.prediction.reason || "Keep up consistent effort to improve your grade."}`,
+          recommendation: `Based on your current performance of ${currentPerf}%, the AI predicts you will score between ${predictedMin}% and ${predictedMax}%.\n\nAI Advisor: ${adviceText}`,
         };
 
         setPredictions((prev) => ({

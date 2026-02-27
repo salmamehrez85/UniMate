@@ -383,8 +383,39 @@ const generateActionableRecommendations = async (activeCourses) => {
     const coursesData = activeCourses.map((course) => {
       // Count pending and completed tasks
       const tasks = course.tasks || [];
-      const completedTasks = tasks.filter((t) => t.completed === true).length;
+      const completedTasks = tasks.filter(
+        (t) => t.status === "done" || t.completed === true,
+      ).length;
       const pendingTasks = tasks.length - completedTasks;
+
+      // Extract specific pending tasks with titles and due dates
+      const pendingDeadlines = [];
+      tasks.forEach((task) => {
+        if (task.status !== "done" && !task.completed) {
+          pendingDeadlines.push({
+            title: task.title || "Untitled Task",
+            dueDate: task.dueDate,
+            type: "Task",
+          });
+        }
+      });
+
+      // Extract incomplete project phases (using correct schema fields)
+      const phases = course.phases || [];
+      phases.forEach((phase) => {
+        const requirements = phase.requirements || [];
+        const hasIncomplete = requirements.some((r) => !r.completed);
+        if (hasIncomplete) {
+          pendingDeadlines.push({
+            title: phase.title || "Project Phase",
+            dueDate: phase.dueDate,
+            type: "Phase",
+          });
+        }
+      });
+
+      // Keep only top 3 deadlines to avoid token overload
+      const topDeadlines = pendingDeadlines.slice(0, 3);
 
       // Get recent assessment performance
       const assessments = course.assessments || [];
@@ -402,6 +433,7 @@ const generateActionableRecommendations = async (activeCourses) => {
         currentGradePercentage: course.currentPerformance || 0,
         completedTasks,
         pendingTasks,
+        pendingDeadlines: topDeadlines,
         recentAssessments,
       };
     });
@@ -429,10 +461,14 @@ For each course, provide advice that is:
 - Encouraging but honest
 - Focused on immediate next steps
 
+⚠️ CRITICAL INSTRUCTION:
+If the student has items in 'pendingDeadlines', you MUST mention at least one specific task or phase by its exact name and due date in your advice.
+Example: "Prioritize completing 'Dart Task 1' before March 15th" or "Focus on the 'Phase 2: Database Design' requirements due tomorrow."
+
 Examples of good advice:
 - "Your quiz scores are below 70%. Focus on practicing the problem sets from modules 2-3 before the next quiz."
-- "You have 3 pending assignments. Prioritize the project due Friday—it carries 25% of your grade."
-- "Great start! You're at 88%. Review the recent quiz mistakes to push toward 90%."
+- "You have 3 pending assignments. Prioritize 'Project Proposal' due March 20th—it carries 25% of your grade."
+- "Great start! You're at 88%. Complete 'Final Review Task' by end of week to maintain momentum."
 
 Also determine a status for each course:
 - "green": Performance 75%+, tasks on track
@@ -460,23 +496,45 @@ Return JSON with array of recommendations.`;
     if (activeCourses && activeCourses.length > 0) {
       const coursesData = activeCourses.map((course) => {
         const tasks = course.tasks || [];
-        const completedTasks = tasks.filter((t) => t.completed === true).length;
+        const completedTasks = tasks.filter(
+          (t) => t.status === "done" || t.completed === true,
+        ).length;
         const pendingTasks = tasks.length - completedTasks;
-        const assessments = course.assessments || [];
-        const recentAssessments = assessments.slice(-3).map((a) => ({
-          type: a.type,
-          score: a.score,
-          maxScore: a.maxScore,
-          percentage:
-            a.maxScore > 0 ? Math.round((a.score / a.maxScore) * 100) : 0,
-        }));
+
+        // Extract deadlines for fallback
+        const pendingDeadlines = [];
+        tasks.forEach((task) => {
+          if (task.status !== "done" && !task.completed) {
+            pendingDeadlines.push({
+              title: task.title || "Untitled Task",
+              dueDate: task.dueDate,
+              type: "Task",
+            });
+          }
+        });
+
+        const phases = course.phases || [];
+        phases.forEach((phase) => {
+          const requirements = phase.requirements || [];
+          const hasIncomplete = requirements.some((r) => !r.completed);
+          if (hasIncomplete) {
+            pendingDeadlines.push({
+              title: phase.title || "Project Phase",
+              dueDate: phase.dueDate,
+              type: "Phase",
+            });
+          }
+        });
+
+        const topDeadlines = pendingDeadlines.slice(0, 3);
+
         return {
           courseCode: course.code || "UNKNOWN",
           courseName: course.name || "Unknown Course",
           currentGradePercentage: course.currentPerformance || 0,
           completedTasks,
           pendingTasks,
-          recentAssessments,
+          pendingDeadlines: topDeadlines,
         };
       });
       return generateFallbackRecommendations(coursesData);
@@ -486,34 +544,50 @@ Return JSON with array of recommendations.`;
 };
 
 /**
- * Fallback intelligent recommendations generator without Gemini
+ * Fallback intelligent recommendations generator without Gemini (Deadline-Aware)
  */
 const generateFallbackRecommendations = (coursesData) => {
   const recommendations = coursesData.map((course) => {
     const perf = course.currentGradePercentage || 0;
+    const deadline = course.pendingDeadlines && course.pendingDeadlines[0];
     let status = "green";
     let advice = "";
 
-    // Determine status and generate contextual advice
-    if (perf >= 85 && course.pendingTasks <= 2) {
+    // Determine status based on performance
+    if (perf >= 80) {
       status = "green";
-      if (course.recentAssessments.length > 0) {
-        advice = `Excellent work in ${course.courseCode}! You're at ${Math.round(perf)}%. Keep up the momentum and review any recent assessment feedback to maintain this strong performance.`;
-      } else {
-        advice = `Great start in ${course.courseCode}! You're performing at ${Math.round(perf)}%. Stay focused and maintain consistent effort.`;
-      }
-    } else if (perf >= 75 && perf < 85) {
-      status = "green";
-      advice = `Good progress in ${course.courseCode}! You're at ${Math.round(perf)}%. ${course.pendingTasks > 0 ? `Focus on completing your ${course.pendingTasks} pending task${course.pendingTasks > 1 ? "s" : ""} to boost your grade further.` : "Keep consistent with your coursework."}`;
-    } else if (perf >= 65 && perf < 75) {
+    } else if (perf >= 60) {
       status = "yellow";
-      advice = `${course.courseCode} needs attention. You're at ${Math.round(perf)}%. ${course.pendingTasks > 1 ? `Prioritize your ${course.pendingTasks} pending tasks` : "Complete your pending assignments"} and review challenging concepts to improve your performance.`;
-    } else if (perf >= 50 && perf < 65) {
-      status = "yellow";
-      advice = `${course.courseCode} requires focused effort. Your current performance is ${Math.round(perf)}%. ${course.pendingTasks > 0 ? `Urgent: Complete your ${course.pendingTasks} pending task${course.pendingTasks > 1 ? "s" : ""} immediately.` : "Seek help from your instructor or peers."} Schedule study sessions for weak areas.`;
     } else {
       status = "red";
-      advice = `${course.courseCode} is at-risk with ${Math.round(perf)}% performance. ${course.pendingTasks > 0 ? `Critical: Complete all ${course.pendingTasks} pending task${course.pendingTasks > 1 ? "s" : ""} NOW.` : ""} Contact your instructor immediately for support and develop a recovery plan.`;
+    }
+
+    // Generate advice - prioritize mentioning specific deadlines if available
+    if (deadline && deadline.dueDate) {
+      const dateStr = new Date(deadline.dueDate).toLocaleDateString();
+      if (perf >= 85) {
+        advice = `Excellent work in ${course.courseCode}! You're at ${Math.round(perf)}%. Don't forget your upcoming ${deadline.type}: '${deadline.title}' due on ${dateStr}. Complete it to maintain this strong performance.`;
+      } else if (perf >= 75) {
+        advice = `Good progress in ${course.courseCode}! You're at ${Math.round(perf)}%. Prioritize completing '${deadline.title}' (${deadline.type}) due on ${dateStr} to boost your grade further.`;
+      } else if (perf >= 60) {
+        advice = `${course.courseCode} needs attention. You're at ${Math.round(perf)}%. URGENT: Complete '${deadline.title}' (${deadline.type}) by ${dateStr} to improve your performance.`;
+      } else {
+        advice = `${course.courseCode} is at-risk with ${Math.round(perf)}%. CRITICAL: Immediately complete '${deadline.title}' (${deadline.type}) due ${dateStr}. Contact your instructor for support.`;
+      }
+    } else if (deadline) {
+      // Deadline exists but no due date
+      advice = `You're doing well in ${course.courseCode} at ${Math.round(perf)}%. Don't forget your upcoming ${deadline.type}: '${deadline.title}'. Prioritize this to protect your grade.`;
+    } else {
+      // No deadlines - generic advice
+      if (perf >= 85) {
+        advice = `Excellent work in ${course.courseCode}! You're at ${Math.round(perf)}%. Keep up the momentum and review recent assessment feedback.`;
+      } else if (perf >= 75) {
+        advice = `Good progress in ${course.courseCode}! You're at ${Math.round(perf)}%. Keep consistent with your coursework.`;
+      } else if (perf >= 60) {
+        advice = `${course.courseCode} needs attention. You're at ${Math.round(perf)}%. Review challenging concepts and seek help if needed.`;
+      } else {
+        advice = `${course.courseCode} is at-risk with ${Math.round(perf)}%. Contact your instructor immediately for support and develop a recovery plan.`;
+      }
     }
 
     return {
