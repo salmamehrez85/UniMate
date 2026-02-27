@@ -815,7 +815,7 @@ const generateFallbackRecommendations = (coursesData) => {
         summaryAdvice = `At-risk (${Math.round(perf)}%). Contact instructor NOW.`;
         const recoveryMessage =
           neededToPass > 100
-            ? `Even scoring 100% on all remaining work, you'd reach ~${maxPossibleGrade}%. Contact your instructor TODAY—recovery requires special arrangements or extra credit.`
+            ? `Even scoring 100% on all remaining work, you'd reach around ${maxPossibleGrade}% as Final Grade. Contact your instructor TODAY—recovery requires special arrangements or extra credit.`
             : `To pass (60%), you need ${neededToPassCapped}%+ on remaining work. Contact your instructor TODAY for a personalized recovery plan.`;
         detailedAnalysis = `CRITICAL: You're at ${Math.round(perf)}%. ${recoveryMessage} Seek tutoring assistance immediately.`;
       }
