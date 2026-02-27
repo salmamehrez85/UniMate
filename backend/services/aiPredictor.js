@@ -221,6 +221,53 @@ Return a JSON object with:
 };
 
 /**
+ * Fallback basic keyword matching for finding similar courses
+ * Works when Gemini API is unavailable
+ */
+const findSimilarCoursesFallback = (currentObj, pastObjs) => {
+  const currentTopics = (currentObj.profile?.main_topics || [])
+    .concat(currentObj.profile?.skills || [])
+    .map((t) => t.toLowerCase());
+
+  const scored = pastObjs.map((past) => {
+    const pastTopics = (past.profile?.main_topics || [])
+      .concat(past.profile?.skills || [])
+      .map((t) => t.toLowerCase());
+
+    // Calculate overlap percentage
+    const commonTopics = currentTopics.filter((t) =>
+      pastTopics.some((p) => p.includes(t) || t.includes(p)),
+    );
+
+    const similarityScore = Math.min(
+      1.0,
+      commonTopics.length /
+        Math.max(currentTopics.length, pastTopics.length, 1),
+    );
+
+    return {
+      courseId: past.id, // KEEP the actual course ID
+      name: past.name, // Also keep the name for display
+      similarity: similarityScore,
+      reason:
+        commonTopics.length > 0
+          ? `Shares ${commonTopics.length} topics: ${commonTopics.slice(0, 3).join(", ")}`
+          : `Course outline similarity based on keywords`,
+    };
+  });
+
+  // Return top 3 by similarity, converted to LLM schema format
+  const ranked = scored.sort((a, b) => b.similarity - a.similarity).slice(0, 3);
+  return {
+    ranked_past_courses: ranked.map((r) => ({
+      courseId: r.courseId,
+      similarity_score: r.similarity,
+      reason: r.reason,
+    })),
+  };
+};
+
+/**
  * Find similar courses using LLM semantic comparison
  */
 const findSimilarCourses = async (currentObj, pastObjs) => {
@@ -246,15 +293,23 @@ Return JSON with a "ranked_past_courses" array.`;
 
     const result = await callLLMWithRetry(prompt, SimilarityRankingSchema);
 
-    if (!result) {
-      // Return empty ranking if LLM fails
-      return { ranked_past_courses: [] };
+    if (
+      !result ||
+      !result.ranked_past_courses ||
+      result.ranked_past_courses.length === 0
+    ) {
+      // Fallback to basic keyword matching when AI fails
+      console.warn(
+        "AI similarity matching failed or returned empty. Using fallback keyword matching.",
+      );
+      return findSimilarCoursesFallback(currentObj, pastObjs);
     }
 
     return result;
   } catch (error) {
-    console.error("Failed to find similar courses:", error.message);
-    return { ranked_past_courses: [] };
+    console.error("Failed to find similar courses with AI:", error.message);
+    // Fallback to basic keyword matching
+    return findSimilarCoursesFallback(currentObj, pastObjs);
   }
 };
 
@@ -367,8 +422,12 @@ const calculateAIPrediction = async (activeCourse, pastCourses) => {
     // Clamp to valid percentage range [0, 100]
     predPct = Math.max(0, Math.min(100, predPct));
 
+    // Ensure we have valid numbers
+    const finalPredictedScore =
+      isNaN(predPct) || predPct === undefined ? currentAvg : predPct;
+
     return {
-      predicted_score_pct: Math.round(predPct * 100) / 100,
+      predicted_score_pct: Math.round(finalPredictedScore * 100) / 100,
       confidence,
       similar_courses: similarCoursesOutput,
     };

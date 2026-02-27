@@ -414,15 +414,28 @@ exports.getPredictedGPA = async (req, res) => {
           );
 
           // Convert AI prediction to min/max range (±3% confidence range)
-          const predictedScore = aiResult.predicted_score_pct;
-          const predictionMin = Math.max(Math.round(predictedScore - 3), 0);
-          const predictionMax = Math.min(Math.round(predictedScore + 3), 100);
+          const predictedScore =
+            aiResult.predicted_score_pct || currentPerformance;
+          const validPrediction = !isNaN(predictedScore)
+            ? predictedScore
+            : currentPerformance;
+          const predictionMin = Math.max(Math.round(validPrediction - 3), 0);
+          const predictionMax = Math.min(Math.round(validPrediction + 3), 100);
+
+          // Transform similar_courses to match frontend expectations
+          const transformedSimilarCourses = (
+            aiResult.similar_courses || []
+          ).map((sc) => ({
+            name: sc.name || sc.courseId,
+            similarity: sc.similarity || sc.similarity_score || 0,
+            reason: sc.reason,
+          }));
 
           prediction = {
             min: predictionMin,
             max: predictionMax,
             confidence: aiResult.confidence,
-            similarCourses: aiResult.similar_courses || [],
+            similarCourses: transformedSimilarCourses,
             usedAI: !aiResult.error,
           };
         } catch (error) {
