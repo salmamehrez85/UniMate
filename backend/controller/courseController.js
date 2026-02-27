@@ -273,20 +273,22 @@ const predictFinalGradeFallback = (currentAverage) => {
   // Handle courses with no assessment data yet
   if (currentAverage === null || currentAverage === undefined) {
     return {
-      min: 70,
-      max: 80,
-      confidence: "Medium",
-      reason: "No assessment data yet - prediction based on general patterns",
+      min: 60,
+      max: 75,
+      confidence: "Low",
+      reason:
+        "No assessment data yet - prediction based on general patterns. Actual range depends on upcoming work.",
     };
   }
 
   // Handle 0% grade (course just started)
   if (currentAverage === 0) {
     return {
-      min: 65,
-      max: 80,
-      confidence: "Medium",
-      reason: "Course just started - no grades available yet",
+      min: 50,
+      max: 65,
+      confidence: "Low",
+      reason:
+        "No assessment data yet - recovery requires significant effort. Assumes ~40% coursework remaining at 100% performance.",
     };
   }
 

@@ -590,6 +590,10 @@ const generateFallbackRecommendations = (coursesData) => {
     const neededForA = perf >= 90 ? 0 : Math.ceil((90 - perf * 0.6) / 0.4); // Simple calculation
     const neededToPass = perf >= 60 ? 0 : Math.ceil((60 - perf * 0.6) / 0.4);
 
+    // Cap needed percentages at 100% (max achievable). Calculate realistic best-case scenario.
+    const neededToPassCapped = Math.min(neededToPass, 100);
+    const maxPossibleGrade = Math.ceil(perf * 0.6 + 100 * 0.4); // If student gets perfect (100%) on all remaining work
+
     // Generate summaryAdvice (max 12 words) and detailedAnalysis
     if (deadline && deadline.dueDate) {
       const dueDate = new Date(deadline.dueDate);
@@ -602,34 +606,38 @@ const generateFallbackRecommendations = (coursesData) => {
 
       if (perf >= 85) {
         summaryAdvice = `Grade: ${Math.round(perf)}%. '${deadline.title}' ${isOverdue ? "OVERDUE" : `due ${dateStr}`}.`;
-        detailedAnalysis = `You're at ${Math.round(perf)}% with '${deadline.title}' (${deadline.type}) ${isOverdue ? `OVERDUE since ${dateStr}` : `due ${dateStr}`}. ${isOverdue ? "Submit this immediately as late submissions may lose points." : "To maintain a 90%+ final grade, you need to score at least 85% on remaining assessments."} Your current performance is strong. Complete this ${deadline.type.toLowerCase()} ${isOverdue ? "now" : "on time"} to protect your grade.`;
+        detailedAnalysis = `You're at ${Math.round(perf)}% with '${deadline.title}' (${deadline.type}) ${isOverdue ? `OVERDUE since ${dateStr}` : `due ${dateStr}`}. ${isOverdue ? "Submit this immediately as late submissions may lose points." : perf >= 90 ? "To keep your A grade (90%+), score 85%+ on remaining work." : "To reach an A grade (90%+), you need to score at least 90% on remaining assessments."} Your current performance is strong. Complete this ${deadline.type.toLowerCase()} ${isOverdue ? "now" : "on time"} to protect your grade.`;
       } else if (perf >= 75) {
         summaryAdvice = `Grade: ${Math.round(perf)}%. '${deadline.title}' ${isOverdue ? "OVERDUE!" : `due ${dateStr}`}`;
-        detailedAnalysis = `You're at ${Math.round(perf)}% with '${deadline.title}' (${deadline.type}) ${isOverdue ? `OVERDUE since ${dateStr}` : `due ${dateStr}`}. ${isOverdue ? "URGENT: Submit immediately to minimize grade penalty." : `To reach 90%, you need approximately ${neededForA}% on remaining work.`} Focus on completing this ${deadline.type.toLowerCase()} to improve your standing and boost your final grade.`;
+        detailedAnalysis = `You're at ${Math.round(perf)}% with '${deadline.title}' (${deadline.type}) ${isOverdue ? `OVERDUE since ${dateStr}` : `due ${dateStr}`}. ${isOverdue ? "URGENT: Submit immediately to minimize grade penalty." : `To reach an A grade (90%+), you need approximately ${neededForA}% on remaining work.`} Focus on completing this ${deadline.type.toLowerCase()} to improve your standing and boost your final grade.`;
       } else if (perf >= 60) {
-        summaryAdvice = `Grade: ${Math.round(perf)}%. URGENT: '${deadline.title}' ${isOverdue ? "OVERDUE!" : "NOW"}`;
-        detailedAnalysis = `You're at ${Math.round(perf)}% with '${deadline.title}' (${deadline.type}) ${isOverdue ? `OVERDUE since ${dateStr}` : `due ${dateStr}`}. CRITICAL: ${isOverdue ? "This is late. Submit NOW to avoid further penalties." : "To avoid falling below 60%, you must score at least 70% on all remaining work."} Complete this ${deadline.type.toLowerCase()} immediately and seek instructor help if struggling with concepts.`;
+        summaryAdvice = `Grade: ${Math.round(perf)}%. '${deadline.title}' ${isOverdue ? "OVERDUE!" : `due ${dateStr}`}`;
+        detailedAnalysis = `You're at ${Math.round(perf)}% with '${deadline.title}' (${deadline.type}) ${isOverdue ? `OVERDUE since ${dateStr}` : `due ${dateStr}`}. CRITICAL: ${isOverdue ? "This is late. Submit NOW to avoid further penalties." : "To avoid falling below passing (60%), you must score at least 70% on all remaining work."} Complete this ${deadline.type.toLowerCase()} ${isOverdue ? "immediately" : "on time"} and seek instructor help if struggling with concepts.`;
       } else {
-        summaryAdvice = `At-risk (${Math.round(perf)}%). '${deadline.title}' ${isOverdue ? "OVERDUE!" : "NOW!"}`;
-        detailedAnalysis = `CRITICAL: You're at ${Math.round(perf)}% with '${deadline.title}' (${deadline.type}) ${isOverdue ? `OVERDUE since ${dateStr}` : `due ${dateStr}`}. To pass this course (60%), you need ${neededToPass}%+ on ALL remaining work. ${isOverdue ? "This late submission will hurt your grade further." : "Historical data shows recovery from this position requires immediate action."} Complete '${deadline.title}' NOW and contact your instructor for a recovery plan.`;
+        summaryAdvice = `At-risk (${Math.round(perf)}%). '${deadline.title}' ${isOverdue ? "OVERDUE!" : `due ${dateStr}`}`;
+        detailedAnalysis = `CRITICAL: You're at ${Math.round(perf)}% with '${deadline.title}' (${deadline.type}) ${isOverdue ? `OVERDUE since ${dateStr}` : `due ${dateStr}`}. To pass this course (60%), you need ${neededToPass}%+ on ALL remaining work. ${isOverdue ? "This late submission will hurt your grade further." : "Historical data shows recovery from this position requires immediate action."} Complete '${deadline.title}' and contact your instructor for a recovery plan.`;
       }
     } else if (deadline) {
       summaryAdvice = `Grade: ${Math.round(perf)}%. Focus on '${deadline.title}'.`;
-      detailedAnalysis = `You're at ${Math.round(perf)}% with upcoming ${deadline.type}: '${deadline.title}'. ${perf >= 85 ? "To maintain 90%+, score 85%+ on remaining work." : perf >= 60 ? `To reach 90%, you need ${neededForA}% on remaining assessments.` : `To pass (60%), you need ${neededToPass}%+ on all work.`} Prioritize this ${deadline.type.toLowerCase()} to protect your grade.`;
+      detailedAnalysis = `You're at ${Math.round(perf)}% with upcoming ${deadline.type}: '${deadline.title}'. ${perf >= 90 ? "To keep your A grade (90%+), maintain 85%+ on remaining work." : perf >= 85 ? "To reach an A grade (90%+), aim for 90%+ on remaining assessments." : perf >= 60 ? `To reach an A grade (90%+), you need ${neededForA}% on remaining assessments.` : `To pass (60%), you need ${neededToPass}%+ on all work.`} Prioritize this ${deadline.type.toLowerCase()} to protect your grade.`;
     } else {
       // No deadlines
       if (perf >= 85) {
         summaryAdvice = `Grade: ${Math.round(perf)}%. Maintain strong performance.`;
-        detailedAnalysis = `Excellent work! You're at ${Math.round(perf)}%. To lock in a 90%+ final grade, continue scoring 85%+ on remaining assessments. Your performance is on track—maintain this consistency through the semester.`;
+        detailedAnalysis = `Excellent work! You're at ${Math.round(perf)}%. ${perf >= 90 ? "To keep your A grade (90%+), continue scoring 85%+ on remaining assessments." : "To reach an A grade (90%+), aim for 90%+ on remaining work."} Your performance is on track—maintain this consistency through the semester.`;
       } else if (perf >= 75) {
         summaryAdvice = `Grade: ${Math.round(perf)}%. Push toward 85%+.`;
-        detailedAnalysis = `You're at ${Math.round(perf)}%. To reach 90%, you need approximately ${neededForA}% on remaining work. Focus on upcoming assessments and review challenging concepts to boost your performance.`;
+        detailedAnalysis = `You're at ${Math.round(perf)}%. To reach an A grade (90%+), you need approximately ${neededForA}% on remaining work. Focus on upcoming assessments and review challenging concepts to boost your performance.`;
       } else if (perf >= 60) {
         summaryAdvice = `Grade: ${Math.round(perf)}%. Review concepts, seek help.`;
-        detailedAnalysis = `You're at ${Math.round(perf)}%, in the yellow zone. To avoid dropping below 60%, you must score 70%+ on all remaining work. Schedule office hours, form study groups, and tackle weak areas immediately.`;
+        detailedAnalysis = `You're at ${Math.round(perf)}%, in the yellow zone. To avoid falling below passing (60%), you must score 70%+ on all remaining work. Schedule office hours, form study groups, and tackle weak areas immediately.`;
       } else {
         summaryAdvice = `At-risk (${Math.round(perf)}%). Contact instructor NOW.`;
-        detailedAnalysis = `CRITICAL: You're at ${Math.round(perf)}%. To pass (60%), you need ${neededToPass}%+ on ALL remaining work. This is a steep climb. Contact your instructor TODAY for a personalized recovery plan. Consider tutoring and extra study sessions.`;
+        const recoveryMessage =
+          neededToPass > 100
+            ? `Even scoring 100% on all remaining work, you'd reach ~${maxPossibleGrade}%. Contact your instructor TODAY—recovery requires special arrangements or extra credit.`
+            : `To pass (60%), you need ${neededToPassCapped}%+ on remaining work. Contact your instructor TODAY for a personalized recovery plan.`;
+        detailedAnalysis = `CRITICAL: You're at ${Math.round(perf)}%. ${recoveryMessage} Seek tutoring assistance immediately.`;
       }
     }
 
