@@ -221,6 +221,50 @@ Return a JSON object with:
 };
 
 /**
+ * Preset computer science keywords/topics database
+ */
+const CS_KEYWORDS_DB = {
+  "data structures": [
+    "data structure",
+    "array",
+    "linked list",
+    "tree",
+    "graph",
+    "hash",
+    "queue",
+    "stack",
+  ],
+  algorithms: [
+    "algorithm",
+    "sorting",
+    "searching",
+    "dynamic programming",
+    "greedy",
+    "divide conquer",
+  ],
+  systems: [
+    "operating system",
+    "os",
+    "process",
+    "memory",
+    "cpu",
+    "threading",
+    "concurrency",
+  ],
+  databases: ["database", "dbms", "sql", "query", "transaction", "index"],
+  networks: ["network", "tcp", "ip", "socket", "protocol", "http"],
+  programming: [
+    "programming",
+    "language",
+    "python",
+    "java",
+    "c++",
+    "javascript",
+    "coding",
+  ],
+};
+
+/**
  * Fallback basic keyword matching for finding similar courses
  * Works when Gemini API is unavailable
  */
@@ -229,35 +273,110 @@ const findSimilarCoursesFallback = (currentObj, pastObjs) => {
     .concat(currentObj.profile?.skills || [])
     .map((t) => t.toLowerCase());
 
+  // Extract keywords from outline text
+  const extractKeywords = (text) => {
+    if (!text || typeof text !== "string") return [];
+    return text
+      .toLowerCase()
+      .split(/\s+|,|;|\.|\//)
+      .filter(
+        (w) =>
+          w.length > 3 &&
+          ![
+            "covers",
+            "includes",
+            "such",
+            "like",
+            "core",
+            "based",
+            "including",
+          ].includes(w),
+      );
+  };
+
+  const currentOutlineKeywords = extractKeywords(currentObj.outline_text);
+
+  console.log(
+    "Current course keywords from outline:",
+    currentOutlineKeywords.slice(0, 10),
+  );
+
   const scored = pastObjs.map((past) => {
     const pastTopics = (past.profile?.main_topics || [])
       .concat(past.profile?.skills || [])
       .map((t) => t.toLowerCase());
 
-    // Calculate overlap percentage
-    const commonTopics = currentTopics.filter((t) =>
+    const pastOutlineKeywords = extractKeywords(past.outline_text);
+
+    // Try profile-based matching first
+    let commonTopics = currentTopics.filter((t) =>
       pastTopics.some((p) => p.includes(t) || t.includes(p)),
+    );
+
+    // If profiles empty, try outline keyword matching
+    if (
+      commonTopics.length === 0 &&
+      currentOutlineKeywords.length > 0 &&
+      pastOutlineKeywords.length > 0
+    ) {
+      commonTopics = currentOutlineKeywords.filter((w) =>
+        pastOutlineKeywords.includes(w),
+      );
+      console.log(
+        `Matching ${currentObj.name} with ${past.name} via outline keywords: ${commonTopics.length} matches`,
+      );
+    }
+
+    // If still nothing, try preset CS keywords database
+    if (commonTopics.length === 0) {
+      let keywordMatches = 0;
+      for (const [category, keywords] of Object.entries(CS_KEYWORDS_DB)) {
+        const currentHasCategory = currentOutlineKeywords.some((w) =>
+          keywords.some((k) => w.includes(k) || k.includes(w)),
+        );
+        const pastHasCategory = pastOutlineKeywords.some((w) =>
+          keywords.some((k) => w.includes(k) || k.includes(w)),
+        );
+        if (currentHasCategory && pastHasCategory) {
+          keywordMatches++;
+          commonTopics.push(category);
+        }
+      }
+    }
+
+    // Calculate similarity score
+    const denominator = Math.max(
+      currentTopics.length || currentOutlineKeywords.length || 1,
+      pastTopics.length || pastOutlineKeywords.length || 1,
     );
 
     const similarityScore = Math.min(
       1.0,
-      commonTopics.length /
-        Math.max(currentTopics.length, pastTopics.length, 1),
+      Math.max(0, commonTopics.length / denominator),
     );
 
     return {
-      courseId: past.id, // KEEP the actual course ID
-      name: past.name, // Also keep the name for display
+      courseId: past.id,
+      name: past.name,
       similarity: similarityScore,
       reason:
         commonTopics.length > 0
-          ? `Shares ${commonTopics.length} topics: ${commonTopics.slice(0, 3).join(", ")}`
-          : `Course outline similarity based on keywords`,
+          ? `Shares topics: ${[...new Set(commonTopics)].slice(0, 3).join(", ")}`
+          : `Related course in computer science`,
     };
   });
 
-  // Return top 3 by similarity, converted to LLM schema format
+  // Return top 3 by similarity
   const ranked = scored.sort((a, b) => b.similarity - a.similarity).slice(0, 3);
+
+  console.log(
+    "Fallback similarity results:",
+    ranked.map((r) => ({
+      name: r.name,
+      similarity: Math.round(r.similarity * 100) + "%",
+    })),
+  );
+
   return {
     ranked_past_courses: ranked.map((r) => ({
       courseId: r.courseId,
@@ -341,6 +460,7 @@ const calculateAIPrediction = async (activeCourse, pastCourses) => {
       id: activeCourse.code,
       name: activeCourse.name,
       profile: activeProfile,
+      outline_text: activeCourse.outline_text || activeCourse.name,
     };
 
     // 2. Generate profiles for all past courses
@@ -364,6 +484,7 @@ const calculateAIPrediction = async (activeCourse, pastCourses) => {
         id: pCode,
         name: past.name,
         profile: pProfile,
+        outline_text: past.outline_text || past.name,
       });
     }
 
