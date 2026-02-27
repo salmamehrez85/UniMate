@@ -77,7 +77,7 @@ export function AIRecommendations() {
                 <p className="font-semibold text-gray-900">
                   {rec.courseCode} - {rec.courseName}
                 </p>
-                <p className="text-sm text-gray-600">{rec.advice}</p>
+                <p className="text-sm text-gray-600">{rec.summaryAdvice}</p>
               </div>
             </div>
           ))}

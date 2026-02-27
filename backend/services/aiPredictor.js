@@ -105,12 +105,24 @@ const RecommendationSchema = {
             description:
               "green for on-track, yellow for watch, red for at-risk",
           },
-          advice: {
+          summaryAdvice: {
             type: "string",
-            description: "1-2 short, highly actionable sentences of advice.",
+            description:
+              "Very short advice (max 20 words) for dashboard. Focus only on the single most urgent task or risk.",
+          },
+          detailedAnalysis: {
+            type: "string",
+            description:
+              "Deep analysis for modal. Must include: what-if calculations, comparison to historical performance, and specific task/phase mentions.",
           },
         },
-        required: ["courseCode", "courseName", "status", "advice"],
+        required: [
+          "courseCode",
+          "courseName",
+          "status",
+          "summaryAdvice",
+          "detailedAnalysis",
+        ],
       },
     },
   },
@@ -449,33 +461,43 @@ const generateActionableRecommendations = async (activeCourses) => {
     }
 
     const coursesJson = JSON.stringify(coursesData, null, 2);
+    const todayDate = new Date().toLocaleDateString();
 
-    const prompt = `You are a supportive academic advisor. Analyze the following student's active courses and provide ONE specific, actionable piece of advice per course.
+    const prompt = `You are a data-driven academic advisor. Analyze the following student's active courses and provide TWO types of advice per course.
 
 STUDENT'S ACTIVE COURSES:
 ${coursesJson}
 
-For each course, provide advice that is:
-- Specific to their current performance and tasks
-- Highly actionable (not generic)
-- Encouraging but honest
-- Focused on immediate next steps
+⚠️ CRITICAL: You must return TWO distinct fields for EACH course:
 
-⚠️ CRITICAL INSTRUCTION:
-If the student has items in 'pendingDeadlines', you MUST mention at least one specific task or phase by its exact name and due date in your advice.
-Example: "Prioritize completing 'Dart Task 1' before March 15th" or "Focus on the 'Phase 2: Database Design' requirements due tomorrow."
+1️⃣ "summaryAdvice" (Dashboard Quick Action):
+   - MAX 20 WORDS. Be blunt and fast.
+   - Start with "Grade: X%" to make the percentage clear.
+   - If a deadline has already passed (date is before today, ${todayDate}), say "OVERDUE!" instead of the date.
+   - Focus ONLY on the single most urgent task or risk.
+   - Examples:
+     ✅ "Grade: 93%. 'Dart Task 1' OVERDUE!"
+     ✅ "At-risk (15%). Contact instructor NOW."
+     ✅ "Grade: 88%. 'Final Project' due March 5."
+   - DO NOT write full sentences or be verbose.
 
-Examples of good advice:
-- "Your quiz scores are below 70%. Focus on practicing the problem sets from modules 2-3 before the next quiz."
-- "You have 3 pending assignments. Prioritize 'Project Proposal' due March 20th—it carries 25% of your grade."
-- "Great start! You're at 88%. Complete 'Final Review Task' by end of week to maintain momentum."
+2️⃣ "detailedAnalysis" (Modal Deep Dive):
+   - Act like a data scientist. Use 'pendingDeadlines' and 'recentAssessments' to calculate specific goals.
+   - Check if deadlines are overdue (before ${todayDate}) and mention "OVERDUE since [date]" to emphasize urgency.
+   - MUST include:
+     a) What-If Scenario: Tell the student what grade they need on remaining work to maintain/improve their current trend.
+     b) Historical Comparison: Reference how this performance compares to typical patterns.
+     c) Specific Tasks/Phases: Mention at least one item from 'pendingDeadlines' by exact name and date/overdue status.
+   - Examples:
+     ✅ "You're at 93% with 'Dart Task 1' OVERDUE since 2/24/2026. Submit this immediately as late submissions may lose points. To maintain a 90%+ final grade, you need to score at least 85% on remaining assessments. Your current performance is strong—complete this task now to protect your grade."
+     ✅ "At 0%, you need to score 75%+ on all remaining work to pass. 'Math Quiz 1' is due March 1—prioritize this immediately. Historical data shows students starting late rarely recover without intensive effort."
 
-Also determine a status for each course:
+Also determine a status:
 - "green": Performance 75%+, tasks on track
 - "yellow": Performance 60-75% OR pending tasks piling up
-- "red": Performance below 60% OR critical deadlines approaching
+- "red": Performance below 60% OR critical deadlines
 
-Return JSON with array of recommendations.`;
+Return JSON with both 'summaryAdvice' and 'detailedAnalysis' for each course.`;
 
     const result = await callLLMWithRetry(prompt, RecommendationSchema);
 
@@ -551,7 +573,8 @@ const generateFallbackRecommendations = (coursesData) => {
     const perf = course.currentGradePercentage || 0;
     const deadline = course.pendingDeadlines && course.pendingDeadlines[0];
     let status = "green";
-    let advice = "";
+    let summaryAdvice = "";
+    let detailedAnalysis = "";
 
     // Determine status based on performance
     if (perf >= 80) {
@@ -562,31 +585,51 @@ const generateFallbackRecommendations = (coursesData) => {
       status = "red";
     }
 
-    // Generate advice - prioritize mentioning specific deadlines if available
+    // Calculate what-if scenario
+    const remainingWeight = Math.max(0, 100 - perf); // Simplified: assume current grade represents work done
+    const neededForA = perf >= 90 ? 0 : Math.ceil((90 - perf * 0.6) / 0.4); // Simple calculation
+    const neededToPass = perf >= 60 ? 0 : Math.ceil((60 - perf * 0.6) / 0.4);
+
+    // Generate summaryAdvice (max 12 words) and detailedAnalysis
     if (deadline && deadline.dueDate) {
-      const dateStr = new Date(deadline.dueDate).toLocaleDateString();
+      const dueDate = new Date(deadline.dueDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset time for accurate date comparison
+      dueDate.setHours(0, 0, 0, 0);
+
+      const isOverdue = dueDate < today;
+      const dateStr = dueDate.toLocaleDateString();
+
       if (perf >= 85) {
-        advice = `Excellent work in ${course.courseCode}! You're at ${Math.round(perf)}%. Don't forget your upcoming ${deadline.type}: '${deadline.title}' due on ${dateStr}. Complete it to maintain this strong performance.`;
+        summaryAdvice = `Grade: ${Math.round(perf)}%. '${deadline.title}' ${isOverdue ? "OVERDUE" : `due ${dateStr}`}.`;
+        detailedAnalysis = `You're at ${Math.round(perf)}% with '${deadline.title}' (${deadline.type}) ${isOverdue ? `OVERDUE since ${dateStr}` : `due ${dateStr}`}. ${isOverdue ? "Submit this immediately as late submissions may lose points." : "To maintain a 90%+ final grade, you need to score at least 85% on remaining assessments."} Your current performance is strong. Complete this ${deadline.type.toLowerCase()} ${isOverdue ? "now" : "on time"} to protect your grade.`;
       } else if (perf >= 75) {
-        advice = `Good progress in ${course.courseCode}! You're at ${Math.round(perf)}%. Prioritize completing '${deadline.title}' (${deadline.type}) due on ${dateStr} to boost your grade further.`;
+        summaryAdvice = `Grade: ${Math.round(perf)}%. '${deadline.title}' ${isOverdue ? "OVERDUE!" : `due ${dateStr}`}`;
+        detailedAnalysis = `You're at ${Math.round(perf)}% with '${deadline.title}' (${deadline.type}) ${isOverdue ? `OVERDUE since ${dateStr}` : `due ${dateStr}`}. ${isOverdue ? "URGENT: Submit immediately to minimize grade penalty." : `To reach 90%, you need approximately ${neededForA}% on remaining work.`} Focus on completing this ${deadline.type.toLowerCase()} to improve your standing and boost your final grade.`;
       } else if (perf >= 60) {
-        advice = `${course.courseCode} needs attention. You're at ${Math.round(perf)}%. URGENT: Complete '${deadline.title}' (${deadline.type}) by ${dateStr} to improve your performance.`;
+        summaryAdvice = `Grade: ${Math.round(perf)}%. URGENT: '${deadline.title}' ${isOverdue ? "OVERDUE!" : "NOW"}`;
+        detailedAnalysis = `You're at ${Math.round(perf)}% with '${deadline.title}' (${deadline.type}) ${isOverdue ? `OVERDUE since ${dateStr}` : `due ${dateStr}`}. CRITICAL: ${isOverdue ? "This is late. Submit NOW to avoid further penalties." : "To avoid falling below 60%, you must score at least 70% on all remaining work."} Complete this ${deadline.type.toLowerCase()} immediately and seek instructor help if struggling with concepts.`;
       } else {
-        advice = `${course.courseCode} is at-risk with ${Math.round(perf)}%. CRITICAL: Immediately complete '${deadline.title}' (${deadline.type}) due ${dateStr}. Contact your instructor for support.`;
+        summaryAdvice = `At-risk (${Math.round(perf)}%). '${deadline.title}' ${isOverdue ? "OVERDUE!" : "NOW!"}`;
+        detailedAnalysis = `CRITICAL: You're at ${Math.round(perf)}% with '${deadline.title}' (${deadline.type}) ${isOverdue ? `OVERDUE since ${dateStr}` : `due ${dateStr}`}. To pass this course (60%), you need ${neededToPass}%+ on ALL remaining work. ${isOverdue ? "This late submission will hurt your grade further." : "Historical data shows recovery from this position requires immediate action."} Complete '${deadline.title}' NOW and contact your instructor for a recovery plan.`;
       }
     } else if (deadline) {
-      // Deadline exists but no due date
-      advice = `You're doing well in ${course.courseCode} at ${Math.round(perf)}%. Don't forget your upcoming ${deadline.type}: '${deadline.title}'. Prioritize this to protect your grade.`;
+      summaryAdvice = `Grade: ${Math.round(perf)}%. Focus on '${deadline.title}'.`;
+      detailedAnalysis = `You're at ${Math.round(perf)}% with upcoming ${deadline.type}: '${deadline.title}'. ${perf >= 85 ? "To maintain 90%+, score 85%+ on remaining work." : perf >= 60 ? `To reach 90%, you need ${neededForA}% on remaining assessments.` : `To pass (60%), you need ${neededToPass}%+ on all work.`} Prioritize this ${deadline.type.toLowerCase()} to protect your grade.`;
     } else {
-      // No deadlines - generic advice
+      // No deadlines
       if (perf >= 85) {
-        advice = `Excellent work in ${course.courseCode}! You're at ${Math.round(perf)}%. Keep up the momentum and review recent assessment feedback.`;
+        summaryAdvice = `Grade: ${Math.round(perf)}%. Maintain strong performance.`;
+        detailedAnalysis = `Excellent work! You're at ${Math.round(perf)}%. To lock in a 90%+ final grade, continue scoring 85%+ on remaining assessments. Your performance is on track—maintain this consistency through the semester.`;
       } else if (perf >= 75) {
-        advice = `Good progress in ${course.courseCode}! You're at ${Math.round(perf)}%. Keep consistent with your coursework.`;
+        summaryAdvice = `Grade: ${Math.round(perf)}%. Push toward 85%+.`;
+        detailedAnalysis = `You're at ${Math.round(perf)}%. To reach 90%, you need approximately ${neededForA}% on remaining work. Focus on upcoming assessments and review challenging concepts to boost your performance.`;
       } else if (perf >= 60) {
-        advice = `${course.courseCode} needs attention. You're at ${Math.round(perf)}%. Review challenging concepts and seek help if needed.`;
+        summaryAdvice = `Grade: ${Math.round(perf)}%. Review concepts, seek help.`;
+        detailedAnalysis = `You're at ${Math.round(perf)}%, in the yellow zone. To avoid dropping below 60%, you must score 70%+ on all remaining work. Schedule office hours, form study groups, and tackle weak areas immediately.`;
       } else {
-        advice = `${course.courseCode} is at-risk with ${Math.round(perf)}%. Contact your instructor immediately for support and develop a recovery plan.`;
+        summaryAdvice = `At-risk (${Math.round(perf)}%). Contact instructor NOW.`;
+        detailedAnalysis = `CRITICAL: You're at ${Math.round(perf)}%. To pass (60%), you need ${neededToPass}%+ on ALL remaining work. This is a steep climb. Contact your instructor TODAY for a personalized recovery plan. Consider tutoring and extra study sessions.`;
       }
     }
 
@@ -594,7 +637,8 @@ const generateFallbackRecommendations = (coursesData) => {
       courseCode: course.courseCode,
       courseName: course.courseName,
       status,
-      advice,
+      summaryAdvice,
+      detailedAnalysis,
     };
   });
 

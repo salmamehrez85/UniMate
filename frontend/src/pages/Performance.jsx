@@ -370,8 +370,8 @@ export function Performance() {
           // Convert array to object keyed by course code
           const adviceLookup = {};
           recommendationsArray.forEach((rec) => {
-            if (rec.courseCode && rec.advice) {
-              adviceLookup[rec.courseCode] = rec.advice;
+            if (rec.courseCode && rec.detailedAnalysis) {
+              adviceLookup[rec.courseCode] = rec.detailedAnalysis;
             }
           });
 
@@ -455,7 +455,7 @@ export function Performance() {
             similarity: Math.round(sc.similarity * 100),
             reason: sc.reason,
           })),
-          recommendation: `Based on your current performance of ${currentPerf}%, the AI predicts you will score between ${predictedMin}% and ${predictedMax}%.\n\nAI Advisor: ${adviceText}`,
+          recommendation: adviceText,
         };
 
         setPredictions((prev) => ({
