@@ -605,20 +605,20 @@ const generateFallbackRecommendations = (coursesData) => {
       const dateStr = dueDate.toLocaleDateString();
 
       if (perf >= 85) {
-        summaryAdvice = `Grade: ${Math.round(perf)}%. '${deadline.title}' ${isOverdue ? "OVERDUE" : `due ${dateStr}`}.`;
+        summaryAdvice = `Grade: ${Math.round(perf)}%. '${deadline.title}' ${deadline.type} ${isOverdue ? "OVERDUE" : `due ${dateStr}`}.`;
         detailedAnalysis = `You're at ${Math.round(perf)}% with '${deadline.title}' (${deadline.type}) ${isOverdue ? `OVERDUE since ${dateStr}` : `due ${dateStr}`}. ${isOverdue ? "Submit this immediately as late submissions may lose points." : perf >= 90 ? "To keep your A grade (90%+), score 85%+ on remaining work." : "To reach an A grade (90%+), you need to score at least 90% on remaining assessments."} Your current performance is strong. Complete this ${deadline.type.toLowerCase()} ${isOverdue ? "now" : "on time"} to protect your grade.`;
       } else if (perf >= 75) {
-        summaryAdvice = `Grade: ${Math.round(perf)}%. '${deadline.title}' ${isOverdue ? "OVERDUE!" : `due ${dateStr}`}`;
+        summaryAdvice = `Grade: ${Math.round(perf)}%. '${deadline.title}' ${deadline.type} ${isOverdue ? "OVERDUE!" : `due ${dateStr}`}`;
         detailedAnalysis = `You're at ${Math.round(perf)}% with '${deadline.title}' (${deadline.type}) ${isOverdue ? `OVERDUE since ${dateStr}` : `due ${dateStr}`}. ${isOverdue ? "URGENT: Submit immediately to minimize grade penalty." : `To reach an A grade (90%+), you need approximately ${neededForA}% on remaining work.`} Focus on completing this ${deadline.type.toLowerCase()} to improve your standing and boost your final grade.`;
       } else if (perf >= 60) {
-        summaryAdvice = `Grade: ${Math.round(perf)}%. '${deadline.title}' ${isOverdue ? "OVERDUE!" : `due ${dateStr}`}`;
+        summaryAdvice = `Grade: ${Math.round(perf)}%. '${deadline.title}' ${deadline.type} ${isOverdue ? "OVERDUE!" : `due ${dateStr}`}`;
         detailedAnalysis = `You're at ${Math.round(perf)}% with '${deadline.title}' (${deadline.type}) ${isOverdue ? `OVERDUE since ${dateStr}` : `due ${dateStr}`}. CRITICAL: ${isOverdue ? "This is late. Submit NOW to avoid further penalties." : "To avoid falling below passing (60%), you must score at least 70% on all remaining work."} Complete this ${deadline.type.toLowerCase()} ${isOverdue ? "immediately" : "on time"} and seek instructor help if struggling with concepts.`;
       } else {
-        summaryAdvice = `At-risk (${Math.round(perf)}%). '${deadline.title}' ${isOverdue ? "OVERDUE!" : `due ${dateStr}`}`;
+        summaryAdvice = `At-risk (${Math.round(perf)}%). '${deadline.title}' ${deadline.type} ${isOverdue ? "OVERDUE!" : `due ${dateStr}`}`;
         detailedAnalysis = `CRITICAL: You're at ${Math.round(perf)}% with '${deadline.title}' (${deadline.type}) ${isOverdue ? `OVERDUE since ${dateStr}` : `due ${dateStr}`}. To pass this course (60%), you need ${neededToPass}%+ on ALL remaining work. ${isOverdue ? "This late submission will hurt your grade further." : "Historical data shows recovery from this position requires immediate action."} Complete '${deadline.title}' and contact your instructor for a recovery plan.`;
       }
     } else if (deadline) {
-      summaryAdvice = `Grade: ${Math.round(perf)}%. Focus on '${deadline.title}'.`;
+      summaryAdvice = `Grade: ${Math.round(perf)}%. Focus on '${deadline.title}' ${deadline.type}.`;
       detailedAnalysis = `You're at ${Math.round(perf)}% with upcoming ${deadline.type}: '${deadline.title}'. ${perf >= 90 ? "To keep your A grade (90%+), maintain 85%+ on remaining work." : perf >= 85 ? "To reach an A grade (90%+), aim for 90%+ on remaining assessments." : perf >= 60 ? `To reach an A grade (90%+), you need ${neededForA}% on remaining assessments.` : `To pass (60%), you need ${neededToPass}%+ on all work.`} Prioritize this ${deadline.type.toLowerCase()} to protect your grade.`;
     } else {
       // No deadlines
