@@ -20,8 +20,9 @@ function getCurrentSemester() {
   return `${semester} ${year} Semester`;
 }
 
-export function CoursesHeader({ totalCourses, onAddCourse }) {
+export function CoursesHeader({ totalCourses, coursesLabel, onAddCourse }) {
   const currentSemester = getCurrentSemester();
+  const labelText = coursesLabel || "active courses";
 
   return (
     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
@@ -29,7 +30,7 @@ export function CoursesHeader({ totalCourses, onAddCourse }) {
         <h1 className="text-2xl font-bold text-gray-700">{currentSemester}</h1>
         <p className="text-gray-600 mt-1 flex items-center gap-1">
           <Calendar className="w-4 h-4" />
-          {totalCourses} active courses
+          {totalCourses} {labelText}
         </p>
       </div>
       <div className="flex gap-3">
