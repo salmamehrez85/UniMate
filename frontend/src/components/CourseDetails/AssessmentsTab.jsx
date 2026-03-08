@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Edit2, Trash2, X } from "lucide-react";
 
 const ASSESSMENT_TYPES = [
@@ -8,16 +8,59 @@ const ASSESSMENT_TYPES = [
   { value: "assignment", label: "Assignment" },
 ];
 
-function AddAssessmentModal({ isOpen, onClose, onAdd }) {
-  const [formData, setFormData] = useState({
-    title: "",
-    type: "quiz",
-    score: "",
-    maxScore: "100",
-    date: "",
-    weight: "",
-  });
+const defaultFormData = {
+  title: "",
+  type: "quiz",
+  score: "",
+  maxScore: "100",
+  date: "",
+  weight: "",
+};
+
+const normalizeDateInput = (value) => {
+  if (!value) return "";
+  if (typeof value === "string" && value.length >= 10) {
+    return value.slice(0, 10);
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toISOString().slice(0, 10);
+};
+
+const hasFinalAssessment = (list) =>
+  list.some((assessment) => assessment.type === "final");
+
+function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
+  const [formData, setFormData] = useState(defaultFormData);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (initialData) {
+      setFormData({
+        title: initialData.title || "",
+        type: initialData.type || "quiz",
+        score:
+          initialData.score !== null && initialData.score !== undefined
+            ? String(initialData.score)
+            : "",
+        maxScore:
+          initialData.maxScore !== null && initialData.maxScore !== undefined
+            ? String(initialData.maxScore)
+            : "100",
+        date: normalizeDateInput(initialData.date),
+        weight:
+          initialData.weight !== null && initialData.weight !== undefined
+            ? String(initialData.weight)
+            : "",
+      });
+    } else {
+      setFormData(defaultFormData);
+    }
+
+    setError("");
+  }, [initialData, isOpen]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -44,21 +87,12 @@ function AddAssessmentModal({ isOpen, onClose, onAdd }) {
       return;
     }
 
-    onAdd({
-      id: Date.now(),
+    onSubmit({
+      id: initialData?.id ?? Date.now(),
       ...formData,
       score: parseFloat(formData.score),
       maxScore: parseFloat(formData.maxScore),
       weight: formData.weight ? parseFloat(formData.weight) : null,
-    });
-
-    setFormData({
-      title: "",
-      type: "quiz",
-      score: "",
-      maxScore: "100",
-      date: "",
-      weight: "",
     });
     onClose();
   };
@@ -69,7 +103,9 @@ function AddAssessmentModal({ isOpen, onClose, onAdd }) {
     <div className="fixed inset-0 bg-black/10 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-lg max-w-md w-full">
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <h2 className="text-xl font-bold text-primary-900">Add Assessment</h2>
+          <h2 className="text-xl font-bold text-primary-900">
+            {initialData ? "Edit Assessment" : "Add Assessment"}
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700">
@@ -180,7 +216,7 @@ function AddAssessmentModal({ isOpen, onClose, onAdd }) {
             <button
               type="submit"
               className="flex-1 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
-              Add Assessment
+              {initialData ? "Save Changes" : "Add Assessment"}
             </button>
             <button
               type="button"
@@ -197,29 +233,46 @@ function AddAssessmentModal({ isOpen, onClose, onAdd }) {
 
 export function AssessmentsTab({ course, onCourseUpdate }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState(null);
+  const [editingAssessment, setEditingAssessment] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const assessments = course.assessments || [];
 
   const handleAddAssessment = (newAssessment) => {
+    const updatedAssessments = [newAssessment, ...assessments];
     const updated = {
       ...course,
-      assessments: [newAssessment, ...assessments],
+      assessments: updatedAssessments,
     };
 
-    // Mark course as old if adding a final grade assessment
-    if (newAssessment.type === "final") {
-      updated.isOldCourse = true;
-    }
+    updated.isOldCourse = hasFinalAssessment(updatedAssessments);
 
     onCourseUpdate(updated);
     setIsModalOpen(false);
   };
 
-  const handleDeleteAssessment = (id) => {
+  const handleEditAssessment = (updatedAssessment) => {
+    const updatedAssessments = assessments.map((assessment) =>
+      assessment.id === updatedAssessment.id ? updatedAssessment : assessment,
+    );
+
     const updated = {
       ...course,
-      assessments: assessments.filter((a) => a.id !== id),
+      assessments: updatedAssessments,
+      isOldCourse: hasFinalAssessment(updatedAssessments),
+    };
+
+    onCourseUpdate(updated);
+    setEditingAssessment(null);
+  };
+
+  const handleDeleteAssessment = (id) => {
+    const updatedAssessments = assessments.filter(
+      (assessment) => assessment.id !== id,
+    );
+    const updated = {
+      ...course,
+      assessments: updatedAssessments,
+      isOldCourse: hasFinalAssessment(updatedAssessments),
     };
     onCourseUpdate(updated);
     setDeleteConfirm(null);
@@ -300,9 +353,8 @@ export function AssessmentsTab({ course, onCourseUpdate }) {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       <button
-                        disabled
-                        title="Edit coming soon"
-                        className="p-2 text-gray-400 cursor-not-allowed">
+                        onClick={() => setEditingAssessment(assessment)}
+                        className="p-2 text-teal-600 hover:bg-teal-50 rounded transition">
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
@@ -346,10 +398,17 @@ export function AssessmentsTab({ course, onCourseUpdate }) {
         </div>
       )}
 
-      <AddAssessmentModal
+      <AssessmentModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onAdd={handleAddAssessment}
+        onSubmit={handleAddAssessment}
+      />
+
+      <AssessmentModal
+        isOpen={Boolean(editingAssessment)}
+        onClose={() => setEditingAssessment(null)}
+        onSubmit={handleEditAssessment}
+        initialData={editingAssessment}
       />
     </div>
   );
