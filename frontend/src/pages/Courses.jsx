@@ -20,6 +20,35 @@ export function Courses({ onSelectCourse }) {
   const coursesLabel =
     viewMode === "completed" ? "completed courses" : "active courses";
 
+  const getSemesterSortKey = (semester) => {
+    if (!semester) return { year: 0, season: 0 };
+    const match = String(semester).match(
+      /(Winter|Spring|Summer|Fall)\s+(\d{4})/i,
+    );
+    if (!match) return { year: 0, season: 0 };
+    const seasonOrder = { winter: 0, spring: 1, summer: 2, fall: 3 };
+    return {
+      year: parseInt(match[2], 10),
+      season: seasonOrder[match[1].toLowerCase()] ?? 0,
+    };
+  };
+
+  const semesterGroups = Object.entries(
+    displayedCourses.reduce((acc, course) => {
+      const semesterKey = course.semester || "Unknown Semester";
+      if (!acc[semesterKey]) {
+        acc[semesterKey] = [];
+      }
+      acc[semesterKey].push(course);
+      return acc;
+    }, {}),
+  ).sort(([aSemester], [bSemester]) => {
+    const aKey = getSemesterSortKey(aSemester);
+    const bKey = getSemesterSortKey(bSemester);
+    if (aKey.year !== bKey.year) return aKey.year - bKey.year;
+    return aKey.season - bKey.season;
+  });
+
   // Fetch courses on component mount
   useEffect(() => {
     fetchCourses();
@@ -125,13 +154,28 @@ export function Courses({ onSelectCourse }) {
           )}
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {displayedCourses.map((course) => (
-            <CourseCard
-              key={course._id}
-              course={course}
-              onManage={() => onSelectCourse(course)}
-            />
+        <div className="space-y-8">
+          {semesterGroups.map(([semester, semesterCourses]) => (
+            <section key={semester} className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-800">
+                  {semester}
+                </h2>
+                <span className="text-sm text-gray-500">
+                  {semesterCourses.length} course
+                  {semesterCourses.length === 1 ? "" : "s"}
+                </span>
+              </div>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {semesterCourses.map((course) => (
+                  <CourseCard
+                    key={course._id}
+                    course={course}
+                    onManage={() => onSelectCourse(course)}
+                  />
+                ))}
+              </div>
+            </section>
           ))}
         </div>
       )}
