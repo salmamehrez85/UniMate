@@ -9,22 +9,20 @@ const getCurrentSemester = () => {
   const month = new Date().getMonth(); // 0-11
   const year = new Date().getFullYear();
 
-  // Winter: January (0) - February (1)
-  if (month >= 0 && month <= 2) {
+  // Winter: December (11) - February (1)
+  if (month === 11 || month === 0 || month === 1) {
     return `Winter ${year}`;
   }
   // Spring: March (2) - May (4)
-  else if (month >= 3 && month <= 6) {
+  if (month >= 2 && month <= 4) {
     return `Spring ${year}`;
   }
   // Summer: June (5) - August (7)
-  else if (month >= 7 && month <= 9) {
+  if (month >= 5 && month <= 7) {
     return `Summer ${year}`;
   }
-  // Fall: 10 - 11
-  else {
-    return `Fall ${year}`;
-  }
+  // Fall: September (8) - November (10)
+  return `Fall ${year}`;
 };
 
 // @desc    Get all courses for logged in user
@@ -357,29 +355,40 @@ exports.getPredictedGPA = async (req, res) => {
         (a) => a.type === "final",
       );
 
-      if (finalAssessment) {
-        const credits = parseFloat(course.credits) || 3;
-        const finalGradePercentage =
+      // Prefer stored finalGrade. Fall back to final assessment if needed.
+      let finalGradePercentage = course.finalGrade;
+      if (
+        (finalGradePercentage === null || finalGradePercentage === undefined) &&
+        finalAssessment
+      ) {
+        finalGradePercentage =
           (finalAssessment.score / finalAssessment.maxScore) * 100;
-        const gradePoints = gradeToGPA(finalGradePercentage);
-
-        completedWeightedGrade += gradePoints * credits;
-        completedCredits += credits;
-
-        // Calculate the performance before final (for AI)
-        const currentPerformance = calculateCurrentPerformance(
-          course.assessments || [],
-        );
-
-        // Add to past courses dataset for AI
-        pastCoursesForAI.push({
-          code: course.code,
-          name: course.name,
-          outline: course.outlineText || course.name, // Use actual outline, fallback to name if not provided
-          currentPerformance: currentPerformance || finalGradePercentage, // Fallback to final if no pre-final assessments
-          finalGrade: finalGradePercentage,
-        });
       }
+
+      // Skip completed courses that still don't have a usable final grade.
+      if (finalGradePercentage === null || finalGradePercentage === undefined) {
+        return;
+      }
+
+      const credits = parseFloat(course.credits) || 3;
+      const gradePoints = gradeToGPA(finalGradePercentage);
+
+      completedWeightedGrade += gradePoints * credits;
+      completedCredits += credits;
+
+      // Calculate the performance before final (for AI)
+      const currentPerformance = calculateCurrentPerformance(
+        course.assessments || [],
+      );
+
+      // Add to past courses dataset for AI
+      pastCoursesForAI.push({
+        code: course.code,
+        name: course.name,
+        outline: course.outlineText || course.name,
+        currentPerformance: currentPerformance ?? finalGradePercentage,
+        finalGrade: finalGradePercentage,
+      });
     });
 
     // Process active courses and predict their final grades using AI
@@ -393,8 +402,8 @@ exports.getPredictedGPA = async (req, res) => {
 
       let prediction;
 
-      // Only call AI if we have past courses data and current performance
-      if (pastCoursesForAI.length > 0 && currentPerformance != null) {
+      // Call AI whenever we have past courses data, even if this course has no assessments yet.
+      if (pastCoursesForAI.length > 0) {
         try {
           // Call Gemini AI predictor
           const aiResult = await calculateAIPrediction(
@@ -402,7 +411,7 @@ exports.getPredictedGPA = async (req, res) => {
               code: course.code,
               name: course.name,
               outline_text: course.outlineText || course.name,
-              current_performance: currentPerformance,
+              current_performance: currentPerformance ?? 0,
             },
             pastCoursesForAI.map((c) => ({
               code: c.code,
@@ -414,11 +423,10 @@ exports.getPredictedGPA = async (req, res) => {
           );
 
           // Convert AI prediction to min/max range (±3% confidence range)
-          const predictedScore =
-            aiResult.predicted_score_pct || currentPerformance;
-          const validPrediction = !isNaN(predictedScore)
+          const predictedScore = aiResult.predicted_score_pct;
+          const validPrediction = Number.isFinite(predictedScore)
             ? predictedScore
-            : currentPerformance;
+            : (currentPerformance ?? 0);
           const predictionMin = Math.max(Math.round(validPrediction - 3), 0);
           const predictionMax = Math.min(Math.round(validPrediction + 3), 100);
 
@@ -644,7 +652,7 @@ exports.getGPATrend = async (req, res) => {
 
           // Add predicted data point to trend array with "(Projected)" suffix to avoid x-axis duplication
           predictedDataPoint = {
-            semester: `${activeSemesterName} (Projected)`,
+            semester: `${activeSemesterName} (Predicted)`,
             gpa: predictedGPA,
             isPredicted: true,
           };

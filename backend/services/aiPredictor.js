@@ -448,7 +448,7 @@ Return JSON with a "ranked_past_courses" array.`;
  */
 const calculateAIPrediction = async (activeCourse, pastCourses) => {
   try {
-    const currentAvg = activeCourse.current_performance || 70;
+    const currentAvg = activeCourse.current_performance ?? 70;
 
     // 1. Generate profile for active course
     const activeProfile = await generateCourseProfile(
@@ -471,8 +471,8 @@ const calculateAIPrediction = async (activeCourse, pastCourses) => {
       const pCode = past.code;
 
       pastDataMap[pCode] = {
-        quiz_avg: past.current_performance || past.final_grade || 70,
-        final_pct: past.final_grade || 70,
+        quiz_avg: past.current_performance ?? past.final_grade ?? 70,
+        final_pct: past.final_grade ?? 70,
       };
 
       const pProfile = await generateCourseProfile(
@@ -557,7 +557,7 @@ const calculateAIPrediction = async (activeCourse, pastCourses) => {
 
     // Return fallback prediction with error flag
     return {
-      predicted_score_pct: activeCourse.current_performance || 70,
+      predicted_score_pct: activeCourse.current_performance ?? 70,
       confidence: "Low",
       similar_courses: [],
       error: error.message,
@@ -795,11 +795,15 @@ const generateFallbackRecommendations = (coursesData) => {
         detailedAnalysis = `You're at ${Math.round(perf)}% with '${deadline.title}' (${deadline.type}) ${isOverdue ? `OVERDUE since ${dateStr}` : `due ${dateStr}`}. CRITICAL: ${isOverdue ? "This is late. Submit NOW to avoid further penalties." : "To avoid falling below passing (60%), you must score at least 70% on all remaining work."} Complete this ${deadline.type.toLowerCase()} ${isOverdue ? "immediately" : "on time"} and seek instructor help if struggling with concepts.`;
       } else {
         summaryAdvice = `At-risk (${Math.round(perf)}%). '${deadline.title}' ${deadline.type} ${isOverdue ? "OVERDUE!" : `due ${dateStr}`}`;
-        detailedAnalysis = `CRITICAL: You're at ${Math.round(perf)}% with '${deadline.title}' (${deadline.type}) ${isOverdue ? `OVERDUE since ${dateStr}` : `due ${dateStr}`}. To pass this course (60%), you need ${neededToPass}%+ on ALL remaining work. ${isOverdue ? "This late submission will hurt your grade further." : "Historical data shows recovery from this position requires immediate action."} Complete '${deadline.title}' and contact your instructor for a recovery plan.`;
+        const passRecoveryMessage =
+          neededToPass > 100
+            ? `Even scoring 100% on all remaining work, you'd reach around ${maxPossibleGrade}% as Final Grade.`
+            : `To pass this course (60%), you need ${neededToPassCapped}%+ on ALL remaining work.`;
+        detailedAnalysis = `CRITICAL: You're at ${Math.round(perf)}% with '${deadline.title}' (${deadline.type}) ${isOverdue ? `OVERDUE since ${dateStr}` : `due ${dateStr}`}. ${passRecoveryMessage} ${isOverdue ? "This late submission will hurt your grade further." : "Historical data shows recovery from this position requires immediate action."} Complete '${deadline.title}' and contact your instructor for a recovery plan.`;
       }
     } else if (deadline) {
       summaryAdvice = `Grade: ${Math.round(perf)}%. Focus on '${deadline.title}' ${deadline.type}.`;
-      detailedAnalysis = `You're at ${Math.round(perf)}% with upcoming ${deadline.type}: '${deadline.title}'. ${perf >= 90 ? "To keep your A grade (90%+), maintain 85%+ on remaining work." : perf >= 85 ? "To reach an A grade (90%+), aim for 90%+ on remaining assessments." : perf >= 60 ? `To reach an A grade (90%+), you need ${neededForA}% on remaining assessments.` : `To pass (60%), you need ${neededToPass}%+ on all work.`} Prioritize this ${deadline.type.toLowerCase()} to protect your grade.`;
+      detailedAnalysis = `You're at ${Math.round(perf)}% with upcoming ${deadline.type}: '${deadline.title}'. ${perf >= 90 ? "To keep your A grade (90%+), maintain 85%+ on remaining work." : perf >= 85 ? "To reach an A grade (90%+), aim for 90%+ on remaining assessments." : perf >= 60 ? `To reach an A grade (90%+), you need ${neededForA}% on remaining assessments.` : neededToPass > 100 ? `Even scoring 100% on all remaining work, you'd reach around ${maxPossibleGrade}% as Final Grade.` : `To pass (60%), you need ${neededToPassCapped}%+ on all work.`} Prioritize this ${deadline.type.toLowerCase()} to protect your grade.`;
     } else {
       // No deadlines
       if (perf >= 85) {

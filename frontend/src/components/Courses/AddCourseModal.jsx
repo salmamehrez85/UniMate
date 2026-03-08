@@ -6,14 +6,14 @@ const getCurrentSemester = () => {
   const month = new Date().getMonth(); // 0-11
   const year = new Date().getFullYear();
 
-  // Winter: January (0) - February (1)
-  if (month >= 0 && month <= 2) return `Winter ${year}`;
+  // Winter: December (11) - February (1)
+  if (month === 11 || month === 0 || month === 1) return `Winter ${year}`;
   // Spring: March (2) - May (4)
-  else if (month >= 3 && month <= 5) return `Spring ${year}`;
+  if (month >= 2 && month <= 4) return `Spring ${year}`;
   // Summer: June (5) - August (7)
-  else if (month >= 6 && month <= 8) return `Summer ${year}`;
-  // Fall: 9 - 10 - 11
-  else return `Fall ${year}`;
+  if (month >= 5 && month <= 7) return `Summer ${year}`;
+  // Fall: September (8) - November (10)
+  return `Fall ${year}`;
 };
 
 // Helper function to generate semester options for dropdown
