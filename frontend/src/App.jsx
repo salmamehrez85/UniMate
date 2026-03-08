@@ -6,7 +6,7 @@ import { Performance } from "./pages/Performance";
 import { Quizzes } from "./pages/Quizzes";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
-import { Tasks } from "./components/Tasks";
+import { Tasks } from "./pages/Tasks";
 import { AIChat } from "./components/AIChat";
 import { Summarizer } from "./components/Summarizer";
 import { Settings } from "./components/Settings";
