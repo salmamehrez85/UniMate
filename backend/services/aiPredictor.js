@@ -129,6 +129,49 @@ const RecommendationSchema = {
   required: ["recommendations"],
 };
 
+const SummarySchema = {
+  type: "object",
+  properties: {
+    summary: {
+      type: "string",
+      description: "A concise 2-4 sentence summary tailored to the mode",
+    },
+    keyPoints: {
+      type: "array",
+      items: { type: "string" },
+      description: "4-8 key points from the source content",
+    },
+    importantTerms: {
+      type: "array",
+      items: { type: "string" },
+      description: "5-10 important terms, concepts, or formulas",
+    },
+    studyPlan: {
+      type: "array",
+      items: { type: "string" },
+      description: "3-6 ordered study steps",
+    },
+    possibleQuestions: {
+      type: "array",
+      items: { type: "string" },
+      description: "3-6 likely quiz or exam questions",
+    },
+    actionItems: {
+      type: "array",
+      items: { type: "string" },
+      description: "3-6 actionable next tasks",
+    },
+  },
+  required: [
+    "summary",
+    "keyPoints",
+    "importantTerms",
+    "studyPlan",
+    "possibleQuestions",
+    "actionItems",
+  ],
+};
+
 // ==========================================
 // LLM CALLS WITH RETRY LOGIC
 // ==========================================
@@ -837,7 +880,209 @@ const generateFallbackRecommendations = (coursesData) => {
   return { recommendations };
 };
 
+const buildSummaryModeInstructions = (mode) => {
+  switch (mode) {
+    case "exam":
+      return "Prioritize exam-relevant concepts, definitions, contrasts, and likely test points.";
+    case "action":
+      return "Prioritize concrete action items, deadlines, and immediate next steps.";
+    case "detailed":
+      return "Provide comprehensive coverage with deeper context and structured study guidance.";
+    case "quick":
+    default:
+      return "Keep it concise and practical for fast review.";
+  }
+};
+
+const generateFallbackSummary = (content, mode) => {
+  const normalized = (content || "").replace(/\s+/g, " ").trim();
+  const sentences = normalized
+    .split(/(?<=[.!?])\s+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const summary =
+    sentences.slice(0, 3).join(" ") ||
+    "No sufficient text was provided to generate a meaningful summary.";
+
+  const keyPoints = sentences.slice(0, 6).map((sentence) => {
+    if (sentence.length > 160) {
+      return `${sentence.slice(0, 157)}...`;
+    }
+    return sentence;
+  });
+
+  const words = normalized
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((w) => w.length >= 5);
+
+  const stopWords = new Set([
+    "about",
+    "there",
+    "their",
+    "these",
+    "those",
+    "which",
+    "while",
+    "where",
+    "would",
+    "could",
+    "should",
+    "because",
+    "through",
+    "between",
+    "before",
+    "after",
+    "under",
+    "above",
+    "other",
+    "being",
+    "using",
+    "study",
+    "course",
+    "student",
+  ]);
+
+  const frequency = new Map();
+  words.forEach((word) => {
+    if (!stopWords.has(word)) {
+      frequency.set(word, (frequency.get(word) || 0) + 1);
+    }
+  });
+
+  const importantTerms = Array.from(frequency.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8)
+    .map(([word]) => word);
+
+  const basePlan = [
+    "Read the full summary once for context.",
+    "Review key points and rewrite them in your own words.",
+    "Focus on important terms and verify each concept.",
+    "Answer the possible questions without notes.",
+  ];
+
+  const modeSpecificStep =
+    mode === "exam"
+      ? "Simulate a timed exam review on these concepts."
+      : mode === "action"
+        ? "Convert action items into scheduled tasks in your planner."
+        : mode === "detailed"
+          ? "Expand each key point into 3-5 supporting details."
+          : "Do a 10-minute quick recall session at the end.";
+
+  const studyPlan = [...basePlan, modeSpecificStep];
+
+  const possibleQuestions = keyPoints.slice(0, 5).map((point, index) => {
+    const compact = point.length > 90 ? `${point.slice(0, 87)}...` : point;
+    return `Q${index + 1}: Explain this concept and give one example: ${compact}`;
+  });
+
+  const actionItems = [
+    "Identify one weak topic from the key points.",
+    "Create short notes for the top important terms.",
+    "Solve at least 3 practice questions related to this topic.",
+    "Review progress and adjust your next study session.",
+  ];
+
+  return {
+    summary,
+    keyPoints: keyPoints.length > 0 ? keyPoints : ["No key points extracted."],
+    importantTerms:
+      importantTerms.length > 0
+        ? importantTerms
+        : ["No important terms identified."],
+    studyPlan,
+    possibleQuestions:
+      possibleQuestions.length > 0
+        ? possibleQuestions
+        : ["What are the most important ideas in this content?"],
+    actionItems,
+  };
+};
+
+const generateStructuredSummary = async ({
+  content,
+  mode = "quick",
+  courseContext = null,
+}) => {
+  try {
+    const trimmed = (content || "").trim();
+
+    if (!trimmed) {
+      return generateFallbackSummary(content, mode);
+    }
+
+    const hasGeminiKey =
+      process.env.GEMINI_API_KEY &&
+      process.env.GEMINI_API_KEY.trim().length > 0;
+
+    if (!hasGeminiKey || !model) {
+      return generateFallbackSummary(trimmed, mode);
+    }
+
+    const modeInstructions = buildSummaryModeInstructions(mode);
+    const contextLine = courseContext
+      ? `Course context: ${courseContext.code || "N/A"} - ${courseContext.name || "N/A"}`
+      : "Course context: Not provided";
+
+    const prompt = `You are an academic study assistant. Create a structured study summary from the provided content.
+
+Summary mode: ${mode}
+Mode guidance: ${modeInstructions}
+${contextLine}
+
+SOURCE CONTENT:
+${trimmed}
+
+Return valid JSON with these fields only:
+- summary: 2-4 clear sentences.
+- keyPoints: 4-8 bullets (short and specific).
+- importantTerms: 5-10 terms.
+- studyPlan: 3-6 ordered steps.
+- possibleQuestions: 3-6 likely quiz/exam questions.
+- actionItems: 3-6 concrete actions.
+
+Constraints:
+- Keep language concise and student-friendly.
+- Avoid markdown.
+- Avoid generic filler.
+- Keep each item under 20 words when possible.`;
+
+    const result = await callLLMWithRetry(prompt, SummarySchema);
+
+    if (!result || typeof result !== "object") {
+      return generateFallbackSummary(trimmed, mode);
+    }
+
+    return {
+      summary: result.summary || generateFallbackSummary(trimmed, mode).summary,
+      keyPoints: Array.isArray(result.keyPoints)
+        ? result.keyPoints
+        : generateFallbackSummary(trimmed, mode).keyPoints,
+      importantTerms: Array.isArray(result.importantTerms)
+        ? result.importantTerms
+        : generateFallbackSummary(trimmed, mode).importantTerms,
+      studyPlan: Array.isArray(result.studyPlan)
+        ? result.studyPlan
+        : generateFallbackSummary(trimmed, mode).studyPlan,
+      possibleQuestions: Array.isArray(result.possibleQuestions)
+        ? result.possibleQuestions
+        : generateFallbackSummary(trimmed, mode).possibleQuestions,
+      actionItems: Array.isArray(result.actionItems)
+        ? result.actionItems
+        : generateFallbackSummary(trimmed, mode).actionItems,
+    };
+  } catch (error) {
+    console.error("Failed to generate structured summary:", error.message);
+    return generateFallbackSummary(content, mode);
+  }
+};
+
 module.exports = {
   calculateAIPrediction,
   generateActionableRecommendations,
+  generateStructuredSummary,
 };

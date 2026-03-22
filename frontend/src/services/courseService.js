@@ -157,6 +157,41 @@ export const getAIRecommendations = async () => {
   }
 };
 
+// Generate structured summary from text or course outline
+export const summarizeContent = async ({
+  sourceType = "text",
+  text = "",
+  mode = "quick",
+  courseId,
+}) => {
+  const response = await fetch(`${API_BASE_URL}/courses/summarize`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ sourceType, text, mode, courseId }),
+  });
+
+  const raw = await response.text();
+  let data = {};
+
+  if (raw) {
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      throw new Error(
+        `Server returned unexpected response format (${response.status}). Restart backend and try again.`,
+      );
+    }
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || data.error || `Failed to generate summary (${response.status})`,
+    );
+  }
+
+  return data;
+};
+
 // Get single course by ID
 export const getSingleCourse = async (id) => {
   const response = await fetch(`${API_BASE_URL}/courses/${id}`, {

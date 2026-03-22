@@ -2,6 +2,7 @@ const Course = require("../model/Course");
 const {
   calculateAIPrediction,
   generateActionableRecommendations,
+  generateStructuredSummary,
 } = require("../services/aiPredictor");
 
 // Helper function to auto-assign semester based on current month
@@ -802,6 +803,94 @@ exports.getAIRecommendations = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error generating recommendations",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Generate structured study summary
+// @route   POST /api/courses/summarize
+// @access  Private
+exports.summarizeCourseContent = async (req, res) => {
+  try {
+    const {
+      sourceType = "text",
+      text = "",
+      mode = "quick",
+      courseId,
+    } = req.body;
+
+    const allowedModes = ["quick", "detailed", "exam", "action"];
+    const selectedMode = allowedModes.includes(mode) ? mode : "quick";
+
+    let content = (text || "").trim();
+    let courseContext = null;
+
+    if (sourceType === "courseOutline") {
+      if (!courseId) {
+        return res.status(400).json({
+          success: false,
+          message: "courseId is required when sourceType is courseOutline",
+        });
+      }
+
+      const course = await Course.findOne({
+        _id: courseId,
+        userId: req.user._id,
+      });
+
+      if (!course) {
+        return res.status(404).json({
+          success: false,
+          message: "Course not found",
+        });
+      }
+
+      const outline = (course.outlineText || "").trim();
+
+      if (!outline) {
+        return res.status(400).json({
+          success: false,
+          message: "Selected course has no outline text to summarize",
+        });
+      }
+
+      content = outline;
+      courseContext = {
+        id: course._id,
+        code: course.code,
+        name: course.name,
+      };
+    }
+
+    if (!content || content.length < 20) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Please provide at least 20 characters of content to summarize",
+      });
+    }
+
+    const summaryResult = await generateStructuredSummary({
+      content,
+      mode: selectedMode,
+      courseContext,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        sourceType,
+        mode: selectedMode,
+        result: summaryResult,
+        generatedAt: new Date().toISOString(),
+      },
+    });
+  } catch (error) {
+    console.error("Summarizer error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error generating summary",
       error: error.message,
     });
   }
