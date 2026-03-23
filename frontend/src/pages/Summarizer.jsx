@@ -4,7 +4,11 @@ import pdfWorkerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { SummarizerHeader } from "../components/Summarizer/SummarizerHeader";
 import { SummarizerForm } from "../components/Summarizer/SummarizerForm";
 import { SummaryResult } from "../components/Summarizer/SummaryResult";
-import { getCourses, summarizeContent } from "../services/courseService";
+import {
+  getCourses,
+  summarizeContent,
+  summarizeUploadedContent,
+} from "../services/courseService";
 
 GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
 
@@ -15,6 +19,8 @@ const INITIAL_FORM = {
   text: "",
   fileName: "",
   fileText: "",
+  isScannedPdf: false,
+  ocrImages: [],
 };
 
 const SUPPORTED_UPLOAD_EXTENSIONS = [
@@ -27,7 +33,10 @@ const SUPPORTED_UPLOAD_EXTENSIONS = [
   ".log",
 ];
 
-const MAX_UPLOAD_SIZE_BYTES = 2 * 1024 * 1024;
+const MAX_UPLOAD_SIZE_MB = 10;
+const MAX_UPLOAD_SIZE_BYTES = MAX_UPLOAD_SIZE_MB * 1024 * 1024;
+const PDF_TEXT_THRESHOLD = 200;
+const OCR_MAX_PAGES = 6;
 
 const extractPdfText = async (file) => {
   const arrayBuffer = await file.arrayBuffer();
@@ -53,11 +62,37 @@ const extractPdfText = async (file) => {
   return pagesText.join("\n\n").trim();
 };
 
+const renderPdfPagesAsBase64Images = async (file, maxPages = OCR_MAX_PAGES) => {
+  const arrayBuffer = await file.arrayBuffer();
+  const typedArray = new Uint8Array(arrayBuffer);
+  const pdf = await getDocument({ data: typedArray }).promise;
+  const pageCount = Math.min(pdf.numPages, maxPages);
+  const images = [];
+
+  for (let pageNumber = 1; pageNumber <= pageCount; pageNumber += 1) {
+    const page = await pdf.getPage(pageNumber);
+    const viewport = page.getViewport({ scale: 1.4 });
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+
+    canvas.width = Math.floor(viewport.width);
+    canvas.height = Math.floor(viewport.height);
+
+    await page.render({ canvasContext: context, viewport }).promise;
+
+    const base64Image = canvas.toDataURL("image/jpeg", 0.85);
+    images.push(base64Image);
+  }
+
+  return images;
+};
+
 export function Summarizer() {
   const [form, setForm] = useState(INITIAL_FORM);
   const [courses, setCourses] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPreparingOCR, setIsPreparingOCR] = useState(false);
   const [error, setError] = useState("");
   const [summaryResult, setSummaryResult] = useState(null);
 
@@ -88,6 +123,8 @@ export function Summarizer() {
         text: value === "text" ? prev.text : "",
         fileName: value === "file" ? prev.fileName : "",
         fileText: value === "file" ? prev.fileText : "",
+        isScannedPdf: value === "file" ? prev.isScannedPdf : false,
+        ocrImages: value === "file" ? prev.ocrImages : [],
       }));
       return;
     }
@@ -106,6 +143,8 @@ export function Summarizer() {
         ...prev,
         fileName: "",
         fileText: "",
+        isScannedPdf: false,
+        ocrImages: [],
       }));
       return;
     }
@@ -123,28 +162,50 @@ export function Summarizer() {
         ...prev,
         fileName: "",
         fileText: "",
+        isScannedPdf: false,
+        ocrImages: [],
       }));
       return;
     }
 
     if (file.size > MAX_UPLOAD_SIZE_BYTES) {
-      setError("File is too large. Please upload a file up to 2 MB.");
+      setError(
+        `File is too large. Please upload a file up to ${MAX_UPLOAD_SIZE_MB} MB.`,
+      );
       setForm((prev) => ({
         ...prev,
         fileName: "",
         fileText: "",
+        isScannedPdf: false,
+        ocrImages: [],
       }));
       return;
     }
 
     try {
-      const textContent = fileNameLower.endsWith(".pdf")
-        ? await extractPdfText(file)
-        : await file.text();
+      let textContent = "";
+      let isScannedPdf = false;
+      let ocrImages = [];
 
-      if (textContent.trim().length < 20) {
+      if (fileNameLower.endsWith(".pdf")) {
+        textContent = await extractPdfText(file);
+
+        if (textContent.trim().length < PDF_TEXT_THRESHOLD) {
+          isScannedPdf = true;
+          setIsPreparingOCR(true);
+          ocrImages = await renderPdfPagesAsBase64Images(file, OCR_MAX_PAGES);
+        }
+      } else {
+        textContent = await file.text();
+      }
+
+      if (!isScannedPdf && textContent.trim().length < 20) {
+        throw new Error("The uploaded file has too little readable text.");
+      }
+
+      if (isScannedPdf && ocrImages.length === 0) {
         throw new Error(
-          "The PDF appears to contain little or no selectable text. It may be scanned and need OCR.",
+          "This PDF seems scanned, but no page images were generated for OCR.",
         );
       }
 
@@ -152,6 +213,8 @@ export function Summarizer() {
         ...prev,
         fileName: file.name,
         fileText: textContent,
+        isScannedPdf,
+        ocrImages,
       }));
       setSummaryResult(null);
       setError("");
@@ -165,7 +228,11 @@ export function Summarizer() {
         ...prev,
         fileName: "",
         fileText: "",
+        isScannedPdf: false,
+        ocrImages: [],
       }));
+    } finally {
+      setIsPreparingOCR(false);
     }
   };
 
@@ -183,7 +250,18 @@ export function Summarizer() {
     }
 
     if (form.sourceType === "file" && form.fileText.trim().length < 20) {
-      setError("Please upload a text-based file with enough content.");
+      if (!form.isScannedPdf) {
+        setError("Please upload a text-based file with enough content.");
+        return;
+      }
+    }
+
+    if (
+      form.sourceType === "file" &&
+      form.isScannedPdf &&
+      (!Array.isArray(form.ocrImages) || form.ocrImages.length === 0)
+    ) {
+      setError("OCR images were not prepared. Please re-upload the PDF.");
       return;
     }
 
@@ -191,24 +269,52 @@ export function Summarizer() {
       setIsSubmitting(true);
       setError("");
 
-      const response = await summarizeContent({
-        sourceType: form.sourceType,
-        mode: form.mode,
-        courseId:
-          form.sourceType === "courseOutline" ? form.courseId : undefined,
-        text:
-          form.sourceType === "text"
-            ? form.text
-            : form.sourceType === "file"
-              ? form.fileText
-              : "",
-      });
+      let response;
+
+      if (form.sourceType === "file") {
+        const uploadData = new FormData();
+        uploadData.append("sourceType", "file");
+        uploadData.append("mode", form.mode);
+
+        if (form.fileText) {
+          uploadData.append("text", form.fileText);
+        }
+
+        if (form.isScannedPdf && Array.isArray(form.ocrImages)) {
+          uploadData.append("ocrImages", JSON.stringify(form.ocrImages));
+        }
+
+        response = await summarizeUploadedContent(uploadData);
+      } else {
+        response = await summarizeContent({
+          sourceType: form.sourceType,
+          mode: form.mode,
+          courseId:
+            form.sourceType === "courseOutline" ? form.courseId : undefined,
+          text: form.sourceType === "text" ? form.text : "",
+        });
+      }
+
+      const uploadResult = response?.data?.result;
+      const normalizedResult = uploadResult?.overview
+        ? {
+            summary: uploadResult.overview,
+            plainLanguageSummary: uploadResult.overview,
+            learningOutcomes: uploadResult.keyTopics || [],
+            conceptConnections: [],
+            examFocus: [],
+            importantTerms: uploadResult.importantDefinitions || [],
+            studyPlan: uploadResult.studyPlan || [],
+            possibleQuestions: uploadResult.possibleQuestions || [],
+            actionItems: uploadResult.studyPlan || [],
+          }
+        : response?.data?.result || null;
 
       setSummaryResult(
         response.data
           ? {
               mode: response.data.mode,
-              result: response.data.result,
+              result: normalizedResult,
             }
           : null,
       );
@@ -233,8 +339,31 @@ export function Summarizer() {
       <SummarizerHeader />
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-          {error}
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm space-y-2">
+          <p className="font-semibold">{error}</p>
+          {error.includes("GEMINI") || error.includes("API Key") ? (
+            <div className="text-xs text-red-600 bg-red-100 p-2 rounded mt-2">
+              <p className="font-semibold mb-1">Steps to fix:</p>
+              <ol className="list-decimal list-inside space-y-1">
+                <li>
+                  Visit:{" "}
+                  <a
+                    href="https://aistudio.google.com/apikey"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline hover:text-red-700">
+                    https://aistudio.google.com/apikey
+                  </a>
+                </li>
+                <li>Create or copy a valid API key</li>
+                <li>
+                  Update <code className="bg-red-200 px-1">GEMINI_API_KEY</code>{" "}
+                  in <code className="bg-red-200 px-1">backend/.env</code>
+                </li>
+                <li>Restart the backend server</li>
+              </ol>
+            </div>
+          ) : null}
         </div>
       )}
 
@@ -242,9 +371,13 @@ export function Summarizer() {
         <button
           type="button"
           onClick={handleGenerateClick}
-          disabled={isSubmitting}
+          disabled={isSubmitting || isPreparingOCR}
           className="w-full inline-flex items-center justify-center px-5 py-3 rounded-lg bg-teal-500 hover:bg-teal-600 text-white font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed">
-          {isSubmitting ? "Generating Summary..." : "Generate Summary"}
+          {isPreparingOCR
+            ? "OCR in progress..."
+            : isSubmitting
+              ? "Generating Summary..."
+              : "Generate Summary"}
         </button>
       </div>
 
@@ -253,6 +386,7 @@ export function Summarizer() {
         form={form}
         courses={courses}
         loadingCourses={loadingCourses}
+        isPreparingOCR={isPreparingOCR}
         onChange={handleFieldChange}
         onFileSelect={handleFileSelect}
         onSubmit={handleSubmit}

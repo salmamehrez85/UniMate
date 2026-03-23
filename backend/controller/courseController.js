@@ -1,9 +1,117 @@
 const Course = require("../model/Course");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 const {
   calculateAIPrediction,
   generateActionableRecommendations,
   generateStructuredSummary,
 } = require("../services/aiPredictor");
+
+const UploadSummarySchema = {
+  type: "object",
+  properties: {
+    overview: {
+      type: "string",
+      description: "Short high-value overview of the document content",
+    },
+    keyTopics: {
+      type: "array",
+      items: { type: "string" },
+      description: "Main topics extracted from the document",
+    },
+    importantDefinitions: {
+      type: "array",
+      items: { type: "string" },
+      description: "Key terms and concise definitions",
+    },
+    studyPlan: {
+      type: "array",
+      items: { type: "string" },
+      description: "Actionable study sequence",
+    },
+    possibleQuestions: {
+      type: "array",
+      items: { type: "string" },
+      description: "Likely test or quiz questions",
+    },
+  },
+  required: [
+    "overview",
+    "keyTopics",
+    "importantDefinitions",
+    "studyPlan",
+    "possibleQuestions",
+  ],
+};
+
+const callGeminiUploadSummary = async (parts) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey) {
+    const error = new Error("Missing GEMINI_API_KEY - Please set GEMINI_API_KEY in .env file");
+    error.code = "MISSING_API_KEY";
+    throw error;
+  }
+
+  // Validate API key format
+  if (!apiKey.startsWith("AIza")) {
+    const error = new Error("Invalid GEMINI_API_KEY format - Key should start with 'AIza'");
+    error.code = "INVALID_API_KEY_FORMAT";
+    throw error;
+  }
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const candidateModels = [
+    process.env.GEMINI_OCR_MODEL,
+    "gemini-2.5-flash",
+    "gemini-1.5-flash",
+    "gemini-2.0-flash",
+  ].filter(Boolean);
+
+  let lastError;
+
+  for (const modelId of candidateModels) {
+    try {
+      const model = genAI.getGenerativeModel({ model: modelId });
+
+      const response = await model.generateContent({
+        contents: [{ role: "user", parts }],
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: UploadSummarySchema,
+          temperature: 0.1,
+        },
+      });
+
+      const text = response.response.text();
+      return JSON.parse(text);
+    } catch (error) {
+      console.error(`[${modelId}] Error:`, error.message);
+      lastError = error;
+    }
+  }
+
+  throw lastError || new Error("Failed to call Gemini model");
+};
+
+const normalizeImageData = (imageData) => {
+  if (!imageData || typeof imageData !== "string") return null;
+
+  const trimmed = imageData.trim();
+
+  if (trimmed.startsWith("data:")) {
+    const match = trimmed.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+    if (!match) return null;
+    return {
+      mimeType: match[1],
+      data: match[2],
+    };
+  }
+
+  return {
+    mimeType: "image/jpeg",
+    data: trimmed,
+  };
+};
 
 // Helper function to auto-assign semester based on current month
 const getCurrentSemester = () => {
@@ -901,5 +1009,150 @@ exports.summarizeCourseContent = async (req, res) => {
       message: "Error generating summary",
       error: error.message,
     });
+  }
+};
+
+// @desc    Summarize uploaded content with OCR fallback support
+// @route   POST /api/summarize/upload
+// @access  Private
+exports.summarizeUploadedDocument = async (req, res) => {
+  let parsedImages = [];
+
+  try {
+    const text = (req.body?.text || "").trim();
+    const sourceType = req.body?.sourceType || "file";
+    const mode = req.body?.mode || "quick";
+    const rawImages = req.body?.ocrImages || "[]";
+
+    if (rawImages) {
+      try {
+        const imagesCandidate = JSON.parse(rawImages);
+        if (Array.isArray(imagesCandidate)) {
+          parsedImages = imagesCandidate
+            .map(normalizeImageData)
+            .filter(Boolean)
+            .slice(0, 10);
+        }
+      } catch (parseError) {
+        return res.status(400).json({
+          error: "Invalid ocrImages payload",
+          type: "INVALID_UPLOAD_PAYLOAD",
+        });
+      }
+    }
+
+    if (!text && parsedImages.length === 0 && !req.file) {
+      return res.status(400).json({
+        error: "No upload content provided",
+        type: "INVALID_UPLOAD_PAYLOAD",
+      });
+    }
+
+    const systemInstructionText =
+      parsedImages.length > 0
+        ? `You are an expert academic assistant. The input is a scanned document image. First, transcribe the text accurately (ignoring noise/artifacts), then format it into the UniMate study schema (overview, keyTopics, importantDefinitions, studyPlan, possibleQuestions).`
+        : `You are an expert academic assistant. Format the provided document text into the UniMate study schema (overview, keyTopics, importantDefinitions, studyPlan, possibleQuestions).`;
+
+    const promptText = `${systemInstructionText}
+
+Summary mode: ${mode}
+Source type: ${sourceType}
+
+Rules:
+- Return strictly valid JSON only.
+- Keep content concise, academic, and useful.
+- keyTopics: 4-8 items
+- importantDefinitions: 4-8 items, each with concept + short definition
+- studyPlan: 3-6 actionable steps
+- possibleQuestions: 3-6 likely assessment questions`;
+
+    const parts = [{ text: promptText }];
+
+    if (text) {
+      parts.push({
+        text: `DOCUMENT TEXT:\n${text}`,
+      });
+    }
+
+    if (parsedImages.length > 0) {
+      parsedImages.forEach((image) => {
+        parts.push({
+          inlineData: {
+            mimeType: image.mimeType,
+            data: image.data,
+          },
+        });
+      });
+    }
+
+    const result = await callGeminiUploadSummary(parts);
+
+    if (!result || typeof result !== "object") {
+      return res.status(422).json({
+        error: "Document too blurry or unreadable",
+        type: "OCR_FAILURE",
+      });
+    }
+
+    const hasUsableContent =
+      (result.overview && result.overview.trim().length > 20) ||
+      (Array.isArray(result.keyTopics) && result.keyTopics.length > 0);
+
+    if (!hasUsableContent) {
+      return res.status(422).json({
+        error: "Document too blurry or unreadable",
+        type: "OCR_FAILURE",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        mode,
+        sourceType,
+        result,
+      },
+    });
+  } catch (error) {
+    console.error("Upload summarize error:", error);
+
+    // Check for API key errors
+    if (error.code === "MISSING_API_KEY" || error.code === "INVALID_API_KEY_FORMAT") {
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+        type: "API_KEY_ERROR",
+        instructions: "Please set a valid GEMINI_API_KEY in your backend .env file. Get one from: https://aistudio.google.com/apikey",
+      });
+    }
+
+    // Check for Gemini API authentication errors
+    if (error.message && error.message.includes("API Key not found")) {
+      return res.status(500).json({
+        success: false,
+        message: "Gemini API Key is invalid or inactive. Please verify your API key.",
+        type: "INVALID_GEMINI_KEY",
+        instructions: "1. Visit https://aistudio.google.com/apikey\n2. Create a new API key\n3. Update GEMINI_API_KEY in backend/.env\n4. Restart the backend server",
+      });
+    }
+
+    if (parsedImages.length > 0) {
+      return res.status(422).json({
+        error: "Document too blurry or unreadable",
+        type: "OCR_FAILURE",
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Error summarizing uploaded document",
+      error: error.message,
+    });
+  } finally {
+    if (req.file) {
+      req.file.buffer = null;
+    }
+
+    parsedImages = [];
   }
 };

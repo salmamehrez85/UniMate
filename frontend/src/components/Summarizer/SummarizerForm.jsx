@@ -9,6 +9,7 @@ export function SummarizerForm({
   form,
   courses,
   loadingCourses,
+  isPreparingOCR = false,
   onChange,
   onFileSelect,
   onSubmit,
@@ -90,8 +91,18 @@ export function SummarizerForm({
             className="px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 file:mr-3 file:px-3 file:py-1.5 file:rounded-md file:border-0 file:bg-primary-100 file:text-primary-800 file:font-medium hover:file:bg-primary-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
           />
           <span className="text-xs text-gray-500">
-            Supported: .pdf, .txt, .md, .csv, .json, .rtf, .log (max 2 MB)
+            Supported: .pdf, .txt, .md, .csv, .json, .rtf, .log (max 10 MB)
           </span>
+          {isPreparingOCR && (
+            <span className="text-xs text-amber-700">
+              OCR in progress... preparing page images from scanned PDF.
+            </span>
+          )}
+          {form.isScannedPdf && !isPreparingOCR && (
+            <span className="text-xs text-amber-700">
+              Scanned PDF detected. OCR images are ready.
+            </span>
+          )}
           {form.fileName && (
             <span className="text-xs text-primary-700">
               Selected: {form.fileName} ({form.fileText?.length || 0} chars)

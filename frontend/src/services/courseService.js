@@ -194,6 +194,39 @@ export const summarizeContent = async ({
   return data;
 };
 
+// Summarize uploaded content (text or OCR images) via multipart endpoint
+export const summarizeUploadedContent = async (formData) => {
+  const token = getAuthToken();
+  const response = await fetch(`${API_BASE_URL}/summarize/upload`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  const raw = await response.text();
+  let data = {};
+
+  if (raw) {
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      throw new Error(
+        `Server returned unexpected response format (${response.status}).`,
+      );
+    }
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      data.error || data.message || `Failed to summarize upload (${response.status})`,
+    );
+  }
+
+  return data;
+};
+
 // Get single course by ID
 export const getSingleCourse = async (id) => {
   const response = await fetch(`${API_BASE_URL}/courses/${id}`, {
