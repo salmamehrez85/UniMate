@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
+import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
+import pdfWorkerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { SummarizerHeader } from "../components/Summarizer/SummarizerHeader";
 import { SummarizerForm } from "../components/Summarizer/SummarizerForm";
 import { SummaryResult } from "../components/Summarizer/SummaryResult";
 import { getCourses, summarizeContent } from "../services/courseService";
+
+GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
 
 const INITIAL_FORM = {
   sourceType: "text",
@@ -14,6 +18,7 @@ const INITIAL_FORM = {
 };
 
 const SUPPORTED_UPLOAD_EXTENSIONS = [
+  ".pdf",
   ".txt",
   ".md",
   ".csv",
@@ -23,6 +28,30 @@ const SUPPORTED_UPLOAD_EXTENSIONS = [
 ];
 
 const MAX_UPLOAD_SIZE_BYTES = 2 * 1024 * 1024;
+
+const extractPdfText = async (file) => {
+  const arrayBuffer = await file.arrayBuffer();
+  const typedArray = new Uint8Array(arrayBuffer);
+  const pdf = await getDocument({ data: typedArray }).promise;
+
+  const pagesText = [];
+
+  for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+    const page = await pdf.getPage(pageNumber);
+    const textContent = await page.getTextContent();
+    const pageText = textContent.items
+      .map((item) => item.str || "")
+      .join(" ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (pageText) {
+      pagesText.push(pageText);
+    }
+  }
+
+  return pagesText.join("\n\n").trim();
+};
 
 export function Summarizer() {
   const [form, setForm] = useState(INITIAL_FORM);
@@ -109,7 +138,15 @@ export function Summarizer() {
     }
 
     try {
-      const textContent = await file.text();
+      const textContent = fileNameLower.endsWith(".pdf")
+        ? await extractPdfText(file)
+        : await file.text();
+
+      if (textContent.trim().length < 20) {
+        throw new Error(
+          "The PDF appears to contain little or no selectable text. It may be scanned and need OCR.",
+        );
+      }
 
       setForm((prev) => ({
         ...prev,
@@ -120,7 +157,10 @@ export function Summarizer() {
       setError("");
     } catch (readError) {
       console.error("Failed to read uploaded file:", readError);
-      setError("Could not read this file. Please try a plain text-based file.");
+      setError(
+        readError?.message ||
+          "Could not read this file. Please try a supported text file or a text-based PDF.",
+      );
       setForm((prev) => ({
         ...prev,
         fileName: "",
