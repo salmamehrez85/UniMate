@@ -49,22 +49,23 @@ export function SummaryResult({ summaryData }) {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-bold text-gray-900">Summary</h3>
-        <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${config.badgeClass}`}>
+        <span
+          className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${config.badgeClass}`}>
           {config.label}
         </span>
       </div>
 
       {/* Prose block — shown for all modes */}
-      <p className="text-sm text-gray-700 leading-7">
-        {overviewText}
-      </p>
+      <p className="text-sm text-gray-700 leading-7">{overviewText}</p>
 
       {/* Detailed mode: prose only, no sections */}
-      {config.type === "prose-only" && result.plainLanguageSummary && result.plainLanguageSummary !== overviewText && (
-        <p className="text-sm text-gray-600 leading-7 mt-3">
-          {result.plainLanguageSummary}
-        </p>
-      )}
+      {config.type === "prose-only" &&
+        result.plainLanguageSummary &&
+        result.plainLanguageSummary !== overviewText && (
+          <p className="text-sm text-gray-600 leading-7 mt-3">
+            {result.plainLanguageSummary}
+          </p>
+        )}
 
       {/* Section list (quick & exam modes) */}
       {config.sections.length > 0 && (
@@ -80,12 +81,15 @@ export function SummaryResult({ summaryData }) {
 
               return (
                 <div key={section.key}>
-                  <h4 className={`text-xs font-bold uppercase tracking-widest mb-2 ${config.accentClass}`}>
+                  <h4
+                    className={`text-xs font-bold uppercase tracking-widest mb-2 ${config.accentClass}`}>
                     {section.title}
                   </h4>
                   <div className="space-y-1.5">
                     {items.map((item, index) => (
-                      <p key={index} className="text-sm text-gray-700 leading-6">
+                      <p
+                        key={index}
+                        className="text-sm text-gray-700 leading-6">
                         {item}
                       </p>
                     ))}

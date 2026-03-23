@@ -1084,24 +1084,30 @@ const generateFallbackSummary = (content, mode) => {
     .map(({ s }) => s);
 
   // Build summary prose from top-ranked sentences
-  const summaryCount = mode === "detailed" ? 7 : mode === "exam" ? 4 : 3;
+  const summaryCount = mode === "detailed" ? 20 : mode === "exam" ? 4 : 3;
   const topSentences = ranked.slice(0, summaryCount);
   const fallbackToFirst = allSentences.slice(0, summaryCount);
   const summaryPool = topSentences.length >= 2 ? topSentences : fallbackToFirst;
 
+  // For detailed mode, restore original document order for natural reading flow
+  const orderedPool =
+    mode === "detailed"
+      ? allSentences.filter((s) => summaryPool.includes(s))
+      : summaryPool;
+
   const summary =
-    summaryPool.join(" ") ||
+    orderedPool.join(" ") ||
     "No sufficient text was provided to generate a summary.";
 
   // For quick mode: pull 3 additional real sentences as "key takeaways"
   const takeawaySentences = ranked
-    .filter((s) => !summaryPool.includes(s))
+    .filter((s) => !orderedPool.includes(s))
     .slice(0, 5);
 
   const learningOutcomes =
     takeawaySentences.length >= 2
       ? takeawaySentences.slice(0, mode === "quick" ? 3 : 5)
-      : allSentences.filter((s) => !summaryPool.includes(s)).slice(0, 3);
+      : allSentences.filter((s) => !orderedPool.includes(s)).slice(0, 3);
 
   // Extract definition-style or fact sentences for exam focus
   const factSentences = allSentences.filter((s) =>
