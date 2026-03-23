@@ -220,7 +220,9 @@ export const summarizeUploadedContent = async (formData) => {
 
   if (!response.ok) {
     throw new Error(
-      data.error || data.message || `Failed to summarize upload (${response.status})`,
+      data.error ||
+        data.message ||
+        `Failed to summarize upload (${response.status})`,
     );
   }
 

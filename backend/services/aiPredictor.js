@@ -13,6 +13,12 @@ const MODEL_ID = "gemini-2.0-flash";
 let genAI;
 let model;
 
+console.log("[AI Predictor] GEMINI_API_KEY present:", !!GOOGLE_API_KEY);
+console.log(
+  "[AI Predictor] API Key format valid:",
+  GOOGLE_API_KEY?.startsWith("AIza") ? "✓" : "✗",
+);
+
 try {
   genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
   model = genAI.getGenerativeModel({ model: MODEL_ID });

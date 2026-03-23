@@ -47,14 +47,18 @@ const callGeminiUploadSummary = async (parts) => {
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
-    const error = new Error("Missing GEMINI_API_KEY - Please set GEMINI_API_KEY in .env file");
+    const error = new Error(
+      "Missing GEMINI_API_KEY - Please set GEMINI_API_KEY in .env file",
+    );
     error.code = "MISSING_API_KEY";
     throw error;
   }
 
   // Validate API key format
   if (!apiKey.startsWith("AIza")) {
-    const error = new Error("Invalid GEMINI_API_KEY format - Key should start with 'AIza'");
+    const error = new Error(
+      "Invalid GEMINI_API_KEY format - Key should start with 'AIza'",
+    );
     error.code = "INVALID_API_KEY_FORMAT";
     throw error;
   }
@@ -1048,10 +1052,36 @@ exports.summarizeUploadedDocument = async (req, res) => {
       });
     }
 
+    // If we have extracted text, use generateStructuredSummary which has fallback support.
+    // Only use the direct Gemini multimodal call when we only have OCR images (no text).
+    if (text && text.length >= 20) {
+      const summaryResult = await generateStructuredSummary({
+        content: text,
+        mode,
+        sourceType,
+      });
+
+      // Normalize to the upload response schema
+      const result = {
+        overview:
+          summaryResult.summary || summaryResult.plainLanguageSummary || "",
+        keyTopics: summaryResult.learningOutcomes || [],
+        importantDefinitions: summaryResult.importantTerms || [],
+        studyPlan: summaryResult.studyPlan || summaryResult.actionItems || [],
+        possibleQuestions: summaryResult.possibleQuestions || [],
+      };
+
+      return res.status(200).json({
+        success: true,
+        data: { mode, sourceType, result },
+      });
+    }
+
+    // OCR-only path: images with no text layer
     const systemInstructionText =
-      parsedImages.length > 0
-        ? `You are an expert academic assistant. The input is a scanned document image. First, transcribe the text accurately (ignoring noise/artifacts), then format it into the UniMate study schema (overview, keyTopics, importantDefinitions, studyPlan, possibleQuestions).`
-        : `You are an expert academic assistant. Format the provided document text into the UniMate study schema (overview, keyTopics, importantDefinitions, studyPlan, possibleQuestions).`;
+      `You are an expert academic assistant. The input is a scanned document image. ` +
+      `First, transcribe the text accurately (ignoring noise/artifacts), then format it into ` +
+      `the UniMate study schema (overview, keyTopics, importantDefinitions, studyPlan, possibleQuestions).`;
 
     const promptText = `${systemInstructionText}
 
@@ -1067,12 +1097,6 @@ Rules:
 - possibleQuestions: 3-6 likely assessment questions`;
 
     const parts = [{ text: promptText }];
-
-    if (text) {
-      parts.push({
-        text: `DOCUMENT TEXT:\n${text}`,
-      });
-    }
 
     if (parsedImages.length > 0) {
       parsedImages.forEach((image) => {
@@ -1115,26 +1139,6 @@ Rules:
     });
   } catch (error) {
     console.error("Upload summarize error:", error);
-
-    // Check for API key errors
-    if (error.code === "MISSING_API_KEY" || error.code === "INVALID_API_KEY_FORMAT") {
-      return res.status(500).json({
-        success: false,
-        message: error.message,
-        type: "API_KEY_ERROR",
-        instructions: "Please set a valid GEMINI_API_KEY in your backend .env file. Get one from: https://aistudio.google.com/apikey",
-      });
-    }
-
-    // Check for Gemini API authentication errors
-    if (error.message && error.message.includes("API Key not found")) {
-      return res.status(500).json({
-        success: false,
-        message: "Gemini API Key is invalid or inactive. Please verify your API key.",
-        type: "INVALID_GEMINI_KEY",
-        instructions: "1. Visit https://aistudio.google.com/apikey\n2. Create a new API key\n3. Update GEMINI_API_KEY in backend/.env\n4. Restart the backend server",
-      });
-    }
 
     if (parsedImages.length > 0) {
       return res.status(422).json({
