@@ -97,7 +97,7 @@ export default function App() {
       case "tasks":
         return <Tasks />;
       case "summarizer":
-        return <Summarizer />;
+        return <Summarizer onNavigate={setActiveView} />;
       case "quizzes":
         return <Quizzes />;
       case "performance":

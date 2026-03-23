@@ -102,11 +102,17 @@ export function SummarizerForm({
               Scanned PDF detected. OCR images are ready.
             </span>
           )}
-          {form.fileName && (
-            <span className="text-xs text-primary-700">
-              Selected: {form.fileName} ({form.fileText?.length || 0} chars)
-            </span>
-          )}
+          {form.fileName &&
+            (() => {
+              const chars = form.fileText?.length || 0;
+              const readMins = Math.max(1, Math.ceil(chars / 1000));
+              return (
+                <span className="text-xs text-primary-700">
+                  Selected: {form.fileName} ({chars.toLocaleString()} chars · ~
+                  {readMins} min read)
+                </span>
+              );
+            })()}
         </label>
       ) : (
         <label className="flex flex-col gap-2">

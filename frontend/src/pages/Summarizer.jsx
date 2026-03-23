@@ -87,7 +87,7 @@ const renderPdfPagesAsBase64Images = async (file, maxPages = OCR_MAX_PAGES) => {
   return images;
 };
 
-export function Summarizer() {
+export function Summarizer({ onNavigate }) {
   const [form, setForm] = useState(INITIAL_FORM);
   const [courses, setCourses] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
@@ -392,7 +392,7 @@ export function Summarizer() {
         onSubmit={handleSubmit}
       />
 
-      <SummaryResult summaryData={summaryResult} />
+      <SummaryResult summaryData={summaryResult} onNavigate={onNavigate} />
     </div>
   );
 }
