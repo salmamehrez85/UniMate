@@ -1055,203 +1055,112 @@ const toTitleCase = (value) => {
 
 const generateFallbackSummary = (content, mode) => {
   const normalized = (content || "").replace(/\s+/g, " ").trim();
-  const sentences = normalized
+
+  // Extract real sentences from the document
+  const allSentences = normalized
     .split(/(?<=[.!?])\s+/)
     .map((s) => s.trim())
-    .filter(Boolean);
+    .filter((s) => s.length >= 40 && s.length <= 350 && /[a-zA-Z]{3,}/.test(s));
 
-  const concepts = extractConceptCandidates(content);
+  // Score sentences by information density — prefer sentences with actual facts
+  const skipPattern =
+    /^(this (lecture|course|chapter|slide|week)|we (will|are going to|cover)|in this|by the end|learning objective|agenda|outline|slide \d)/i;
+  const boostPattern =
+    /(\d+%?|\bis\b|\bare\b|\bmeans\b|\bdefined\b|\bcalled\b|\brefers\b|\bsuch as\b|\bfor example\b|\benables\b|\ballows\b|\bconsists\b|\bincludes\b)/i;
 
-  const words = normalized
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, " ")
-    .split(/\s+/)
-    .filter((w) => w.length >= 5);
+  const scoreSentence = (s, idx) => {
+    let score = 0;
+    if (skipPattern.test(s)) score -= 5;
+    if (boostPattern.test(s)) score += 3;
+    if (/\d/.test(s)) score += 2;
+    if (s.length > 80) score += 1;
+    score -= idx * 0.02; // slight early-position bonus
+    return score;
+  };
 
-  const stopWords = new Set([
-    "about",
-    "there",
-    "their",
-    "these",
-    "those",
-    "which",
-    "while",
-    "where",
-    "would",
-    "could",
-    "should",
-    "because",
-    "through",
-    "between",
-    "before",
-    "after",
-    "under",
-    "above",
-    "other",
-    "being",
-    "using",
-    "study",
-    "course",
-    "student",
-  ]);
+  const ranked = allSentences
+    .map((s, i) => ({ s, score: scoreSentence(s, i) }))
+    .sort((a, b) => b.score - a.score)
+    .map(({ s }) => s);
 
-  const frequency = new Map();
-  words.forEach((word) => {
-    if (!stopWords.has(word)) {
-      frequency.set(word, (frequency.get(word) || 0) + 1);
-    }
-  });
-
-  const importantTerms = Array.from(frequency.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 8)
-    .map(([word]) => word);
-
-  const displayTerms =
-    importantTerms.length > 0
-      ? importantTerms.map((term) => toTitleCase(term))
-      : concepts.slice(0, 8).map((term) => toTitleCase(term));
-
-  const leadingConcepts = concepts.length > 0 ? concepts : displayTerms;
+  // Build summary prose from top-ranked sentences
+  const summaryCount = mode === "detailed" ? 7 : mode === "exam" ? 4 : 3;
+  const topSentences = ranked.slice(0, summaryCount);
+  const fallbackToFirst = allSentences.slice(0, summaryCount);
+  const summaryPool = topSentences.length >= 2 ? topSentences : fallbackToFirst;
 
   const summary =
-    leadingConcepts.length > 0
-      ? `This material focuses on ${leadingConcepts.slice(0, 3).join(", ")}. It appears designed to move from core concepts into practical understanding and application.`
-      : sentences.slice(0, 2).join(" ") ||
-        "No sufficient text was provided to generate a meaningful summary.";
+    summaryPool.join(" ") ||
+    "No sufficient text was provided to generate a summary.";
 
-  const plainLanguageSummary =
-    leadingConcepts.length > 0
-      ? `In simple terms, this content teaches how ${leadingConcepts.slice(0, 2).join(" and ")} fit into the bigger subject area, so you can understand both the ideas and how to use them.`
-      : "This content introduces foundational ideas and expects you to understand how they work together.";
+  // For quick mode: pull 3 additional real sentences as "key takeaways"
+  const takeawaySentences = ranked
+    .filter((s) => !summaryPool.includes(s))
+    .slice(0, 5);
 
-  let learningOutcomes = [
-    leadingConcepts[0]
-      ? `Explain the core idea behind ${toTitleCase(leadingConcepts[0])}.`
-      : "Explain the main concept in your own words.",
-    leadingConcepts[1]
-      ? `Compare ${toTitleCase(leadingConcepts[0] || leadingConcepts[1])} with ${toTitleCase(leadingConcepts[1])}.`
-      : "Identify how the major concepts differ from each other.",
-    leadingConcepts[2]
-      ? `Apply ${toTitleCase(leadingConcepts[2])} to a basic example or problem.`
-      : "Apply the ideas to a simple example.",
-    "Describe how the topics build on each other.",
-  ].filter(Boolean);
+  const learningOutcomes =
+    takeawaySentences.length >= 2
+      ? takeawaySentences.slice(0, mode === "quick" ? 3 : 5)
+      : allSentences.filter((s) => !summaryPool.includes(s)).slice(0, 3);
 
-  let conceptConnections = [
-    leadingConcepts.length >= 2
-      ? `${toTitleCase(leadingConcepts[0])} provides the base for understanding ${toTitleCase(leadingConcepts[1])}.`
-      : "The early topics establish the foundation for the later ones.",
-    leadingConcepts.length >= 3
-      ? `${toTitleCase(leadingConcepts[2])} is easier once the earlier concepts are clear.`
-      : "The material is best understood as a progression, not isolated facts.",
-    "Definitions, relationships, and application steps are likely meant to be learned together.",
-  ];
+  // Extract definition-style or fact sentences for exam focus
+  const factSentences = allSentences.filter((s) =>
+    /(\bis\b|\bare\b|\bmeans\b|\bdefined as\b|\bcalled\b|\bprocess of\b|\btype of\b|\bsuch as\b|\bfor example\b)/i.test(
+      s,
+    ),
+  );
+  const examFocus =
+    factSentences.length >= 2
+      ? factSentences.slice(0, 4)
+      : ranked.filter((s) => !summaryPool.includes(s)).slice(0, 3);
 
-  let examFocus = [
-    leadingConcepts[0]
-      ? `Expect definitions and short explanations around ${toTitleCase(leadingConcepts[0])}.`
-      : "Expect definition-based questions.",
-    leadingConcepts[1]
-      ? `Be ready to compare ${toTitleCase(leadingConcepts[0] || leadingConcepts[1])} and ${toTitleCase(leadingConcepts[1])}.`
-      : "Be ready for compare-and-contrast questions.",
-    "Focus on examples, use cases, and why one approach is chosen over another.",
-  ];
+  // Build possible questions from actual content sentences
+  const questionSeeds = [...factSentences, ...takeawaySentences]
+    .filter((v, i, arr) => arr.indexOf(v) === i)
+    .slice(0, 4);
 
-  const basePlan = [
-    "Read the overview once to understand the big picture.",
-    "Turn each learning outcome into a short self-explanation.",
-    "Review how the concepts connect instead of memorizing them separately.",
-    "Practice answering the possible questions without notes.",
-  ];
+  const possibleQuestions =
+    questionSeeds.length >= 2
+      ? questionSeeds.map((s) => {
+          const stripped = s.replace(/\.$/, "");
+          // Convert statement to question form
+          if (/\bis\b|\bare\b/.test(s))
+            return `What ${stripped
+              .split(/\bis\b|\bare\b/)[0]
+              .trim()
+              .toLowerCase()} is described here, and what makes it significant?`;
+          return `Based on the text, explain: "${stripped.length > 80 ? stripped.slice(0, 80) + "…" : stripped}"`;
+        })
+      : [
+          "What are the key concepts introduced in this material?",
+          "How do the main ideas in this content connect to each other?",
+          "What would you need to explain to someone studying this topic for the first time?",
+        ];
 
-  const modeSpecificStep =
+  const studyPlan = [
+    "Read through the material once without stopping to get the big picture.",
+    "Identify the 3–5 most important points and write them in your own words.",
+    "Look up any terms or concepts that were unclear on first reading.",
     mode === "exam"
-      ? "Simulate a timed exam review on these concepts."
-      : mode === "action"
-        ? "Convert action items into scheduled tasks in your planner."
-        : mode === "detailed"
-          ? "Expand each key point into 3-5 supporting details."
-          : "Do a 10-minute quick recall session at the end.";
-
-  const studyPlan = [...basePlan, modeSpecificStep];
-
-  let possibleQuestions = [
-    leadingConcepts[0]
-      ? `How would you explain ${toTitleCase(leadingConcepts[0])} to a beginner?`
-      : "What is the main idea of this content?",
-    leadingConcepts.length >= 2
-      ? `What is the relationship between ${toTitleCase(leadingConcepts[0])} and ${toTitleCase(leadingConcepts[1])}?`
-      : "How do the main concepts connect?",
-    leadingConcepts[2]
-      ? `Give one practical example where ${toTitleCase(leadingConcepts[2])} matters.`
-      : "Give one practical example related to this topic.",
-    "Which part of this topic is most likely to confuse students, and why?",
+      ? "Simulate a short exam: write answers to the possible questions from memory."
+      : "Review how each key point connects to the others.",
   ];
 
-  let actionItems = [
-    "Rewrite the summary in your own simpler words.",
-    "Choose one concept and build a worked example around it.",
-    "Create 3 flashcards from the most testable terms.",
-    "Mark one topic that still feels unclear and review it next.",
+  const actionItems = [
+    "Rewrite the main idea in one sentence without looking at the text.",
+    "Choose the concept you understood least and re-read that section.",
+    "Create 2–3 practice questions from the most testable content.",
+    "Review this summary again 24 hours later to check recall.",
   ];
-
-  if (mode === "exam") {
-    learningOutcomes = learningOutcomes.slice(0, 4);
-    conceptConnections = conceptConnections.slice(0, 3);
-    examFocus = [
-      ...examFocus,
-      "Expect compare-and-contrast questions between the main concepts.",
-      "Be ready to justify why a concept is useful, not just define it.",
-    ];
-    possibleQuestions = [
-      ...possibleQuestions,
-      "Which concept would most likely appear in a short-answer exam question, and why?",
-    ];
-    actionItems = [
-      "Create a one-page exam sheet from the strongest concepts.",
-      "Practice 3 short-answer explanations under time pressure.",
-      "Review the most likely compare-and-contrast questions.",
-      "Test yourself on key terms without looking at notes.",
-    ];
-  }
-
-  if (mode === "action") {
-    conceptConnections = conceptConnections.slice(0, 2);
-    examFocus = examFocus.slice(0, 2);
-    possibleQuestions = [
-      "What should you practice first to make the biggest improvement?",
-      "Which concept still feels weakest, and how will you fix it?",
-      "What example can you solve today to prove you understand this topic?",
-    ];
-    actionItems = [
-      "Start with the hardest concept and write a 3-line explanation.",
-      "Practice one concrete example for each main topic.",
-      "Turn the most important terms into flashcards.",
-      "Revisit one weak point before ending this study session.",
-      "Plan the next 30 minutes around practice, not reading only.",
-    ];
-  }
-
-  if (mode === "quick") {
-    learningOutcomes = learningOutcomes.slice(0, 3);
-    conceptConnections = conceptConnections.slice(0, 2);
-    examFocus = examFocus.slice(0, 2);
-    possibleQuestions = possibleQuestions.slice(0, 2);
-    actionItems = actionItems.slice(0, 3);
-  }
 
   return shapeSummaryByMode(
     {
       summary,
-      plainLanguageSummary,
+      plainLanguageSummary: summary,
       learningOutcomes,
-      conceptConnections,
+      conceptConnections: [],
       examFocus,
-      importantTerms:
-        displayTerms.length > 0
-          ? displayTerms
-          : ["No important terms identified."],
+      importantTerms: [],
       studyPlan,
       possibleQuestions,
       actionItems,

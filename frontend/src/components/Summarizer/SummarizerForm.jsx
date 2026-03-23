@@ -2,7 +2,6 @@ const SUMMARY_MODES = [
   { value: "quick", label: "Quick" },
   { value: "detailed", label: "Detailed" },
   { value: "exam", label: "Exam Focus" },
-  { value: "action", label: "Action Plan" },
 ];
 
 export function SummarizerForm({
