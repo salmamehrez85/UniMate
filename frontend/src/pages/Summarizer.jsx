@@ -392,7 +392,11 @@ export function Summarizer({ onNavigate }) {
         onSubmit={handleSubmit}
       />
 
-      <SummaryResult summaryData={summaryResult} onNavigate={onNavigate} />
+      <SummaryResult
+        summaryData={summaryResult}
+        onNavigate={onNavigate}
+        courses={courses}
+      />
     </div>
   );
 }

@@ -23,6 +23,8 @@ router.route("/recommendations").get(courseController.getAIRecommendations);
 // Summarizer route
 router.route("/summarize").post(courseController.summarizeCourseContent);
 
+router.route("/:id/save-summary").post(courseController.saveSummaryToCourse);
+
 router
   .route("/:id")
   .get(courseController.getCourse)

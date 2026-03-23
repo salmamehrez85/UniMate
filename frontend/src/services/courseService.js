@@ -157,6 +157,21 @@ export const getAIRecommendations = async () => {
   }
 };
 
+// Save a summary to a specific course
+export const saveSummaryToCourse = async (courseId, { mode, text }) => {
+  const response = await fetch(
+    `${API_BASE_URL}/courses/${courseId}/save-summary`,
+    {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ mode, text }),
+    },
+  );
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || "Failed to save summary");
+  return data;
+};
+
 // Generate structured summary from text or course outline
 export const summarizeContent = async ({
   sourceType = "text",

@@ -1,5 +1,14 @@
-import { useState } from "react";
-import { Copy, Check, BookMarked, FileQuestion } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import {
+  Copy,
+  Check,
+  BookMarked,
+  FileQuestion,
+  ChevronDown,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
+import { saveSummaryToCourse } from "../../services/courseService";
 
 const MODE_CONFIG = {
   quick: {
@@ -61,8 +70,23 @@ function BoldedText({ text }) {
   return <>{parts}</>;
 }
 
-export function SummaryResult({ summaryData, onNavigate }) {
+export function SummaryResult({ summaryData, onNavigate, courses = [] }) {
   const [copied, setCopied] = useState(false);
+  const [saveOpen, setSaveOpen] = useState(false);
+  const [saveStatus, setSaveStatus] = useState(null); // null | 'saving' | 'saved' | 'error'
+  const [saveMsg, setSaveMsg] = useState("");
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    if (!saveOpen) return;
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setSaveOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [saveOpen]);
 
   if (!summaryData?.result) return null;
 
@@ -70,8 +94,8 @@ export function SummaryResult({ summaryData, onNavigate }) {
   const result = summaryData.result;
   const config = MODE_CONFIG[mode] || MODE_CONFIG.quick;
   const overviewText = result.summary || result.plainLanguageSummary || "";
+  const activeCourses = (courses || []).filter((c) => !c.isOldCourse);
 
-  // Build plain text version for copy / quiz
   const buildPlainText = () => {
     const lines = [overviewText];
     config.sections.forEach((section) => {
@@ -93,6 +117,25 @@ export function SummaryResult({ summaryData, onNavigate }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
+  };
+
+  const handleSaveToCourse = async (course) => {
+    setSaveOpen(false);
+    setSaveStatus("saving");
+    setSaveMsg("");
+    try {
+      await saveSummaryToCourse(course._id, { mode, text: buildPlainText() });
+      setSaveStatus("saved");
+      setSaveMsg(`Saved to ${course.code}`);
+    } catch (err) {
+      setSaveStatus("error");
+      setSaveMsg(err.message || "Failed to save");
+    } finally {
+      setTimeout(() => {
+        setSaveStatus(null);
+        setSaveMsg("");
+      }, 3000);
+    }
   };
 
   const handleStartQuiz = () => {
@@ -182,21 +225,54 @@ export function SummaryResult({ summaryData, onNavigate }) {
           )}
           {copied ? "Copied!" : "Copy"}
         </button>
-        <button
-          type="button"
-          disabled
-          title="Coming soon"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-50 text-gray-400 border border-gray-200 cursor-not-allowed">
-          <BookMarked className="w-3.5 h-3.5" />
-          Save to Course
-        </button>
-        <button
-          type="button"
-          onClick={handleStartQuiz}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200 transition-colors">
-          <FileQuestion className="w-3.5 h-3.5" />
-          Start Quiz
-        </button>
+
+        {/* Save to Course – inline course picker */}
+        <div className="relative" ref={dropdownRef}>
+          <button
+            type="button"
+            onClick={() => setSaveOpen((o) => !o)}
+            disabled={saveStatus === "saving" || activeCourses.length === 0}
+            title={
+              activeCourses.length === 0
+                ? "No active courses available"
+                : "Save summary to a course"
+            }
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            <BookMarked className="w-3.5 h-3.5" />
+            {saveStatus === "saving" ? "Saving…" : "Save to Course"}
+            <ChevronDown className="w-3 h-3 ml-0.5" />
+          </button>
+
+          {saveOpen && activeCourses.length > 0 && (
+            <div className="absolute left-0 mt-1 z-20 bg-white border border-gray-200 rounded-xl shadow-lg min-w-50 py-1 overflow-hidden">
+              <p className="px-3 py-1.5 text-xs text-gray-400 font-medium uppercase tracking-wide border-b border-gray-100">
+                Choose a course
+              </p>
+              {activeCourses.map((c) => (
+                <button
+                  key={c._id}
+                  type="button"
+                  onClick={() => handleSaveToCourse(c)}
+                  className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 text-gray-700 transition-colors">
+                  <span className="font-semibold">{c.code}</span>
+                  <span className="ml-1 text-gray-500 truncate">{c.name}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Save status toast */}
+        {saveStatus === "saved" && (
+          <span className="inline-flex items-center gap-1 text-xs text-green-700">
+            <CheckCircle2 className="w-3.5 h-3.5" /> {saveMsg}
+          </span>
+        )}
+        {saveStatus === "error" && (
+          <span className="inline-flex items-center gap-1 text-xs text-red-600">
+            <XCircle className="w-3.5 h-3.5" /> {saveMsg}
+          </span>
+        )}
       </div>
     </div>
   );

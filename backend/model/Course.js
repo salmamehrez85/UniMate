@@ -90,6 +90,16 @@ const courseSchema = new mongoose.Schema(
       default: false,
       description: "Marks course as completed with final grade",
     },
+    savedSummaries: {
+      type: [
+        {
+          mode: String,
+          text: String,
+          savedAt: { type: Date, default: Date.now },
+        },
+      ],
+      default: [],
+    },
   },
   {
     timestamps: true,
