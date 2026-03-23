@@ -8,7 +8,10 @@ import {
   CheckCircle2,
   XCircle,
 } from "lucide-react";
-import { saveSummaryToCourse } from "../../services/courseService";
+import {
+  saveSummaryToCourse,
+  updateCourse,
+} from "../../services/courseService";
 
 const MODE_CONFIG = {
   quick: {
@@ -123,13 +126,33 @@ export function SummaryResult({ summaryData, onNavigate, courses = [] }) {
     setSaveOpen(false);
     setSaveStatus("saving");
     setSaveMsg("");
+    const summaryText = buildPlainText();
+
     try {
-      await saveSummaryToCourse(course._id, { mode, text: buildPlainText() });
+      await saveSummaryToCourse(course._id, { mode, text: summaryText });
       setSaveStatus("saved");
       setSaveMsg(`Saved to ${course.code}`);
     } catch (err) {
-      setSaveStatus("error");
-      setSaveMsg(err.message || "Failed to save");
+      const message = err?.message || "Failed to save";
+
+      if (message.includes("(404)")) {
+        try {
+          const nextSummaries = [
+            ...(course.savedSummaries || []),
+            { mode, text: summaryText, savedAt: new Date().toISOString() },
+          ];
+
+          await updateCourse(course._id, { savedSummaries: nextSummaries });
+          setSaveStatus("saved");
+          setSaveMsg(`Saved to ${course.code}`);
+        } catch (fallbackErr) {
+          setSaveStatus("error");
+          setSaveMsg(fallbackErr?.message || "Failed to save");
+        }
+      } else {
+        setSaveStatus("error");
+        setSaveMsg(message);
+      }
     } finally {
       setTimeout(() => {
         setSaveStatus(null);

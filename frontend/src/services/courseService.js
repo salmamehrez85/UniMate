@@ -167,8 +167,23 @@ export const saveSummaryToCourse = async (courseId, { mode, text }) => {
       body: JSON.stringify({ mode, text }),
     },
   );
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.message || "Failed to save summary");
+  const raw = await response.text();
+  let data = {};
+
+  if (raw) {
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      throw new Error(`Failed to save summary (${response.status})`);
+    }
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || `Failed to save summary (${response.status})`,
+    );
+  }
+
   return data;
 };
 

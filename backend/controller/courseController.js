@@ -230,10 +230,6 @@ exports.createCourse = async (req, res) => {
   }
 };
 
-// @desc    Update course
-// @route   PUT /api/courses/:id
-// @access  Private
-exports.updateCourse = async (req, res) => {
 // @desc    Save a generated summary to a course
 // @route   POST /api/courses/:id/save-summary
 // @access  Private
@@ -242,7 +238,9 @@ exports.saveSummaryToCourse = async (req, res) => {
     const { mode, text } = req.body;
 
     if (!text || !text.trim()) {
-      return res.status(400).json({ success: false, message: "Summary text is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Summary text is required" });
     }
 
     const course = await Course.findOne({
@@ -251,7 +249,9 @@ exports.saveSummaryToCourse = async (req, res) => {
     });
 
     if (!course) {
-      return res.status(404).json({ success: false, message: "Course not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Course not found" });
     }
 
     course.savedSummaries.push({ mode: mode || "quick", text: text.trim() });
@@ -264,10 +264,15 @@ exports.saveSummaryToCourse = async (req, res) => {
     });
   } catch (error) {
     console.error("Save summary error:", error);
-    return res.status(500).json({ success: false, message: "Error saving summary" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Error saving summary" });
   }
 };
 
+// @desc    Update course
+// @route   PUT /api/courses/:id
+// @access  Private
 exports.updateCourse = async (req, res) => {
   try {
     let course = await Course.findOne({

@@ -8,6 +8,21 @@ export function OverviewTab({ course }) {
   const assessmentsCount = (course.assessments || []).length;
 
   const phasesCount = (course.phases || []).length;
+  const savedSummaries = [...(course.savedSummaries || [])].sort(
+    (a, b) => new Date(b.savedAt || 0) - new Date(a.savedAt || 0),
+  );
+
+  const formatSavedAt = (dateValue) => {
+    if (!dateValue) return "Unknown date";
+    const date = new Date(dateValue);
+    if (Number.isNaN(date.getTime())) return "Unknown date";
+    return date.toLocaleString();
+  };
+
+  const getSummaryPreview = (text) => {
+    if (!text) return "";
+    return text.length > 500 ? `${text.slice(0, 500)}...` : text;
+  };
 
   const stats = [
     {
@@ -114,6 +129,38 @@ export function OverviewTab({ course }) {
             </p>
           </div>
         </div>
+      </div>
+
+      <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
+        <h2 className="text-xl font-bold text-primary-900 mb-6">
+          Saved Summaries
+        </h2>
+
+        {savedSummaries.length === 0 ? (
+          <p className="text-sm text-gray-500">
+            No summaries saved yet. Use Summarizer and choose “Save to Course”.
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {savedSummaries.map((summary, index) => (
+              <div
+                key={`${summary.savedAt || "summary"}-${index}`}
+                className="border border-gray-100 rounded-lg p-4 bg-gray-50">
+                <div className="flex items-center justify-between gap-3 mb-2">
+                  <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold bg-teal-100 text-teal-700 uppercase">
+                    {summary.mode || "quick"}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {formatSavedAt(summary.savedAt)}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-700 leading-6 whitespace-pre-wrap">
+                  {getSummaryPreview(summary.text)}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
