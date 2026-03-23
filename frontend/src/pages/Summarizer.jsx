@@ -78,7 +78,14 @@ export function Summarizer() {
         text: form.sourceType === "text" ? form.text : "",
       });
 
-      setSummaryResult(response.data?.result || null);
+      setSummaryResult(
+        response.data
+          ? {
+              mode: response.data.mode,
+              result: response.data.result,
+            }
+          : null,
+      );
     } catch (err) {
       console.error("Summarizer request failed:", err);
       setError(err.message || "Failed to generate summary");
@@ -110,7 +117,7 @@ export function Summarizer() {
           type="button"
           onClick={handleGenerateClick}
           disabled={isSubmitting}
-          className="w-full inline-flex items-center justify-center px-5 py-3 rounded-lg bg-primary-700 hover:bg-primary-800 text-white font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
+          className="w-full inline-flex items-center justify-center px-5 py-3 rounded-lg bg-teal-500 hover:bg-teal-600 text-white font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed">
           {isSubmitting ? "Generating Summary..." : "Generate Summary"}
         </button>
       </div>
@@ -122,10 +129,9 @@ export function Summarizer() {
         loadingCourses={loadingCourses}
         onChange={handleFieldChange}
         onSubmit={handleSubmit}
-        isSubmitting={isSubmitting}
       />
 
-      <SummaryResult result={summaryResult} />
+      <SummaryResult summaryData={summaryResult} />
     </div>
   );
 }

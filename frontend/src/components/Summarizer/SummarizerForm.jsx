@@ -11,7 +11,6 @@ export function SummarizerForm({
   loadingCourses,
   onChange,
   onSubmit,
-  isSubmitting,
   formId = "summarizer-form",
 }) {
   const activeCourses = (courses || []).filter((course) => !course.isOldCourse);
@@ -54,12 +53,6 @@ export function SummarizerForm({
         <span className="text-xs text-gray-500">
           Click Generate Summary after choosing source and mode.
         </span>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
-          {isSubmitting ? "Generating Summary..." : "Generate Summary"}
-        </button>
       </div>
 
       {form.sourceType === "courseOutline" ? (

@@ -134,12 +134,29 @@ const SummarySchema = {
   properties: {
     summary: {
       type: "string",
-      description: "A concise 2-4 sentence summary tailored to the mode",
+      description: "A concise academic overview that synthesizes the material",
     },
-    keyPoints: {
+    plainLanguageSummary: {
+      type: "string",
+      description:
+        "A simpler explanation of what the content is really about and why it matters",
+    },
+    learningOutcomes: {
       type: "array",
       items: { type: "string" },
-      description: "4-8 key points from the source content",
+      description:
+        "4-6 concrete abilities or takeaways the student should gain",
+    },
+    conceptConnections: {
+      type: "array",
+      items: { type: "string" },
+      description:
+        "3-5 explanations of how the main topics connect or build on each other",
+    },
+    examFocus: {
+      type: "array",
+      items: { type: "string" },
+      description: "3-5 high-probability assessment focuses or tricky areas",
     },
     importantTerms: {
       type: "array",
@@ -164,7 +181,10 @@ const SummarySchema = {
   },
   required: [
     "summary",
-    "keyPoints",
+    "plainLanguageSummary",
+    "learningOutcomes",
+    "conceptConnections",
+    "examFocus",
     "importantTerms",
     "studyPlan",
     "possibleQuestions",
@@ -883,15 +903,148 @@ const generateFallbackRecommendations = (coursesData) => {
 const buildSummaryModeInstructions = (mode) => {
   switch (mode) {
     case "exam":
-      return "Prioritize exam-relevant concepts, definitions, contrasts, and likely test points.";
+      return "Prioritize exam-relevant concepts, common traps, likely comparisons, worked reasoning, and what an instructor is most likely to test.";
     case "action":
-      return "Prioritize concrete action items, deadlines, and immediate next steps.";
+      return "Prioritize concrete action items, what to study first, what to practice next, and the fastest path to understanding.";
     case "detailed":
-      return "Provide comprehensive coverage with deeper context and structured study guidance.";
+      return "Provide comprehensive coverage with deeper context, how topics connect, and strong study guidance.";
     case "quick":
     default:
-      return "Keep it concise and practical for fast review.";
+      return "Keep it concise but still useful: explain what it means, not just what words appear.";
   }
+};
+
+const buildSummaryModeOutputRules = (mode) => {
+  switch (mode) {
+    case "exam":
+      return {
+        summaryStyle:
+          "Frame the summary like exam revision notes. Emphasize what is most testable and what students often miss.",
+        focusRules: [
+          "examFocus should be the strongest section and highly specific",
+          "possibleQuestions should sound like actual instructor-style prompts",
+          "studyPlan should read like a revision plan for an upcoming test",
+          "actionItems should be immediate revision tasks",
+        ],
+        limits: {
+          learningOutcomes: 4,
+          conceptConnections: 3,
+          examFocus: 5,
+          importantTerms: 6,
+          studyPlan: 5,
+          possibleQuestions: 5,
+          actionItems: 4,
+        },
+      };
+    case "action":
+      return {
+        summaryStyle:
+          "Frame the summary like a practical study coach. Focus on what to do next, what to practice first, and how to turn this into action.",
+        focusRules: [
+          "actionItems should be the strongest section and ordered by priority",
+          "studyPlan should be concrete and sequential",
+          "examFocus should be short and limited to immediate weak spots",
+          "possibleQuestions should be practice-oriented rather than theoretical",
+        ],
+        limits: {
+          learningOutcomes: 3,
+          conceptConnections: 2,
+          examFocus: 3,
+          importantTerms: 5,
+          studyPlan: 6,
+          possibleQuestions: 3,
+          actionItems: 6,
+        },
+      };
+    case "detailed":
+      return {
+        summaryStyle:
+          "Frame the summary like a strong tutor note. Add depth, relationships, and more complete reasoning.",
+        focusRules: [
+          "learningOutcomes and conceptConnections should be rich and complete",
+          "summary should synthesize the big picture, not just list topics",
+          "studyPlan should support multi-step learning",
+        ],
+        limits: {
+          learningOutcomes: 6,
+          conceptConnections: 5,
+          examFocus: 4,
+          importantTerms: 8,
+          studyPlan: 6,
+          possibleQuestions: 5,
+          actionItems: 5,
+        },
+      };
+    case "quick":
+    default:
+      return {
+        summaryStyle:
+          "Frame the summary like a fast, high-value overview for someone reviewing in under two minutes.",
+        focusRules: [
+          "keep every section short and high-signal",
+          "avoid depth unless it adds immediate value",
+          "surface only the most essential outcomes and terms",
+        ],
+        limits: {
+          learningOutcomes: 3,
+          conceptConnections: 2,
+          examFocus: 2,
+          importantTerms: 4,
+          studyPlan: 3,
+          possibleQuestions: 2,
+          actionItems: 3,
+        },
+      };
+  }
+};
+
+const trimArray = (value, maxItems) => {
+  if (!Array.isArray(value)) return [];
+  return value.filter(Boolean).slice(0, maxItems);
+};
+
+const shapeSummaryByMode = (summary, mode) => {
+  const modeRules = buildSummaryModeOutputRules(mode);
+
+  return {
+    ...summary,
+    learningOutcomes: trimArray(
+      summary.learningOutcomes,
+      modeRules.limits.learningOutcomes,
+    ),
+    conceptConnections: trimArray(
+      summary.conceptConnections,
+      modeRules.limits.conceptConnections,
+    ),
+    examFocus: trimArray(summary.examFocus, modeRules.limits.examFocus),
+    importantTerms: trimArray(
+      summary.importantTerms,
+      modeRules.limits.importantTerms,
+    ),
+    studyPlan: trimArray(summary.studyPlan, modeRules.limits.studyPlan),
+    possibleQuestions: trimArray(
+      summary.possibleQuestions,
+      modeRules.limits.possibleQuestions,
+    ),
+    actionItems: trimArray(summary.actionItems, modeRules.limits.actionItems),
+  };
+};
+
+const extractConceptCandidates = (content) => {
+  return (content || "")
+    .split(/\n|,|;|\.|\||\/|:/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .filter((item) => item.length > 2)
+    .slice(0, 10);
+};
+
+const toTitleCase = (value) => {
+  return value
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 };
 
 const generateFallbackSummary = (content, mode) => {
@@ -901,16 +1054,7 @@ const generateFallbackSummary = (content, mode) => {
     .map((s) => s.trim())
     .filter(Boolean);
 
-  const summary =
-    sentences.slice(0, 3).join(" ") ||
-    "No sufficient text was provided to generate a meaningful summary.";
-
-  const keyPoints = sentences.slice(0, 6).map((sentence) => {
-    if (sentence.length > 160) {
-      return `${sentence.slice(0, 157)}...`;
-    }
-    return sentence;
-  });
+  const concepts = extractConceptCandidates(content);
 
   const words = normalized
     .toLowerCase()
@@ -957,11 +1101,62 @@ const generateFallbackSummary = (content, mode) => {
     .slice(0, 8)
     .map(([word]) => word);
 
+  const displayTerms =
+    importantTerms.length > 0
+      ? importantTerms.map((term) => toTitleCase(term))
+      : concepts.slice(0, 8).map((term) => toTitleCase(term));
+
+  const leadingConcepts = concepts.length > 0 ? concepts : displayTerms;
+
+  const summary =
+    leadingConcepts.length > 0
+      ? `This material focuses on ${leadingConcepts.slice(0, 3).join(", ")}. It appears designed to move from core concepts into practical understanding and application.`
+      : sentences.slice(0, 2).join(" ") ||
+        "No sufficient text was provided to generate a meaningful summary.";
+
+  const plainLanguageSummary =
+    leadingConcepts.length > 0
+      ? `In simple terms, this content teaches how ${leadingConcepts.slice(0, 2).join(" and ")} fit into the bigger subject area, so you can understand both the ideas and how to use them.`
+      : "This content introduces foundational ideas and expects you to understand how they work together.";
+
+  let learningOutcomes = [
+    leadingConcepts[0]
+      ? `Explain the core idea behind ${toTitleCase(leadingConcepts[0])}.`
+      : "Explain the main concept in your own words.",
+    leadingConcepts[1]
+      ? `Compare ${toTitleCase(leadingConcepts[0] || leadingConcepts[1])} with ${toTitleCase(leadingConcepts[1])}.`
+      : "Identify how the major concepts differ from each other.",
+    leadingConcepts[2]
+      ? `Apply ${toTitleCase(leadingConcepts[2])} to a basic example or problem.`
+      : "Apply the ideas to a simple example.",
+    "Describe how the topics build on each other.",
+  ].filter(Boolean);
+
+  let conceptConnections = [
+    leadingConcepts.length >= 2
+      ? `${toTitleCase(leadingConcepts[0])} provides the base for understanding ${toTitleCase(leadingConcepts[1])}.`
+      : "The early topics establish the foundation for the later ones.",
+    leadingConcepts.length >= 3
+      ? `${toTitleCase(leadingConcepts[2])} is easier once the earlier concepts are clear.`
+      : "The material is best understood as a progression, not isolated facts.",
+    "Definitions, relationships, and application steps are likely meant to be learned together.",
+  ];
+
+  let examFocus = [
+    leadingConcepts[0]
+      ? `Expect definitions and short explanations around ${toTitleCase(leadingConcepts[0])}.`
+      : "Expect definition-based questions.",
+    leadingConcepts[1]
+      ? `Be ready to compare ${toTitleCase(leadingConcepts[0] || leadingConcepts[1])} and ${toTitleCase(leadingConcepts[1])}.`
+      : "Be ready for compare-and-contrast questions.",
+    "Focus on examples, use cases, and why one approach is chosen over another.",
+  ];
+
   const basePlan = [
-    "Read the full summary once for context.",
-    "Review key points and rewrite them in your own words.",
-    "Focus on important terms and verify each concept.",
-    "Answer the possible questions without notes.",
+    "Read the overview once to understand the big picture.",
+    "Turn each learning outcome into a short self-explanation.",
+    "Review how the concepts connect instead of memorizing them separately.",
+    "Practice answering the possible questions without notes.",
   ];
 
   const modeSpecificStep =
@@ -975,32 +1170,88 @@ const generateFallbackSummary = (content, mode) => {
 
   const studyPlan = [...basePlan, modeSpecificStep];
 
-  const possibleQuestions = keyPoints.slice(0, 5).map((point, index) => {
-    const compact = point.length > 90 ? `${point.slice(0, 87)}...` : point;
-    return `Q${index + 1}: Explain this concept and give one example: ${compact}`;
-  });
-
-  const actionItems = [
-    "Identify one weak topic from the key points.",
-    "Create short notes for the top important terms.",
-    "Solve at least 3 practice questions related to this topic.",
-    "Review progress and adjust your next study session.",
+  let possibleQuestions = [
+    leadingConcepts[0]
+      ? `How would you explain ${toTitleCase(leadingConcepts[0])} to a beginner?`
+      : "What is the main idea of this content?",
+    leadingConcepts.length >= 2
+      ? `What is the relationship between ${toTitleCase(leadingConcepts[0])} and ${toTitleCase(leadingConcepts[1])}?`
+      : "How do the main concepts connect?",
+    leadingConcepts[2]
+      ? `Give one practical example where ${toTitleCase(leadingConcepts[2])} matters.`
+      : "Give one practical example related to this topic.",
+    "Which part of this topic is most likely to confuse students, and why?",
   ];
 
-  return {
-    summary,
-    keyPoints: keyPoints.length > 0 ? keyPoints : ["No key points extracted."],
-    importantTerms:
-      importantTerms.length > 0
-        ? importantTerms
-        : ["No important terms identified."],
-    studyPlan,
-    possibleQuestions:
-      possibleQuestions.length > 0
-        ? possibleQuestions
-        : ["What are the most important ideas in this content?"],
-    actionItems,
-  };
+  let actionItems = [
+    "Rewrite the summary in your own simpler words.",
+    "Choose one concept and build a worked example around it.",
+    "Create 3 flashcards from the most testable terms.",
+    "Mark one topic that still feels unclear and review it next.",
+  ];
+
+  if (mode === "exam") {
+    learningOutcomes = learningOutcomes.slice(0, 4);
+    conceptConnections = conceptConnections.slice(0, 3);
+    examFocus = [
+      ...examFocus,
+      "Expect compare-and-contrast questions between the main concepts.",
+      "Be ready to justify why a concept is useful, not just define it.",
+    ];
+    possibleQuestions = [
+      ...possibleQuestions,
+      "Which concept would most likely appear in a short-answer exam question, and why?",
+    ];
+    actionItems = [
+      "Create a one-page exam sheet from the strongest concepts.",
+      "Practice 3 short-answer explanations under time pressure.",
+      "Review the most likely compare-and-contrast questions.",
+      "Test yourself on key terms without looking at notes.",
+    ];
+  }
+
+  if (mode === "action") {
+    conceptConnections = conceptConnections.slice(0, 2);
+    examFocus = examFocus.slice(0, 2);
+    possibleQuestions = [
+      "What should you practice first to make the biggest improvement?",
+      "Which concept still feels weakest, and how will you fix it?",
+      "What example can you solve today to prove you understand this topic?",
+    ];
+    actionItems = [
+      "Start with the hardest concept and write a 3-line explanation.",
+      "Practice one concrete example for each main topic.",
+      "Turn the most important terms into flashcards.",
+      "Revisit one weak point before ending this study session.",
+      "Plan the next 30 minutes around practice, not reading only.",
+    ];
+  }
+
+  if (mode === "quick") {
+    learningOutcomes = learningOutcomes.slice(0, 3);
+    conceptConnections = conceptConnections.slice(0, 2);
+    examFocus = examFocus.slice(0, 2);
+    possibleQuestions = possibleQuestions.slice(0, 2);
+    actionItems = actionItems.slice(0, 3);
+  }
+
+  return shapeSummaryByMode(
+    {
+      summary,
+      plainLanguageSummary,
+      learningOutcomes,
+      conceptConnections,
+      examFocus,
+      importantTerms:
+        displayTerms.length > 0
+          ? displayTerms
+          : ["No important terms identified."],
+      studyPlan,
+      possibleQuestions,
+      actionItems,
+    },
+    mode,
+  );
 };
 
 const generateStructuredSummary = async ({
@@ -1024,6 +1275,7 @@ const generateStructuredSummary = async ({
     }
 
     const modeInstructions = buildSummaryModeInstructions(mode);
+    const modeOutputRules = buildSummaryModeOutputRules(mode);
     const contextLine = courseContext
       ? `Course context: ${courseContext.code || "N/A"} - ${courseContext.name || "N/A"}`
       : "Course context: Not provided";
@@ -1032,14 +1284,20 @@ const generateStructuredSummary = async ({
 
 Summary mode: ${mode}
 Mode guidance: ${modeInstructions}
+Mode output style: ${modeOutputRules.summaryStyle}
+Mode-specific rules:
+- ${modeOutputRules.focusRules.join("\n- ")}
 ${contextLine}
 
 SOURCE CONTENT:
 ${trimmed}
 
 Return valid JSON with these fields only:
-- summary: 2-4 clear sentences.
-- keyPoints: 4-8 bullets (short and specific).
+- summary: 2-4 sentences that synthesize the material instead of repeating it.
+- plainLanguageSummary: explain in simpler words what this content is really about and why it matters.
+- learningOutcomes: 4-6 bullets starting with verbs like explain, compare, apply, analyze.
+- conceptConnections: 3-5 bullets showing how the major topics fit together or build on each other.
+- examFocus: 3-5 bullets about what an instructor is most likely to test or where students usually struggle.
 - importantTerms: 5-10 terms.
 - studyPlan: 3-6 ordered steps.
 - possibleQuestions: 3-6 likely quiz/exam questions.
@@ -1049,7 +1307,9 @@ Constraints:
 - Keep language concise and student-friendly.
 - Avoid markdown.
 - Avoid generic filler.
-- Keep each item under 20 words when possible.`;
+- Do not just copy the outline back.
+- Infer the teaching logic if the source looks like a comma-separated outline.
+- Focus on usefulness for studying and exam prep.`;
 
     const result = await callLLMWithRetry(prompt, SummarySchema);
 
@@ -1057,24 +1317,37 @@ Constraints:
       return generateFallbackSummary(trimmed, mode);
     }
 
-    return {
-      summary: result.summary || generateFallbackSummary(trimmed, mode).summary,
-      keyPoints: Array.isArray(result.keyPoints)
-        ? result.keyPoints
-        : generateFallbackSummary(trimmed, mode).keyPoints,
-      importantTerms: Array.isArray(result.importantTerms)
-        ? result.importantTerms
-        : generateFallbackSummary(trimmed, mode).importantTerms,
-      studyPlan: Array.isArray(result.studyPlan)
-        ? result.studyPlan
-        : generateFallbackSummary(trimmed, mode).studyPlan,
-      possibleQuestions: Array.isArray(result.possibleQuestions)
-        ? result.possibleQuestions
-        : generateFallbackSummary(trimmed, mode).possibleQuestions,
-      actionItems: Array.isArray(result.actionItems)
-        ? result.actionItems
-        : generateFallbackSummary(trimmed, mode).actionItems,
-    };
+    const fallback = generateFallbackSummary(trimmed, mode);
+
+    return shapeSummaryByMode(
+      {
+        summary: result.summary || fallback.summary,
+        plainLanguageSummary:
+          result.plainLanguageSummary || fallback.plainLanguageSummary,
+        learningOutcomes: Array.isArray(result.learningOutcomes)
+          ? result.learningOutcomes
+          : fallback.learningOutcomes,
+        conceptConnections: Array.isArray(result.conceptConnections)
+          ? result.conceptConnections
+          : fallback.conceptConnections,
+        examFocus: Array.isArray(result.examFocus)
+          ? result.examFocus
+          : fallback.examFocus,
+        importantTerms: Array.isArray(result.importantTerms)
+          ? result.importantTerms
+          : fallback.importantTerms,
+        studyPlan: Array.isArray(result.studyPlan)
+          ? result.studyPlan
+          : fallback.studyPlan,
+        possibleQuestions: Array.isArray(result.possibleQuestions)
+          ? result.possibleQuestions
+          : fallback.possibleQuestions,
+        actionItems: Array.isArray(result.actionItems)
+          ? result.actionItems
+          : fallback.actionItems,
+      },
+      mode,
+    );
   } catch (error) {
     console.error("Failed to generate structured summary:", error.message);
     return generateFallbackSummary(content, mode);
