@@ -820,6 +820,14 @@ exports.summarizeCourseContent = async (req, res) => {
       courseId,
     } = req.body;
 
+    const allowedSourceTypes = ["text", "courseOutline", "file"];
+    if (!allowedSourceTypes.includes(sourceType)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid sourceType. Use text, courseOutline, or file",
+      });
+    }
+
     const allowedModes = ["quick", "detailed", "exam", "action"];
     const selectedMode = allowedModes.includes(mode) ? mode : "quick";
 

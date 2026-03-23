@@ -10,6 +10,7 @@ export function SummarizerForm({
   courses,
   loadingCourses,
   onChange,
+  onFileSelect,
   onSubmit,
   formId = "summarizer-form",
 }) {
@@ -29,6 +30,7 @@ export function SummarizerForm({
             className="px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400">
             <option value="text">Paste Text</option>
             <option value="courseOutline">Course Outline</option>
+            <option value="file">Upload File</option>
           </select>
         </label>
 
@@ -77,6 +79,26 @@ export function SummarizerForm({
               ? "Loading courses..."
               : "Only courses with outline text can be summarized."}
           </span>
+        </label>
+      ) : form.sourceType === "file" ? (
+        <label className="flex flex-col gap-2">
+          <span className="text-sm font-medium text-gray-700">
+            Upload File
+          </span>
+          <input
+            type="file"
+            accept=".txt,.md,.csv,.json,.rtf,.log,text/plain,text/markdown,text/csv,application/json"
+            onChange={onFileSelect}
+            className="px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 file:mr-3 file:px-3 file:py-1.5 file:rounded-md file:border-0 file:bg-primary-100 file:text-primary-800 file:font-medium hover:file:bg-primary-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
+          />
+          <span className="text-xs text-gray-500">
+            Supported: .txt, .md, .csv, .json, .rtf, .log (max 2 MB)
+          </span>
+          {form.fileName && (
+            <span className="text-xs text-primary-700">
+              Selected: {form.fileName} ({form.fileText?.length || 0} chars)
+            </span>
+          )}
         </label>
       ) : (
         <label className="flex flex-col gap-2">

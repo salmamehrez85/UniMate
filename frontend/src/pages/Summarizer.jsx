@@ -9,7 +9,20 @@ const INITIAL_FORM = {
   mode: "quick",
   courseId: "",
   text: "",
+  fileName: "",
+  fileText: "",
 };
+
+const SUPPORTED_UPLOAD_EXTENSIONS = [
+  ".txt",
+  ".md",
+  ".csv",
+  ".json",
+  ".rtf",
+  ".log",
+];
+
+const MAX_UPLOAD_SIZE_BYTES = 2 * 1024 * 1024;
 
 export function Summarizer() {
   const [form, setForm] = useState(INITIAL_FORM);
@@ -43,6 +56,9 @@ export function Summarizer() {
         ...prev,
         sourceType: value,
         courseId: value === "courseOutline" ? prev.courseId : "",
+        text: value === "text" ? prev.text : "",
+        fileName: value === "file" ? prev.fileName : "",
+        fileText: value === "file" ? prev.fileText : "",
       }));
       return;
     }
@@ -51,6 +67,66 @@ export function Summarizer() {
       ...prev,
       [field]: value,
     }));
+  };
+
+  const handleFileSelect = async (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      setForm((prev) => ({
+        ...prev,
+        fileName: "",
+        fileText: "",
+      }));
+      return;
+    }
+
+    const fileNameLower = file.name.toLowerCase();
+    const isSupported = SUPPORTED_UPLOAD_EXTENSIONS.some((extension) =>
+      fileNameLower.endsWith(extension),
+    );
+
+    if (!isSupported) {
+      setError(
+        `Unsupported file type. Please upload one of: ${SUPPORTED_UPLOAD_EXTENSIONS.join(", ")}`,
+      );
+      setForm((prev) => ({
+        ...prev,
+        fileName: "",
+        fileText: "",
+      }));
+      return;
+    }
+
+    if (file.size > MAX_UPLOAD_SIZE_BYTES) {
+      setError("File is too large. Please upload a file up to 2 MB.");
+      setForm((prev) => ({
+        ...prev,
+        fileName: "",
+        fileText: "",
+      }));
+      return;
+    }
+
+    try {
+      const textContent = await file.text();
+
+      setForm((prev) => ({
+        ...prev,
+        fileName: file.name,
+        fileText: textContent,
+      }));
+      setSummaryResult(null);
+      setError("");
+    } catch (readError) {
+      console.error("Failed to read uploaded file:", readError);
+      setError("Could not read this file. Please try a plain text-based file.");
+      setForm((prev) => ({
+        ...prev,
+        fileName: "",
+        fileText: "",
+      }));
+    }
   };
 
   const handleSubmit = async (event) => {
@@ -66,6 +142,11 @@ export function Summarizer() {
       return;
     }
 
+    if (form.sourceType === "file" && form.fileText.trim().length < 20) {
+      setError("Please upload a text-based file with enough content.");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       setError("");
@@ -75,7 +156,12 @@ export function Summarizer() {
         mode: form.mode,
         courseId:
           form.sourceType === "courseOutline" ? form.courseId : undefined,
-        text: form.sourceType === "text" ? form.text : "",
+        text:
+          form.sourceType === "text"
+            ? form.text
+            : form.sourceType === "file"
+              ? form.fileText
+              : "",
       });
 
       setSummaryResult(
@@ -128,6 +214,7 @@ export function Summarizer() {
         courses={courses}
         loadingCourses={loadingCourses}
         onChange={handleFieldChange}
+        onFileSelect={handleFileSelect}
         onSubmit={handleSubmit}
       />
 
