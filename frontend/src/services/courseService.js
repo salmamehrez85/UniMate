@@ -185,7 +185,9 @@ export const summarizeContent = async ({
 
   if (!response.ok) {
     throw new Error(
-      data.message || data.error || `Failed to generate summary (${response.status})`,
+      data.message ||
+        data.error ||
+        `Failed to generate summary (${response.status})`,
     );
   }
 
