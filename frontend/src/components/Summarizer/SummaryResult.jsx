@@ -74,7 +74,7 @@ function BoldedText({ text }) {
   return <>{parts}</>;
 }
 
-export function SummaryResult({ summaryData, onNavigate, courses = [] }) {
+export function SummaryResult({ summaryData, courses = [] }) {
   const [copied, setCopied] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
   const [saveStatus, setSaveStatus] = useState(null); // null | 'saving' | 'saved' | 'error'
@@ -95,10 +95,21 @@ export function SummaryResult({ summaryData, onNavigate, courses = [] }) {
   if (!summaryData?.result) return null;
 
   const mode = summaryData.mode || "quick";
+  const language = summaryData.options?.language || "en";
+  const isArabic = language === "ar";
   const result = summaryData.result;
   const config = MODE_CONFIG[mode] || MODE_CONFIG.quick;
   const overviewText = result.summary || result.plainLanguageSummary || "";
   const activeCourses = (courses || []).filter((c) => !c.isOldCourse);
+  const textBlockClass = isArabic
+    ? "text-base leading-8 text-right"
+    : "text-sm leading-7";
+  const paragraphBlockClass = isArabic
+    ? "text-base leading-8 text-justify"
+    : "text-sm leading-7";
+  const textStyle = isArabic
+    ? { fontFamily: "Cairo, Inter, sans-serif" }
+    : undefined;
 
   const buildPlainText = () => {
     const lines = [overviewText];
@@ -179,12 +190,11 @@ export function SummaryResult({ summaryData, onNavigate, courses = [] }) {
     }
   };
 
-  const handleStartQuiz = () => {
-    if (onNavigate) onNavigate("quizzes");
-  };
-
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+    <div
+      dir={isArabic ? "rtl" : "ltr"}
+      lang={isArabic ? "ar" : "en"}
+      className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-bold text-gray-900">Summary</h3>
@@ -195,7 +205,7 @@ export function SummaryResult({ summaryData, onNavigate, courses = [] }) {
       </div>
 
       {/* Prose block */}
-      <p className="text-sm text-gray-700 leading-7">
+      <p className={`${paragraphBlockClass} text-gray-700`} style={textStyle}>
         <BoldedText text={overviewText} />
       </p>
 
@@ -203,7 +213,9 @@ export function SummaryResult({ summaryData, onNavigate, courses = [] }) {
       {config.type === "prose-only" &&
         result.plainLanguageSummary &&
         result.plainLanguageSummary !== overviewText && (
-          <p className="text-sm text-gray-600 leading-7 mt-3">
+          <p
+            className={`${paragraphBlockClass} text-gray-600 mt-3`}
+            style={textStyle}>
             <BoldedText text={result.plainLanguageSummary} />
           </p>
         )}
@@ -233,14 +245,17 @@ export function SummaryResult({ summaryData, onNavigate, courses = [] }) {
                             className={`text-xs font-bold shrink-0 mt-0.5 ${config.accentClass}`}>
                             Q{index + 1}.
                           </span>
-                          <p className="text-sm text-gray-700 leading-6">
+                          <p
+                            className={`${textBlockClass} text-gray-700`}
+                            style={textStyle}>
                             {item}
                           </p>
                         </div>
                       ) : (
                         <p
                           key={index}
-                          className="text-sm text-gray-700 leading-6">
+                          className={`${textBlockClass} text-gray-700`}
+                          style={textStyle}>
                           <BoldedText text={item} />
                         </p>
                       ),

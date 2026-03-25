@@ -1209,6 +1209,9 @@ Rules:
 - Return strictly valid JSON only.
 - Keep content concise, academic, and useful.
 - If Arabic is selected, every response sentence must be Arabic.
+- If Arabic is selected, use natural academic Arabic phrasing and include original English technical terms in parentheses when relevant.
+- If the source lacks evidence for a field, return [] or "N/A" instead of inventing details.
+- Keep JSON keys in English exactly as requested.
 - keyTopics: 4-8 items
 - importantDefinitions: 4-8 items, each with concept + short definition
 - studyPlan: 3-6 actionable steps

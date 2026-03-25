@@ -1062,6 +1062,18 @@ const buildSummaryOptionInstructions = (mode, options) => {
     lines.push(
       "Output language must be Arabic (العربية) for all text fields. Do not return English sentences.",
     );
+    lines.push(
+      "If the user selects Arabic, the summary must use fluent natural Arabic academic phrasing (لغة أكاديمية رصينة), not literal word-for-word translation.",
+    );
+    lines.push(
+      "For Arabic requests, the summary field must be one cohesive academic paragraph of 3-5 sentences, flowing naturally like a textbook introduction. Do not write it like a list and do not start with phrases such as 'This summary covers'. Start directly with the core topic.",
+    );
+    lines.push(
+      "When the output language is Arabic, every specific technical term, concept name, or formula title must include its original English equivalent in parentheses.",
+    );
+    lines.push(
+      "For action items in Arabic, use natural imperative study phrasing such as قم بمراجعة، اكتب، قارن، وطبّق.",
+    );
   } else {
     lines.push("Output language must be English.");
   }
@@ -1087,6 +1099,35 @@ const buildSummaryOptionInstructions = (mode, options) => {
     normalizedOptions,
     instructionText: lines.join(" "),
   };
+};
+
+const buildWeightedSourceContent = (content, maxChars = 24000) => {
+  const normalized = (content || "").trim();
+
+  if (!normalized || normalized.length <= maxChars) {
+    return normalized;
+  }
+
+  const headLength = Math.floor(maxChars * 0.4);
+  const tailLength = Math.floor(maxChars * 0.2);
+  const middleLength = maxChars - headLength - tailLength;
+  const middleStart = Math.max(
+    headLength,
+    Math.floor((normalized.length - middleLength) / 2),
+  );
+
+  const head = normalized.slice(0, headLength);
+  const middle = normalized.slice(middleStart, middleStart + middleLength);
+  const tail = normalized.slice(-tailLength);
+
+  return [
+    "[Introduction Emphasis]",
+    head,
+    "[Core Content Excerpt]",
+    middle,
+    "[Conclusion Emphasis]",
+    tail,
+  ].join("\n\n");
 };
 
 const trimArray = (value, maxItems) => {
@@ -1137,8 +1178,12 @@ const translateSummaryToArabic = async (summary) => {
 Rules:
 - Return strictly valid JSON.
 - Keep exactly the same keys and structure.
+- Keep JSON keys in English exactly as they are.
 - Keep numbers, formulas, and technical terms accurate.
 - Every sentence in every field must be Arabic.
+- For every technical academic term, concept name, or formula title, include the original English term in parentheses when relevant.
+- Avoid literal word-for-word translation; use natural academic Arabic phrasing (لغة أكاديمية رصينة).
+- For action items, use natural study imperatives such as قم بمراجعة، اكتب، قارن، وطبّق.
 
 Input JSON:
 ${JSON.stringify(summary)}`;
@@ -1147,11 +1192,163 @@ ${JSON.stringify(summary)}`;
   return translated && typeof translated === "object" ? translated : summary;
 };
 
+const asArray = (value) => {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item) => typeof item === "string" && item.trim());
+};
+
+const extractEnglishTerms = (text = "") => {
+  return (
+    text.match(/[A-Z][A-Za-z0-9+/.-]*(?:\s+[A-Z]?[A-Za-z0-9+/.-]+){0,4}/g) || []
+  )
+    .map((item) => item.trim())
+    .filter(
+      (item, index, array) => item.length > 1 && array.indexOf(item) === index,
+    );
+};
+
+const cleanupEnglishText = (text = "") => {
+  return text
+    .replace(/[\u0600-\u06FF]+(?:\s+[\u0600-\u06FF]+)*/g, "")
+    .replace(/\(\s*\)/g, "")
+    .replace(/\s{2,}/g, " ")
+    .replace(/\s+([,.;:!?])/g, "$1")
+    .trim();
+};
+
+const localizeSummaryToEnglishFallback = (summary = {}) => {
+  const normalizeField = (value) => {
+    if (Array.isArray(value)) {
+      return value.map((item) => cleanupEnglishText(item)).filter(Boolean);
+    }
+    if (typeof value === "string") {
+      return cleanupEnglishText(value);
+    }
+    return value;
+  };
+
+  return {
+    summary: normalizeField(summary.summary) || "Summary unavailable.",
+    plainLanguageSummary: normalizeField(summary.plainLanguageSummary) || "N/A",
+    learningOutcomes: normalizeField(summary.learningOutcomes) || [],
+    conceptConnections: normalizeField(summary.conceptConnections) || [],
+    examFocus: normalizeField(summary.examFocus) || [],
+    importantTerms: normalizeField(summary.importantTerms) || [],
+    studyPlan: normalizeField(summary.studyPlan) || [],
+    possibleQuestions: normalizeField(summary.possibleQuestions) || [],
+    actionItems: normalizeField(summary.actionItems) || [],
+  };
+};
+
+const toArabicTermHint = (text = "") => {
+  const hasArabic = /[\u0600-\u06FF]/.test(text);
+  const hasEnglish = /[A-Za-z]/.test(text);
+
+  if (hasArabic && hasEnglish) return text;
+  if (hasEnglish && !hasArabic) return `مفهوم (${text.trim()})`;
+  return text || "هذا المفهوم";
+};
+
+const localizeSummaryToArabicFallback = (summary = {}) => {
+  const outcomes = asArray(summary.learningOutcomes);
+  const connections = asArray(summary.conceptConnections);
+  const examFocus = asArray(summary.examFocus);
+  const terms = asArray(summary.importantTerms);
+  const plan = asArray(summary.studyPlan);
+  const questions = asArray(summary.possibleQuestions);
+  const actions = asArray(summary.actionItems);
+
+  const normalizedTerms =
+    terms.length > 0
+      ? terms
+      : extractConceptCandidates(flattenSummaryText(summary)).slice(0, 8);
+  const normalizedArabicTerms = normalizedTerms.map((term) => {
+    const hasArabic = /[\u0600-\u06FF]/.test(term);
+    const hasEnglish = /[A-Za-z]/.test(term);
+
+    if (hasArabic && hasEnglish) return term;
+    if (hasEnglish && !hasArabic) return `مفهوم (${term})`;
+    return term;
+  });
+
+  const summaryText =
+    normalizedArabicTerms.length > 0
+      ? `يتناول هذا المحتوى بشكل أساسي موضوع ${normalizedArabicTerms[0]}، حيث يستعرض المحاور الرئيسية المتعلقة بـ ${normalizedArabicTerms.slice(1, 4).join(" و")}. يهدف هذا الملخص إلى تقديم رؤية شاملة ومنظمة تساعدك على استيعاب المفاهيم الأكثر أهمية للمراجعة والاستعداد الدراسي.`
+      : "يقدم هذا الملخص عرضاً شاملاً للفكرة العامة للمحتوى، مع تسليط الضوء على النقاط الجوهرية التي تضمن الفهم العميق للمادة العلمية وتسهل عملية الاستذكار الفعال.";
+
+  return {
+    summary: summaryText,
+    plainLanguageSummary:
+      "ببساطة، المحتوى يشرح الأفكار الأساسية المطلوبة للفهم والمراجعة مع خطوات عملية للتعلّم.",
+    learningOutcomes:
+      outcomes.length > 0
+        ? outcomes.map(
+            (item) =>
+              `تعلّم شرح الفكرة التالية بوضوح: ${toArabicTermHint(item)}`,
+          )
+        : normalizedArabicTerms
+            .slice(0, 5)
+            .map((item) => `فهم مفهوم ${item} وتوضيح تطبيقه.`),
+    conceptConnections:
+      connections.length > 0
+        ? connections.map(
+            (item) =>
+              `يربط المحتوى بين ${toArabicTermHint(item)} وبين بقية المفاهيم ضمن سياق دراسي مترابط.`,
+          )
+        : normalizedArabicTerms
+            .slice(0, 4)
+            .map((item, index) =>
+              index === 0
+                ? `يمثّل ${item} أساس الفهم لباقي المفاهيم.`
+                : `يرتبط ${item} بالمفاهيم السابقة ضمن نفس السياق الدراسي.`,
+            ),
+    examFocus:
+      examFocus.length > 0
+        ? examFocus.map(
+            (item) =>
+              `يركز المحتوى اختبارياً على ${toArabicTermHint(item)}، لذلك احرص على فهمه وتطبيقه بدقة.`,
+          )
+        : normalizedArabicTerms
+            .slice(0, 4)
+            .map((item) => `راجع أسئلة التطبيق والمقارنة المتعلقة بـ ${item}.`),
+    importantTerms: normalizedArabicTerms,
+    studyPlan:
+      plan.length > 0
+        ? plan.map(
+            (item, index) => `الخطوة ${index + 1}: ${toArabicTermHint(item)}`,
+          )
+        : [
+            "الخطوة 1: اقرأ الملخص لفهم الصورة العامة.",
+            "الخطوة 2: راجع المصطلحات الأساسية واكتب ملاحظات قصيرة.",
+            "الخطوة 3: تدرب على الأسئلة المحتملة وحدد نقاط الضعف.",
+          ],
+    possibleQuestions:
+      questions.length > 0
+        ? questions.map(
+            (item) => `سؤال متوقع: كيف تشرح ${toArabicTermHint(item)}؟`,
+          )
+        : normalizedArabicTerms
+            .slice(0, 4)
+            .map((item) => `كيف تشرح ${item} مع مثال عملي؟`),
+    actionItems:
+      actions.length > 0
+        ? actions.map(
+            (item) =>
+              `قم بتنفيذ الإجراء التالي المتعلق بـ ${toArabicTermHint(item)}.`,
+          )
+        : [
+            "قم بتلخيص الفكرة الرئيسية في جملة واحدة.",
+            "قم بمراجعة أصعب مفهوم لديك مع مثال تطبيقي.",
+            "قم بإنشاء 2–3 أسئلة تدريبية من النقاط الأهم.",
+          ],
+  };
+};
+
 const enforceSummaryLanguage = async (summary, options = {}) => {
   const normalizedOptions = normalizeSummaryOptions(options);
 
   if (normalizedOptions.language !== "ar") {
-    return summary;
+    return localizeSummaryToEnglishFallback(summary);
   }
 
   if (isMostlyArabicSummary(summary)) {
@@ -1162,7 +1359,7 @@ const enforceSummaryLanguage = async (summary, options = {}) => {
     return await translateSummaryToArabic(summary);
   } catch (error) {
     console.error("Arabic translation enforcement failed:", error.message);
-    return summary;
+    return localizeSummaryToArabicFallback(summary);
   }
 };
 
@@ -1214,71 +1411,19 @@ const generateFallbackSummary = (content, mode, language = "en") => {
   const useArabic = String(language || "en").toLowerCase() === "ar";
   const normalized = (content || "").replace(/\s+/g, " ").trim();
 
-  if (useArabic) {
-    const conceptCandidates = extractConceptCandidates(normalized);
-    const concepts =
-      conceptCandidates.length > 0
-        ? conceptCandidates.slice(0, 6)
-        : ["المفاهيم الأساسية", "العناصر الرئيسية", "التطبيقات العملية"];
-
-    const summary = `يتناول هذا المحتوى بشكل أساسي: ${concepts.join("، ")}. يركز الملخص على الفهم السريع وربط النقاط المهمة للدراسة.`;
-
-    const learningOutcomes = concepts
-      .slice(0, 5)
-      .map((item) => `شرح مفهوم ${item} وتوضيح دوره ضمن الموضوع.`);
-
-    const examFocus = concepts
-      .slice(0, 4)
-      .map(
-        (item) => `التركيز على أسئلة المقارنة والتطبيق المتعلقة بـ ${item}.`,
-      );
-
-    const possibleQuestions = concepts
-      .slice(0, 4)
-      .map((item) => `كيف تشرح ${item} مع مثال عملي؟`);
-
-    const studyPlan = [
-      "اقرأ الملخص أولًا لفهم الصورة العامة.",
-      "راجع المصطلحات والمفاهيم الأساسية بترتيب منطقي.",
-      mode === "exam"
-        ? "تدرّب على أسئلة اختبار قصيرة من الذاكرة."
-        : "اربط كل مفهوم بتطبيق عملي أو مثال واقعي.",
-    ];
-
-    const actionItems = [
-      "اكتب الفكرة الرئيسية بأسلوبك الخاص في جملة واحدة.",
-      "حدّد أصعب مفهوم لديك وأعد قراءته مع مثال.",
-      "اكتب 2–3 أسئلة تدريبية من أكثر النقاط أهمية.",
-      "راجع الملخص مرة أخرى خلال 24 ساعة لتثبيت الفهم.",
-    ];
-
-    return shapeSummaryByMode(
-      {
-        summary,
-        plainLanguageSummary: summary,
-        learningOutcomes,
-        conceptConnections: [],
-        examFocus,
-        importantTerms: concepts,
-        studyPlan,
-        possibleQuestions,
-        actionItems,
-      },
-      mode,
-    );
-  }
-
-  // Extract real sentences from the document
+  // Extract real sentences from the document (Arabic + English friendly)
   const allSentences = normalized
-    .split(/(?<=[.!?])\s+/)
+    .split(/(?<=[.!?؟])\s+/u)
     .map((s) => s.trim())
-    .filter((s) => s.length >= 40 && s.length <= 350 && /[a-zA-Z]{3,}/.test(s));
+    .filter((s) => s.length >= 30 && s.length <= 420 && /[\p{L}]{3,}/u.test(s));
 
   // Score sentences by information density — prefer sentences with actual facts
-  const skipPattern =
-    /^(this (lecture|course|chapter|slide|week)|we (will|are going to|cover)|in this|by the end|learning objective|agenda|outline|slide \d)/i;
-  const boostPattern =
-    /(\d+%?|\bis\b|\bare\b|\bmeans\b|\bdefined\b|\bcalled\b|\brefers\b|\bsuch as\b|\bfor example\b|\benables\b|\ballows\b|\bconsists\b|\bincludes\b)/i;
+  const skipPattern = useArabic
+    ? /^(في هذا|خلال هذا|سنقوم|سوف نتناول|أهداف التعلّم|الخطة|المقدمة)/i
+    : /^(this (lecture|course|chapter|slide|week)|we (will|are going to|cover)|in this|by the end|learning objective|agenda|outline|slide \d)/i;
+  const boostPattern = useArabic
+    ? /(\d+%?|\bيعني\b|\bيُعرّف\b|\bيسمى\b|\bيشمل\b|\bيتكوّن\b|\bعلى سبيل المثال\b|\bمثل\b|\bيتيح\b)/i
+    : /(\d+%?|\bis\b|\bare\b|\bmeans\b|\bdefined\b|\bcalled\b|\brefers\b|\bsuch as\b|\bfor example\b|\benables\b|\ballows\b|\bconsists\b|\bincludes\b)/i;
 
   const scoreSentence = (s, idx) => {
     let score = 0;
@@ -1309,7 +1454,9 @@ const generateFallbackSummary = (content, mode, language = "en") => {
 
   const summary =
     orderedPool.join(" ") ||
-    "No sufficient text was provided to generate a summary.";
+    (useArabic
+      ? "لم يتم توفير نص كافٍ لإنشاء ملخص مفيد."
+      : "No sufficient text was provided to generate a summary.");
 
   // For quick mode: pull 3 additional real sentences as "key takeaways"
   const takeawaySentences = ranked
@@ -1323,9 +1470,10 @@ const generateFallbackSummary = (content, mode, language = "en") => {
 
   // Extract definition-style or fact sentences for exam focus
   const factSentences = allSentences.filter((s) =>
-    /(\bis\b|\bare\b|\bmeans\b|\bdefined as\b|\bcalled\b|\bprocess of\b|\btype of\b|\bsuch as\b|\bfor example\b)/i.test(
-      s,
-    ),
+    (useArabic
+      ? /(\bيعني\b|\bيُعرّف\b|\bيسمى\b|\bيتكوّن\b|\bيشمل\b|\bعلى سبيل المثال\b|\bمثل\b)/i
+      : /(\bis\b|\bare\b|\bmeans\b|\bdefined as\b|\bcalled\b|\bprocess of\b|\btype of\b|\bsuch as\b|\bfor example\b)/i
+    ).test(s),
   );
   const examFocus =
     factSentences.length >= 2
@@ -1340,36 +1488,63 @@ const generateFallbackSummary = (content, mode, language = "en") => {
   const possibleQuestions =
     questionSeeds.length >= 2
       ? questionSeeds.map((s) => {
-          const stripped = s.replace(/\.$/, "");
-          // Convert statement to question form
-          if (/\bis\b|\bare\b/.test(s))
+          const stripped = s.replace(/[.؟]$/, "");
+          if (useArabic) {
+            return `اشرح الفكرة التالية باختصار مع مثال: "${stripped.length > 90 ? stripped.slice(0, 90) + "…" : stripped}"`;
+          }
+          if (/\bis\b|\bare\b/.test(s)) {
             return `What ${stripped
               .split(/\bis\b|\bare\b/)[0]
               .trim()
               .toLowerCase()} is described here, and what makes it significant?`;
+          }
           return `Based on the text, explain: "${stripped.length > 80 ? stripped.slice(0, 80) + "…" : stripped}"`;
         })
-      : [
-          "What are the key concepts introduced in this material?",
-          "How do the main ideas in this content connect to each other?",
-          "What would you need to explain to someone studying this topic for the first time?",
-        ];
+      : useArabic
+        ? [
+            "ما المفاهيم الأساسية المطروحة في هذا المحتوى؟",
+            "كيف ترتبط الأفكار الرئيسية ببعضها؟",
+            "ما الذي يجب شرحه لطالب يدرس هذا الموضوع لأول مرة؟",
+          ]
+        : [
+            "What are the key concepts introduced in this material?",
+            "How do the main ideas in this content connect to each other?",
+            "What would you need to explain to someone studying this topic for the first time?",
+          ];
 
-  const studyPlan = [
-    "Read through the material once without stopping to get the big picture.",
-    "Identify the 3–5 most important points and write them in your own words.",
-    "Look up any terms or concepts that were unclear on first reading.",
-    mode === "exam"
-      ? "Simulate a short exam: write answers to the possible questions from memory."
-      : "Review how each key point connects to the others.",
-  ];
+  const studyPlan = useArabic
+    ? [
+        "اقرأ المحتوى مرة كاملة للحصول على الصورة العامة.",
+        "استخرج 3–5 نقاط أساسية واكتبها بأسلوبك.",
+        "راجع المصطلحات أو المفاهيم غير الواضحة بعد القراءة الأولى.",
+        mode === "exam"
+          ? "حاكي اختبارًا قصيرًا: أجب عن الأسئلة المحتملة من الذاكرة."
+          : "راجع كيف ترتبط كل نقطة رئيسية بالنقاط الأخرى.",
+      ]
+    : [
+        "Read through the material once without stopping to get the big picture.",
+        "Identify the 3–5 most important points and write them in your own words.",
+        "Look up any terms or concepts that were unclear on first reading.",
+        mode === "exam"
+          ? "Simulate a short exam: write answers to the possible questions from memory."
+          : "Review how each key point connects to the others.",
+      ];
 
-  const actionItems = [
-    "Rewrite the main idea in one sentence without looking at the text.",
-    "Choose the concept you understood least and re-read that section.",
-    "Create 2–3 practice questions from the most testable content.",
-    "Review this summary again 24 hours later to check recall.",
-  ];
+  const actionItems = useArabic
+    ? [
+        "أعد صياغة الفكرة الرئيسية في جملة واحدة دون الرجوع للنص.",
+        "اختر المفهوم الأقل وضوحًا لديك وأعد قراءة هذا الجزء.",
+        "أنشئ 2–3 أسئلة تدريبية من أكثر النقاط قابلية للاختبار.",
+        "راجع هذا الملخص بعد 24 ساعة للتحقق من التذكّر.",
+      ]
+    : [
+        "Rewrite the main idea in one sentence without looking at the text.",
+        "Choose the concept you understood least and re-read that section.",
+        "Create 2–3 practice questions from the most testable content.",
+        "Review this summary again 24 hours later to check recall.",
+      ];
+
+  const importantTerms = extractConceptCandidates(normalized).slice(0, 10);
 
   return shapeSummaryByMode(
     {
@@ -1378,7 +1553,7 @@ const generateFallbackSummary = (content, mode, language = "en") => {
       learningOutcomes,
       conceptConnections: [],
       examFocus,
-      importantTerms: [],
+      importantTerms,
       studyPlan,
       possibleQuestions,
       actionItems,
@@ -1396,6 +1571,7 @@ const generateStructuredSummary = async ({
   try {
     const trimmed = (content || "").trim();
     const normalizedOptions = normalizeSummaryOptions(options);
+    const weightedSource = buildWeightedSourceContent(trimmed);
 
     if (!trimmed) {
       return generateFallbackSummary(content, mode, normalizedOptions.language);
@@ -1430,7 +1606,7 @@ Option guidance: ${instructionText}
 ${contextLine}
 
 SOURCE CONTENT:
-${trimmed}
+${weightedSource}
 
 Return valid JSON with these fields only:
 - summary: 2-4 sentences that synthesize the material instead of repeating it.
@@ -1447,6 +1623,10 @@ Constraints:
 - Keep language concise and student-friendly.
 - Respect language, length, and focus options while avoiding duplicate instructions already implied by the selected mode.
 - If language is Arabic, every returned sentence in every field must be Arabic.
+- If source content lacks information for a specific field, return [] for arrays or "N/A" for text fields. Do not invent information.
+- Do not invent formulas, definitions, dates, or technical facts that are not grounded in the source content.
+- For Arabic output, include the original English technical term in parentheses when relevant.
+- Keep JSON keys in English exactly as requested by the schema.
 - Avoid markdown.
 - Avoid generic filler.
 - Do not just copy the outline back.

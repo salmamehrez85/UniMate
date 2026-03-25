@@ -368,6 +368,11 @@ export function Summarizer({ onNavigate }) {
         response.data
           ? {
               mode: response.data.mode,
+              options: response.data.options || {
+                language: form.language,
+                length: form.length,
+                focus: form.focus,
+              },
               result: normalizedResult,
             }
           : null,
