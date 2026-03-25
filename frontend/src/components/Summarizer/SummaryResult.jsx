@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import {
   Copy,
   Check,
+  Download,
   BookMarked,
   FileQuestion,
   ChevronDown,
@@ -120,6 +121,23 @@ export function SummaryResult({ summaryData, onNavigate, courses = [] }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
+  };
+
+  const handleDownload = () => {
+    const content = buildPlainText();
+    const now = new Date();
+    const stamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}_${String(now.getHours()).padStart(2, "0")}-${String(now.getMinutes()).padStart(2, "0")}`;
+    const fileName = `unimate-summary-${mode}-${stamp}.txt`;
+
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const handleSaveToCourse = async (course) => {
@@ -247,6 +265,14 @@ export function SummaryResult({ summaryData, onNavigate, courses = [] }) {
             <Copy className="w-3.5 h-3.5" />
           )}
           {copied ? "Copied!" : "Copy"}
+        </button>
+
+        <button
+          type="button"
+          onClick={handleDownload}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 transition-colors">
+          <Download className="w-3.5 h-3.5" />
+          Download
         </button>
 
         {/* Save to Course – inline course picker */}
