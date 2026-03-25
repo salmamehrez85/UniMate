@@ -53,7 +53,7 @@ const MODE_CONFIG = {
   },
 };
 
-// Highlight capitalized phrases and abbreviations within a paragraph
+// Highlight capitalized phrases and abbreviations within a single line
 function BoldedText({ text }) {
   if (!text) return null;
   const pattern =
@@ -72,6 +72,84 @@ function BoldedText({ text }) {
   }
   if (lastIndex < text.length) parts.push(text.slice(lastIndex));
   return <>{parts}</>;
+}
+
+// Render summary text with smart structure:
+// • Short keyword phrases → horizontal pill tags (scannable)
+// • Medium section-label phrases → bold subheadings
+// • Full sentences → readable paragraphs
+function FormattedSummary({ text, paragraphClass, textStyle, isArabic }) {
+  if (!text) return null;
+
+  // Step 1: break on newlines AND inline bullet separators (•, ▪, ■, ◆)
+  const segments = text
+    .split(/\n+/)
+    .flatMap((line) => line.split(/\s*[•▪■◆]\s+/))
+    .map((s) => s.replace(/^[-–]\s*/, "").trim())
+    .filter((s) => s.length > 2);
+
+  // Step 2: classify each segment
+  const classify = (seg) => {
+    const wc = seg.trim().split(/\s+/).length;
+    const hasPunct = /[.!?؟]$/.test(seg);
+    const isLong = seg.length > 55;
+    // Full sentences → paragraph
+    if (isLong || hasPunct) return "sentence";
+    // Short keyword / label (≤ 6 words, no period) → tag
+    if (wc <= 6) return "tag";
+    return "sentence";
+  };
+
+  // Step 3: group adjacent tags together; keep sentences separate
+  const blocks = [];
+  let tagBuf = [];
+
+  const flushTags = () => {
+    if (tagBuf.length > 0) {
+      blocks.push({ type: "tags", items: [...tagBuf] });
+      tagBuf = [];
+    }
+  };
+
+  segments.forEach((seg) => {
+    if (classify(seg) === "tag") {
+      tagBuf.push(seg);
+    } else {
+      flushTags();
+      blocks.push({ type: "sentence", text: seg });
+    }
+  });
+  flushTags();
+
+  return (
+    <div className="space-y-2.5">
+      {blocks.map((block, i) =>
+        block.type === "tags" ? (
+          // Render short keyword items as horizontal pill chips
+          <div
+            key={i}
+            className={`flex flex-wrap gap-1.5 my-1 ${isArabic ? "flex-row-reverse" : ""}`}>
+            {block.items.map((item, j) => (
+              <span
+                key={j}
+                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200"
+                style={textStyle}>
+                {item}
+              </span>
+            ))}
+          </div>
+        ) : (
+          // Render full sentences as clean readable paragraphs
+          <p
+            key={i}
+            className={`${paragraphClass} text-gray-700`}
+            style={textStyle}>
+            <BoldedText text={block.text} />
+          </p>
+        ),
+      )}
+    </div>
+  );
 }
 
 export function SummaryResult({ summaryData, courses = [] }) {
@@ -205,19 +283,25 @@ export function SummaryResult({ summaryData, courses = [] }) {
       </div>
 
       {/* Prose block */}
-      <p className={`${paragraphBlockClass} text-gray-700`} style={textStyle}>
-        <BoldedText text={overviewText} />
-      </p>
+      <FormattedSummary
+        text={overviewText}
+        paragraphClass={paragraphBlockClass}
+        textStyle={textStyle}
+        isArabic={isArabic}
+      />
 
       {/* Detailed mode extra paragraph */}
       {config.type === "prose-only" &&
         result.plainLanguageSummary &&
         result.plainLanguageSummary !== overviewText && (
-          <p
-            className={`${paragraphBlockClass} text-gray-600 mt-3`}
-            style={textStyle}>
-            <BoldedText text={result.plainLanguageSummary} />
-          </p>
+          <div className="mt-3">
+            <FormattedSummary
+              text={result.plainLanguageSummary}
+              paragraphClass={paragraphBlockClass}
+              textStyle={textStyle}
+              isArabic={isArabic}
+            />
+          </div>
         )}
 
       {/* Section list (quick & exam modes) */}
