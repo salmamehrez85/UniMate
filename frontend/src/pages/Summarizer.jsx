@@ -15,12 +15,22 @@ GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
 const INITIAL_FORM = {
   sourceType: "text",
   mode: "quick",
+  language: "en",
+  length: "medium",
+  focus: "general",
   courseId: "",
   text: "",
   fileName: "",
   fileText: "",
   isScannedPdf: false,
   ocrImages: [],
+};
+
+const MODE_DEFAULTS = {
+  quick: { length: "short", focus: "quick" },
+  detailed: { length: "long", focus: "detailed" },
+  exam: { length: "medium", focus: "exam" },
+  custom: { length: "medium", focus: "general" },
 };
 
 const SUPPORTED_UPLOAD_EXTENSIONS = [
@@ -89,6 +99,7 @@ const renderPdfPagesAsBase64Images = async (file, maxPages = OCR_MAX_PAGES) => {
 
 export function Summarizer({ onNavigate }) {
   const [form, setForm] = useState(INITIAL_FORM);
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const [courses, setCourses] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -104,6 +115,11 @@ export function Summarizer({ onNavigate }) {
         setCourses(response.courses || []);
       } catch (err) {
         console.error("Error loading courses for summarizer:", err);
+        setError(
+          err?.message?.includes("Not authorized")
+            ? "Session expired. Please log in again."
+            : err?.message || "Failed to load courses.",
+        );
       } finally {
         setLoadingCourses(false);
       }
@@ -129,10 +145,40 @@ export function Summarizer({ onNavigate }) {
       return;
     }
 
+    if (field === "mode") {
+      const defaults = MODE_DEFAULTS[value] || MODE_DEFAULTS.quick;
+      setForm((prev) => ({
+        ...prev,
+        mode: value,
+        ...(value === "custom"
+          ? {}
+          : {
+              length: defaults.length,
+              focus: defaults.focus,
+            }),
+      }));
+      setIsAdvancedOpen(value === "custom");
+      return;
+    }
+
+    if (field === "length" || field === "focus") {
+      setForm((prev) => ({
+        ...prev,
+        [field]: value,
+        mode: prev.mode === "custom" ? prev.mode : "custom",
+      }));
+      setIsAdvancedOpen(true);
+      return;
+    }
+
     setForm((prev) => ({
       ...prev,
       [field]: value,
     }));
+  };
+
+  const handleToggleAdvanced = () => {
+    setIsAdvancedOpen((prev) => !prev);
   };
 
   const handleFileSelect = async (event) => {
@@ -275,6 +321,9 @@ export function Summarizer({ onNavigate }) {
         const uploadData = new FormData();
         uploadData.append("sourceType", "file");
         uploadData.append("mode", form.mode);
+        uploadData.append("language", form.language);
+        uploadData.append("length", form.length);
+        uploadData.append("focus", form.focus);
 
         if (form.fileText) {
           uploadData.append("text", form.fileText);
@@ -289,6 +338,11 @@ export function Summarizer({ onNavigate }) {
         response = await summarizeContent({
           sourceType: form.sourceType,
           mode: form.mode,
+          options: {
+            language: form.language,
+            length: form.length,
+            focus: form.focus,
+          },
           courseId:
             form.sourceType === "courseOutline" ? form.courseId : undefined,
           text: form.sourceType === "text" ? form.text : "",
@@ -387,7 +441,9 @@ export function Summarizer({ onNavigate }) {
         courses={courses}
         loadingCourses={loadingCourses}
         isPreparingOCR={isPreparingOCR}
+        isAdvancedOpen={isAdvancedOpen}
         onChange={handleFieldChange}
+        onToggleAdvanced={handleToggleAdvanced}
         onFileSelect={handleFileSelect}
         onSubmit={handleSubmit}
       />

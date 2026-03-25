@@ -48,16 +48,18 @@ export const loginUser = async (credentials) => {
 
 // Store auth token
 export const setAuthToken = (token) => {
+  localStorage.setItem("token", token);
   localStorage.setItem("authToken", token);
 };
 
 // Get auth token
 export const getAuthToken = () => {
-  return localStorage.getItem("authToken");
+  return localStorage.getItem("authToken") || localStorage.getItem("token");
 };
 
 // Remove auth token
 export const removeAuthToken = () => {
+  localStorage.removeItem("token");
   localStorage.removeItem("authToken");
 };
 

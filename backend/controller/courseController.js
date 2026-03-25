@@ -117,6 +117,77 @@ const normalizeImageData = (imageData) => {
   };
 };
 
+const parseSummaryOptionsFromBody = (body = {}) => {
+  const allowedLanguages = ["en", "ar"];
+  const allowedLengths = ["short", "medium", "long"];
+  const allowedFocuses = ["general", "exam", "action", "detailed", "quick"];
+
+  let options = {};
+
+  if (body.options && typeof body.options === "object") {
+    options = body.options;
+  } else if (typeof body.options === "string") {
+    try {
+      const parsed = JSON.parse(body.options);
+      if (parsed && typeof parsed === "object") {
+        options = parsed;
+      }
+    } catch {
+      options = {};
+    }
+  }
+
+  const language = String(options.language || body.language || "en")
+    .trim()
+    .toLowerCase();
+  const length = String(options.length || body.length || "medium")
+    .trim()
+    .toLowerCase();
+  const focus = String(options.focus || body.focus || "general")
+    .trim()
+    .toLowerCase();
+
+  return {
+    language: allowedLanguages.includes(language) ? language : "en",
+    length: allowedLengths.includes(length) ? length : "medium",
+    focus: allowedFocuses.includes(focus) ? focus : "general",
+  };
+};
+
+const buildUploadOptionPrompt = (mode, options) => {
+  const lines = [];
+  const modeLengthDefaults = {
+    quick: "short",
+    detailed: "long",
+    exam: "medium",
+    action: "short",
+  };
+
+  if (options.language === "ar") {
+    lines.push(
+      "- Language: All response text must be in Arabic (العربية). Do not output English sentences.",
+    );
+  } else {
+    lines.push("- Language: All response text must be in English.");
+  }
+
+  if (options.length !== modeLengthDefaults[mode]) {
+    if (options.length === "short") {
+      lines.push("- Length: short and compact.");
+    } else if (options.length === "long") {
+      lines.push("- Length: long with extra depth.");
+    } else {
+      lines.push("- Length: medium balanced detail.");
+    }
+  }
+
+  if (options.focus && options.focus !== "general" && options.focus !== mode) {
+    lines.push(`- Additional focus: ${options.focus}.`);
+  }
+
+  return lines.join("\n");
+};
+
 // Helper function to auto-assign semester based on current month
 const getCurrentSemester = () => {
   const month = new Date().getMonth(); // 0-11
@@ -971,6 +1042,7 @@ exports.summarizeCourseContent = async (req, res) => {
       mode = "quick",
       courseId,
     } = req.body;
+    const summaryOptions = parseSummaryOptionsFromBody(req.body);
 
     const allowedSourceTypes = ["text", "courseOutline", "file"];
     if (!allowedSourceTypes.includes(sourceType)) {
@@ -980,7 +1052,7 @@ exports.summarizeCourseContent = async (req, res) => {
       });
     }
 
-    const allowedModes = ["quick", "detailed", "exam", "action"];
+    const allowedModes = ["quick", "detailed", "exam", "action", "custom"];
     const selectedMode = allowedModes.includes(mode) ? mode : "quick";
 
     let content = (text || "").trim();
@@ -1035,6 +1107,7 @@ exports.summarizeCourseContent = async (req, res) => {
       content,
       mode: selectedMode,
       courseContext,
+      options: summaryOptions,
     });
 
     res.status(200).json({
@@ -1042,6 +1115,7 @@ exports.summarizeCourseContent = async (req, res) => {
       data: {
         sourceType,
         mode: selectedMode,
+        options: summaryOptions,
         result: summaryResult,
         generatedAt: new Date().toISOString(),
       },
@@ -1066,6 +1140,7 @@ exports.summarizeUploadedDocument = async (req, res) => {
     const text = (req.body?.text || "").trim();
     const sourceType = req.body?.sourceType || "file";
     const mode = req.body?.mode || "quick";
+    const summaryOptions = parseSummaryOptionsFromBody(req.body);
     const rawImages = req.body?.ocrImages || "[]";
 
     if (rawImages) {
@@ -1099,6 +1174,7 @@ exports.summarizeUploadedDocument = async (req, res) => {
         content: text,
         mode,
         sourceType,
+        options: summaryOptions,
       });
 
       // Normalize to the upload response schema
@@ -1113,7 +1189,7 @@ exports.summarizeUploadedDocument = async (req, res) => {
 
       return res.status(200).json({
         success: true,
-        data: { mode, sourceType, result },
+        data: { mode, sourceType, options: summaryOptions, result },
       });
     }
 
@@ -1127,10 +1203,12 @@ exports.summarizeUploadedDocument = async (req, res) => {
 
 Summary mode: ${mode}
 Source type: ${sourceType}
+${buildUploadOptionPrompt(mode, summaryOptions)}
 
 Rules:
 - Return strictly valid JSON only.
 - Keep content concise, academic, and useful.
+- If Arabic is selected, every response sentence must be Arabic.
 - keyTopics: 4-8 items
 - importantDefinitions: 4-8 items, each with concept + short definition
 - studyPlan: 3-6 actionable steps
@@ -1174,6 +1252,7 @@ Rules:
       data: {
         mode,
         sourceType,
+        options: summaryOptions,
         result,
       },
     });

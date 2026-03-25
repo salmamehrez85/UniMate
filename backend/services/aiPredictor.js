@@ -908,6 +908,8 @@ const generateFallbackRecommendations = (coursesData) => {
 
 const buildSummaryModeInstructions = (mode) => {
   switch (mode) {
+    case "custom":
+      return "Use a balanced style and prioritize explicit user options for language, length, and focus over preset behavior.";
     case "exam":
       return "Prioritize exam-relevant concepts, common traps, likely comparisons, worked reasoning, and what an instructor is most likely to test.";
     case "action":
@@ -922,6 +924,25 @@ const buildSummaryModeInstructions = (mode) => {
 
 const buildSummaryModeOutputRules = (mode) => {
   switch (mode) {
+    case "custom":
+      return {
+        summaryStyle:
+          "Frame the summary with balanced depth and adapt to the selected custom options.",
+        focusRules: [
+          "follow user-selected focus as the main emphasis",
+          "adjust detail level based on user-selected length",
+          "keep output practical and study-oriented",
+        ],
+        limits: {
+          learningOutcomes: 5,
+          conceptConnections: 4,
+          examFocus: 4,
+          importantTerms: 7,
+          studyPlan: 5,
+          possibleQuestions: 4,
+          actionItems: 5,
+        },
+      };
     case "exam":
       return {
         summaryStyle:
@@ -1004,9 +1025,145 @@ const buildSummaryModeOutputRules = (mode) => {
   }
 };
 
+const normalizeSummaryOptions = (options = {}) => {
+  const allowedLanguages = ["en", "ar"];
+  const allowedLengths = ["short", "medium", "long"];
+  const allowedFocuses = ["general", "exam", "action", "detailed", "quick"];
+
+  const language = String(options.language || "en")
+    .trim()
+    .toLowerCase();
+  const length = String(options.length || "medium")
+    .trim()
+    .toLowerCase();
+  const focus = String(options.focus || "general")
+    .trim()
+    .toLowerCase();
+
+  return {
+    language: allowedLanguages.includes(language) ? language : "en",
+    length: allowedLengths.includes(length) ? length : "medium",
+    focus: allowedFocuses.includes(focus) ? focus : "general",
+  };
+};
+
+const buildSummaryOptionInstructions = (mode, options) => {
+  const normalizedOptions = normalizeSummaryOptions(options);
+  const modeLengthDefaults = {
+    quick: "short",
+    detailed: "long",
+    exam: "medium",
+    action: "short",
+  };
+
+  const lines = [];
+
+  if (normalizedOptions.language === "ar") {
+    lines.push(
+      "Output language must be Arabic (العربية) for all text fields. Do not return English sentences.",
+    );
+  } else {
+    lines.push("Output language must be English.");
+  }
+
+  if (normalizedOptions.length !== modeLengthDefaults[mode]) {
+    if (normalizedOptions.length === "short") {
+      lines.push("Keep responses short and high-signal.");
+    } else if (normalizedOptions.length === "long") {
+      lines.push("Provide longer answers with deeper explanations.");
+    } else {
+      lines.push("Use medium length with balanced detail.");
+    }
+  }
+
+  if (
+    normalizedOptions.focus !== "general" &&
+    normalizedOptions.focus !== mode
+  ) {
+    lines.push(`Additional focus preference: ${normalizedOptions.focus}.`);
+  }
+
+  return {
+    normalizedOptions,
+    instructionText: lines.join(" "),
+  };
+};
+
 const trimArray = (value, maxItems) => {
   if (!Array.isArray(value)) return [];
   return value.filter(Boolean).slice(0, maxItems);
+};
+
+const SUMMARY_TEXT_FIELDS = [
+  "summary",
+  "plainLanguageSummary",
+  "learningOutcomes",
+  "conceptConnections",
+  "examFocus",
+  "importantTerms",
+  "studyPlan",
+  "possibleQuestions",
+  "actionItems",
+];
+
+const flattenSummaryText = (summary = {}) => {
+  return SUMMARY_TEXT_FIELDS.flatMap((field) => {
+    const value = summary[field];
+    if (Array.isArray(value)) {
+      return value.filter((item) => typeof item === "string");
+    }
+    if (typeof value === "string") {
+      return [value];
+    }
+    return [];
+  }).join(" ");
+};
+
+const getArabicCoverage = (text = "") => {
+  const letters = text.match(/[A-Za-z\u0600-\u06FF]/g) || [];
+  if (letters.length === 0) return 0;
+  const arabicLetters = text.match(/[\u0600-\u06FF]/g) || [];
+  return arabicLetters.length / letters.length;
+};
+
+const isMostlyArabicSummary = (summary) => {
+  const combined = flattenSummaryText(summary);
+  return getArabicCoverage(combined) >= 0.4;
+};
+
+const translateSummaryToArabic = async (summary) => {
+  const prompt = `Translate the following UniMate summary JSON to Arabic.
+
+Rules:
+- Return strictly valid JSON.
+- Keep exactly the same keys and structure.
+- Keep numbers, formulas, and technical terms accurate.
+- Every sentence in every field must be Arabic.
+
+Input JSON:
+${JSON.stringify(summary)}`;
+
+  const translated = await callLLMWithRetry(prompt, SummarySchema, 2);
+  return translated && typeof translated === "object" ? translated : summary;
+};
+
+const enforceSummaryLanguage = async (summary, options = {}) => {
+  const normalizedOptions = normalizeSummaryOptions(options);
+
+  if (normalizedOptions.language !== "ar") {
+    return summary;
+  }
+
+  if (isMostlyArabicSummary(summary)) {
+    return summary;
+  }
+
+  try {
+    return await translateSummaryToArabic(summary);
+  } catch (error) {
+    console.error("Arabic translation enforcement failed:", error.message);
+    return summary;
+  }
 };
 
 const shapeSummaryByMode = (summary, mode) => {
@@ -1053,8 +1210,63 @@ const toTitleCase = (value) => {
     .join(" ");
 };
 
-const generateFallbackSummary = (content, mode) => {
+const generateFallbackSummary = (content, mode, language = "en") => {
+  const useArabic = String(language || "en").toLowerCase() === "ar";
   const normalized = (content || "").replace(/\s+/g, " ").trim();
+
+  if (useArabic) {
+    const conceptCandidates = extractConceptCandidates(normalized);
+    const concepts =
+      conceptCandidates.length > 0
+        ? conceptCandidates.slice(0, 6)
+        : ["المفاهيم الأساسية", "العناصر الرئيسية", "التطبيقات العملية"];
+
+    const summary = `يتناول هذا المحتوى بشكل أساسي: ${concepts.join("، ")}. يركز الملخص على الفهم السريع وربط النقاط المهمة للدراسة.`;
+
+    const learningOutcomes = concepts
+      .slice(0, 5)
+      .map((item) => `شرح مفهوم ${item} وتوضيح دوره ضمن الموضوع.`);
+
+    const examFocus = concepts
+      .slice(0, 4)
+      .map(
+        (item) => `التركيز على أسئلة المقارنة والتطبيق المتعلقة بـ ${item}.`,
+      );
+
+    const possibleQuestions = concepts
+      .slice(0, 4)
+      .map((item) => `كيف تشرح ${item} مع مثال عملي؟`);
+
+    const studyPlan = [
+      "اقرأ الملخص أولًا لفهم الصورة العامة.",
+      "راجع المصطلحات والمفاهيم الأساسية بترتيب منطقي.",
+      mode === "exam"
+        ? "تدرّب على أسئلة اختبار قصيرة من الذاكرة."
+        : "اربط كل مفهوم بتطبيق عملي أو مثال واقعي.",
+    ];
+
+    const actionItems = [
+      "اكتب الفكرة الرئيسية بأسلوبك الخاص في جملة واحدة.",
+      "حدّد أصعب مفهوم لديك وأعد قراءته مع مثال.",
+      "اكتب 2–3 أسئلة تدريبية من أكثر النقاط أهمية.",
+      "راجع الملخص مرة أخرى خلال 24 ساعة لتثبيت الفهم.",
+    ];
+
+    return shapeSummaryByMode(
+      {
+        summary,
+        plainLanguageSummary: summary,
+        learningOutcomes,
+        conceptConnections: [],
+        examFocus,
+        importantTerms: concepts,
+        studyPlan,
+        possibleQuestions,
+        actionItems,
+      },
+      mode,
+    );
+  }
 
   // Extract real sentences from the document
   const allSentences = normalized
@@ -1179,12 +1391,14 @@ const generateStructuredSummary = async ({
   content,
   mode = "quick",
   courseContext = null,
+  options = {},
 }) => {
   try {
     const trimmed = (content || "").trim();
+    const normalizedOptions = normalizeSummaryOptions(options);
 
     if (!trimmed) {
-      return generateFallbackSummary(content, mode);
+      return generateFallbackSummary(content, mode, normalizedOptions.language);
     }
 
     const hasGeminiKey =
@@ -1192,11 +1406,15 @@ const generateStructuredSummary = async ({
       process.env.GEMINI_API_KEY.trim().length > 0;
 
     if (!hasGeminiKey || !model) {
-      return generateFallbackSummary(trimmed, mode);
+      return generateFallbackSummary(trimmed, mode, normalizedOptions.language);
     }
 
     const modeInstructions = buildSummaryModeInstructions(mode);
     const modeOutputRules = buildSummaryModeOutputRules(mode);
+    const { instructionText } = buildSummaryOptionInstructions(
+      mode,
+      normalizedOptions,
+    );
     const contextLine = courseContext
       ? `Course context: ${courseContext.code || "N/A"} - ${courseContext.name || "N/A"}`
       : "Course context: Not provided";
@@ -1208,6 +1426,7 @@ Mode guidance: ${modeInstructions}
 Mode output style: ${modeOutputRules.summaryStyle}
 Mode-specific rules:
 - ${modeOutputRules.focusRules.join("\n- ")}
+Option guidance: ${instructionText}
 ${contextLine}
 
 SOURCE CONTENT:
@@ -1226,6 +1445,8 @@ Return valid JSON with these fields only:
 
 Constraints:
 - Keep language concise and student-friendly.
+- Respect language, length, and focus options while avoiding duplicate instructions already implied by the selected mode.
+- If language is Arabic, every returned sentence in every field must be Arabic.
 - Avoid markdown.
 - Avoid generic filler.
 - Do not just copy the outline back.
@@ -1235,12 +1456,20 @@ Constraints:
     const result = await callLLMWithRetry(prompt, SummarySchema);
 
     if (!result || typeof result !== "object") {
-      return generateFallbackSummary(trimmed, mode);
+      const fallbackOnly = generateFallbackSummary(
+        trimmed,
+        mode,
+        normalizedOptions.language,
+      );
+      return await enforceSummaryLanguage(fallbackOnly, normalizedOptions);
     }
 
-    const fallback = generateFallbackSummary(trimmed, mode);
-
-    return shapeSummaryByMode(
+    const fallback = generateFallbackSummary(
+      trimmed,
+      mode,
+      normalizedOptions.language,
+    );
+    const mergedSummary = shapeSummaryByMode(
       {
         summary: result.summary || fallback.summary,
         plainLanguageSummary:
@@ -1269,9 +1498,17 @@ Constraints:
       },
       mode,
     );
+
+    return await enforceSummaryLanguage(mergedSummary, normalizedOptions);
   } catch (error) {
     console.error("Failed to generate structured summary:", error.message);
-    return generateFallbackSummary(content, mode);
+    const normalizedOptions = normalizeSummaryOptions(options);
+    const fallbackOnly = generateFallbackSummary(
+      content,
+      mode,
+      normalizedOptions.language,
+    );
+    return await enforceSummaryLanguage(fallbackOnly, options);
   }
 };
 

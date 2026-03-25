@@ -5,6 +5,11 @@ const API_BASE_URL = "http://localhost:3000/api";
 // Get auth headers
 const getAuthHeaders = () => {
   const token = getAuthToken();
+
+  if (!token) {
+    throw new Error("Your session has expired. Please log in again.");
+  }
+
   return {
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,
@@ -192,12 +197,13 @@ export const summarizeContent = async ({
   sourceType = "text",
   text = "",
   mode = "quick",
+  options,
   courseId,
 }) => {
   const response = await fetch(`${API_BASE_URL}/courses/summarize`, {
     method: "POST",
     headers: getAuthHeaders(),
-    body: JSON.stringify({ sourceType, text, mode, courseId }),
+    body: JSON.stringify({ sourceType, text, mode, options, courseId }),
   });
 
   const raw = await response.text();
@@ -227,6 +233,11 @@ export const summarizeContent = async ({
 // Summarize uploaded content (text or OCR images) via multipart endpoint
 export const summarizeUploadedContent = async (formData) => {
   const token = getAuthToken();
+
+  if (!token) {
+    throw new Error("Your session has expired. Please log in again.");
+  }
+
   const response = await fetch(`${API_BASE_URL}/summarize/upload`, {
     method: "POST",
     headers: {

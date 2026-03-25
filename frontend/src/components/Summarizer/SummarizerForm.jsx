@@ -2,6 +2,26 @@ const SUMMARY_MODES = [
   { value: "quick", label: "Quick" },
   { value: "detailed", label: "Detailed" },
   { value: "exam", label: "Exam Focus" },
+  { value: "custom", label: "Custom" },
+];
+
+const LANGUAGE_OPTIONS = [
+  { value: "en", label: "English" },
+  { value: "ar", label: "Arabic" },
+];
+
+const LENGTH_OPTIONS = [
+  { value: "short", label: "Short" },
+  { value: "medium", label: "Medium" },
+  { value: "long", label: "Long" },
+];
+
+const FOCUS_OPTIONS = [
+  { value: "general", label: "General" },
+  { value: "exam", label: "Exam" },
+  { value: "action", label: "Action" },
+  { value: "detailed", label: "Detailed" },
+  { value: "quick", label: "Quick" },
 ];
 
 export function SummarizerForm({
@@ -9,7 +29,9 @@ export function SummarizerForm({
   courses,
   loadingCourses,
   isPreparingOCR = false,
+  isAdvancedOpen = false,
   onChange,
+  onToggleAdvanced,
   onFileSelect,
   onSubmit,
   formId = "summarizer-form",
@@ -53,8 +75,64 @@ export function SummarizerForm({
 
       <div className="space-y-2">
         <span className="text-xs text-gray-500">
-          Click Generate Summary after choosing source and mode.
+          Choose source and mode, then generate. Use advanced options only when
+          you need custom tuning.
         </span>
+        <button
+          type="button"
+          onClick={onToggleAdvanced}
+          className="text-xs font-medium text-teal-700 hover:text-teal-800 underline underline-offset-2">
+          {isAdvancedOpen ? "Hide Advanced Options" : "Show Advanced Options"}
+        </button>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-4">
+        <label className="flex flex-col gap-2">
+          <span className="text-sm font-medium text-gray-700">Language</span>
+          <select
+            value={form.language}
+            onChange={(event) => onChange("language", event.target.value)}
+            className="px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400">
+            {LANGUAGE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${isAdvancedOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}>
+        <div className="grid md:grid-cols-2 gap-4 pt-1">
+          <label className="flex flex-col gap-2">
+            <span className="text-sm font-medium text-gray-700">Length</span>
+            <select
+              value={form.length}
+              onChange={(event) => onChange("length", event.target.value)}
+              className="px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400">
+              {LENGTH_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="flex flex-col gap-2">
+            <span className="text-sm font-medium text-gray-700">Focus</span>
+            <select
+              value={form.focus}
+              onChange={(event) => onChange("focus", event.target.value)}
+              className="px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400">
+              {FOCUS_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       </div>
 
       {form.sourceType === "courseOutline" ? (
@@ -77,7 +155,9 @@ export function SummarizerForm({
           <span className="text-xs text-gray-500">
             {loadingCourses
               ? "Loading courses..."
-              : "Only courses with outline text can be summarized."}
+              : activeCourses.length > 0
+                ? "Only active courses are shown. If a course has no outline text, you will be asked to add one."
+                : "No active courses found yet. Add an active course first, then try Course Outline."}
           </span>
         </label>
       ) : form.sourceType === "file" ? (
