@@ -1,6 +1,10 @@
+import { useState } from "react";
 import { CheckCircle, BookOpen, Zap } from "lucide-react";
 
 export function OverviewTab({ course }) {
+  const [expandedSummaryKey, setExpandedSummaryKey] = useState(null);
+  const [copiedSummaryKey, setCopiedSummaryKey] = useState(null);
+
   const upcomingTasksCount = (course.tasks || []).filter(
     (t) => t.status !== "done",
   ).length;
@@ -22,6 +26,18 @@ export function OverviewTab({ course }) {
   const getSummaryPreview = (text) => {
     if (!text) return "";
     return text.length > 500 ? `${text.slice(0, 500)}...` : text;
+  };
+
+  const handleCopySummary = async (summaryKey, text) => {
+    try {
+      await navigator.clipboard.writeText(text || "");
+      setCopiedSummaryKey(summaryKey);
+      setTimeout(() => {
+        setCopiedSummaryKey((prev) => (prev === summaryKey ? null : prev));
+      }, 1200);
+    } catch (error) {
+      console.error("Failed to copy summary:", error);
+    }
   };
 
   const stats = [
@@ -142,23 +158,54 @@ export function OverviewTab({ course }) {
           </p>
         ) : (
           <div className="space-y-4">
-            {savedSummaries.map((summary, index) => (
-              <div
-                key={`${summary.savedAt || "summary"}-${index}`}
-                className="border border-gray-100 rounded-lg p-4 bg-gray-50">
-                <div className="flex items-center justify-between gap-3 mb-2">
-                  <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold bg-teal-100 text-teal-700 uppercase">
-                    {summary.mode || "quick"}
-                  </span>
-                  <span className="text-xs text-gray-500">
-                    {formatSavedAt(summary.savedAt)}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-700 leading-6 whitespace-pre-wrap">
-                  {getSummaryPreview(summary.text)}
-                </p>
-              </div>
-            ))}
+            {savedSummaries.map((summary, index) =>
+              (() => {
+                const summaryKey = `${summary.savedAt || "summary"}-${index}`;
+                const isExpanded = expandedSummaryKey === summaryKey;
+
+                return (
+                  <button
+                    type="button"
+                    key={summaryKey}
+                    onClick={() =>
+                      setExpandedSummaryKey((prev) =>
+                        prev === summaryKey ? null : summaryKey,
+                      )
+                    }
+                    className="w-full text-left border border-gray-100 rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition">
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold bg-teal-100 text-teal-700 uppercase">
+                        {summary.mode || "quick"}
+                      </span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-gray-500">
+                          {formatSavedAt(summary.savedAt)}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleCopySummary(summaryKey, summary.text);
+                          }}
+                          className="text-xs font-medium text-teal-700 hover:text-teal-800 underline underline-offset-2">
+                          {copiedSummaryKey === summaryKey ? "Copied!" : "Copy"}
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-700 leading-6 whitespace-pre-wrap">
+                      {isExpanded
+                        ? summary.text || ""
+                        : getSummaryPreview(summary.text)}
+                    </p>
+                    <p className="mt-2 text-xs text-teal-700 font-medium">
+                      {isExpanded
+                        ? "Click to collapse"
+                        : "Click to read full summary"}
+                    </p>
+                  </button>
+                );
+              })(),
+            )}
           </div>
         )}
       </div>
