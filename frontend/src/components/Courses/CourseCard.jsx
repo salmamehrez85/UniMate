@@ -1,6 +1,6 @@
 import { Calendar, Mail } from "lucide-react";
 
-export function CourseCard({ course, onManage }) {
+export function CourseCard({ course, onManage, onEmail }) {
   const getCodeBgColor = (code) => {
     // Generate a consistent color based on the course code
     const colors = [
@@ -70,7 +70,11 @@ export function CourseCard({ course, onManage }) {
           className="flex-1 text-center px-4 py-2 bg-gray-100 border border-gray-200 text-primary-600 hover:text-primary-700 hover:bg-gray-200 hover:border-gray-300 font-medium text-sm transition-colors rounded">
           Manage Course
         </button>
-        <button className="px-3 py-2 bg-gray-100 border border-gray-200 text-gray-600 hover:text-primary-600 hover:bg-gray-200 hover:border-gray-300 transition-colors rounded">
+        <button
+          type="button"
+          onClick={() => onEmail?.(course)}
+          title="Generate email to professor"
+          className="px-3 py-2 bg-gray-100 border border-gray-200 text-gray-600 hover:text-primary-600 hover:bg-gray-200 hover:border-gray-300 transition-colors rounded">
           <Mail className="w-5 h-5" />
         </button>
       </div>

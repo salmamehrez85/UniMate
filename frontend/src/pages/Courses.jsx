@@ -2,13 +2,17 @@ import { useState, useEffect } from "react";
 import { CoursesHeader } from "../components/Courses/CoursesHeader";
 import { CourseCard } from "../components/Courses/CourseCard";
 import { AddCourseModal } from "../components/Courses/AddCourseModal";
+import { GenerateEmailModal } from "../components/Courses/GenerateEmailModal";
 import { getCourses, createCourse } from "../services/courseService";
+import { getUserData } from "../services/authService";
 
 export function Courses({ onSelectCourse }) {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [emailCourse, setEmailCourse] = useState(null);
   const [viewMode, setViewMode] = useState("active");
 
   const activeCourses = courses.filter((course) => course.isOldCourse !== true);
@@ -87,6 +91,13 @@ export function Courses({ onSelectCourse }) {
   const handleCourseDelete = (courseId) => {
     setCourses(courses.filter((c) => c._id !== courseId));
   };
+
+  const handleOpenEmailModal = (course) => {
+    setEmailCourse(course);
+    setIsEmailModalOpen(true);
+  };
+
+  const currentUser = getUserData();
 
   if (loading) {
     return (
@@ -172,6 +183,7 @@ export function Courses({ onSelectCourse }) {
                     key={course._id}
                     course={course}
                     onManage={() => onSelectCourse(course)}
+                    onEmail={handleOpenEmailModal}
                   />
                 ))}
               </div>
@@ -185,6 +197,15 @@ export function Courses({ onSelectCourse }) {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onAdd={handleAddCourse}
+      />
+
+      <GenerateEmailModal
+        key={`${isEmailModalOpen}-${emailCourse?._id || "none"}`}
+        isOpen={isEmailModalOpen}
+        onClose={() => setIsEmailModalOpen(false)}
+        courses={activeCourses}
+        selectedCourse={emailCourse}
+        studentName={currentUser?.fullName || currentUser?.name || ""}
       />
     </div>
   );
