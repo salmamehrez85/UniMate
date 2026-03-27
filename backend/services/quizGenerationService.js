@@ -130,15 +130,86 @@ const normalizeTag = (tag) =>
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "");
 
+const MOCK_TAG_STOP_WORDS = new Set([
+  "a",
+  "an",
+  "and",
+  "are",
+  "as",
+  "at",
+  "be",
+  "by",
+  "for",
+  "from",
+  "in",
+  "into",
+  "is",
+  "like",
+  "of",
+  "on",
+  "or",
+  "the",
+  "to",
+  "with",
+]);
+
+const MOCK_TAG_FALLBACKS = {
+  default: ["core_concepts", "applied_reasoning", "problem_solving"],
+  english: ["grammar", "vocabulary", "reading_comprehension", "writing_skills"],
+  math: ["algebra", "functions", "equations", "problem_solving"],
+  programming: ["variables", "control_flow", "functions", "debugging"],
+  "data structure": ["arrays", "linked_lists", "stacks", "trees", "sorting"],
+  "computer science": [
+    "data_structures",
+    "algorithms",
+    "networking",
+    "operating_systems",
+  ],
+  networking: ["network_layers", "routing", "protocols", "ip_addressing"],
+};
+
+const sanitizeMockTagFragment = (fragment) => {
+  const words = String(fragment || "")
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((word) => word && !MOCK_TAG_STOP_WORDS.has(word) && word.length > 2)
+    .slice(0, 3);
+
+  if (words.length === 0) {
+    return "";
+  }
+
+  return normalizeTag(words.join("_ ")).slice(0, 32).replace(/_+$/g, "");
+};
+
+const getMockFallbackTags = (course) => {
+  const courseDescriptor =
+    `${course.code || ""} ${course.name || ""} ${course.outlineText || ""}`.toLowerCase();
+
+  for (const [keyword, tags] of Object.entries(MOCK_TAG_FALLBACKS)) {
+    if (keyword !== "default" && courseDescriptor.includes(keyword)) {
+      return tags;
+    }
+  }
+
+  return MOCK_TAG_FALLBACKS.default;
+};
+
 const buildTagsFromCourse = (course) => {
-  return Array.from(
+  const cleanedTags = Array.from(
     new Set(
       String(course.outlineText || "")
         .split(/[,.;\n]/)
-        .map((part) => normalizeTag(part))
+        .map((part) => sanitizeMockTagFragment(part))
         .filter(Boolean),
     ),
   ).slice(0, 8);
+
+  if (cleanedTags.length >= 3) {
+    return cleanedTags;
+  }
+
+  return getMockFallbackTags(course);
 };
 
 const getCourseContext = async (courseId, sourceContext, course) => {
@@ -304,6 +375,22 @@ const buildMockQuizPayload = ({
       };
     }),
   };
+};
+
+const shouldFallbackToMock = (error) => {
+  const errorMessage = String(error?.message || "").toLowerCase();
+
+  return (
+    error?.code === "MISSING_API_KEY" ||
+    error?.code === "INVALID_QUIZ_JSON" ||
+    error?.code === "INVALID_QUIZ_PAYLOAD" ||
+    error?.code === "QUIZ_GENERATION_FAILED" ||
+    errorMessage.includes("api key expired") ||
+    errorMessage.includes("api_key_invalid") ||
+    errorMessage.includes("timed out") ||
+    errorMessage.includes("failed to generate quiz with gemini") ||
+    errorMessage.includes("failed to parse quiz json")
+  );
 };
 
 const callGeminiForQuiz = async ({ systemPrompt, userPrompt, timeoutMs }) => {
@@ -524,10 +611,24 @@ const generatePracticeQuiz = async ({
       );
     }
   } catch (error) {
-    if (!error.code) {
-      error.code = "QUIZ_GENERATION_FAILED";
+    if (shouldFallbackToMock(error)) {
+      console.warn(
+        "Falling back to mock quiz generation because live AI generation failed:",
+        error.message,
+      );
+
+      parsedQuizPayload = buildMockQuizPayload({
+        course,
+        numberOfQuestions: normalizedQuestionCount,
+        difficulty: normalizedDifficulty,
+        questionType: normalizedQuestionType,
+      });
+    } else {
+      if (!error.code) {
+        error.code = "QUIZ_GENERATION_FAILED";
+      }
+      throw error;
     }
-    throw error;
   }
 
   const questions = parsedQuizPayload.questions.map((question, index) =>

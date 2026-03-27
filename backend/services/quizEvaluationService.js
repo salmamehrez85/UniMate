@@ -293,7 +293,16 @@ const evaluateQuizSubmission = async (
     ),
   );
 
-  const weakAreaDocs = await TopicMastery.find({
+  const weakAreas = Array.from(
+    new Set(
+      attemptedQuestionRows
+        .filter((answeredQuestion) => !answeredQuestion.isCorrect)
+        .flatMap((answeredQuestion) => answeredQuestion.subTopicTags),
+    ),
+  );
+  quizResult.weakAreas = weakAreas;
+
+  const topicMasterySnapshot = await TopicMastery.find({
     userId,
     courseId: quiz.courseId,
     needsReview: true,
@@ -301,15 +310,12 @@ const evaluateQuizSubmission = async (
     .sort({ masteryScore: 1, tag: 1 })
     .select("tag masteryScore");
 
-  const weakAreas = weakAreaDocs.map((topicMastery) => topicMastery.tag);
-  quizResult.weakAreas = weakAreas;
-
   await quizResult.save();
 
   return {
     quizResult,
     weakAreas,
-    topicMasterySnapshot: weakAreaDocs,
+    topicMasterySnapshot,
   };
 };
 
