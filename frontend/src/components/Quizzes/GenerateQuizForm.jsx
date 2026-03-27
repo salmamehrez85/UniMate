@@ -1,12 +1,49 @@
-import { Sparkles } from "lucide-react";
+import { LoaderCircle, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
 
-const COURSE_OPTIONS = [
-  "CS 301 - Data Structures",
-  "MATH 202 - Calculus II",
-  "CS 305 - Database Systems",
-];
+const getDefaultFormValues = (courseId) => ({
+  courseId: courseId || "",
+  questionType: "all",
+  numberOfQuestions: 10,
+  difficulty: "medium",
+});
 
-export function GenerateQuizForm() {
+export function GenerateQuizForm({
+  courses,
+  selectedCourseId,
+  onSelectCourse,
+  onGenerateQuiz,
+  isGenerating,
+  error,
+}) {
+  const [formValues, setFormValues] = useState(
+    getDefaultFormValues(selectedCourseId),
+  );
+
+  useEffect(() => {
+    setFormValues((currentValues) => ({
+      ...currentValues,
+      courseId: selectedCourseId || currentValues.courseId,
+    }));
+  }, [selectedCourseId]);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormValues((currentValues) => ({
+      ...currentValues,
+      [name]: name === "numberOfQuestions" ? Number(value) : value,
+    }));
+
+    if (name === "courseId") {
+      onSelectCourse(value);
+    }
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    await onGenerateQuiz(formValues);
+  };
+
   return (
     <section className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
       <div className="px-6 py-5 border-b border-gray-100">
@@ -14,15 +51,21 @@ export function GenerateQuizForm() {
           Generate Custom Quiz
         </h2>
       </div>
-      <div className="px-6 py-6 space-y-6">
+      <form onSubmit={handleSubmit} className="px-6 py-6 space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Select Course
           </label>
-          <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition">
-            {COURSE_OPTIONS.map((course) => (
-              <option key={course} value={course}>
-                {course}
+          <select
+            name="courseId"
+            value={formValues.courseId}
+            onChange={handleChange}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+            disabled={isGenerating}>
+            {courses.length === 0 && <option value="">No courses found</option>}
+            {courses.map((course) => (
+              <option key={course._id} value={course._id}>
+                {course.code} - {course.name}
               </option>
             ))}
           </select>
@@ -32,7 +75,12 @@ export function GenerateQuizForm() {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Question Type
           </label>
-          <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition">
+          <select
+            name="questionType"
+            value={formValues.questionType}
+            onChange={handleChange}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+            disabled={isGenerating}>
             <option value="all">All Types</option>
             <option value="mcq">MCQ</option>
             <option value="choose">Choose</option>
@@ -47,18 +95,26 @@ export function GenerateQuizForm() {
               Number of Questions
             </label>
             <input
+              name="numberOfQuestions"
               type="number"
               min="5"
               max="30"
-              defaultValue="10"
+              value={formValues.numberOfQuestions}
+              onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+              disabled={isGenerating}
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Difficulty
             </label>
-            <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition">
+            <select
+              name="difficulty"
+              value={formValues.difficulty}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+              disabled={isGenerating}>
               <option value="easy">Easy</option>
               <option value="medium">Medium</option>
               <option value="hard">Hard</option>
@@ -66,11 +122,29 @@ export function GenerateQuizForm() {
           </div>
         </div>
 
-        <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
-          <Sparkles className="w-5 h-5" />
-          Generate Quiz
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+
+        <button
+          type="submit"
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition disabled:opacity-60 disabled:cursor-not-allowed"
+          disabled={isGenerating || !formValues.courseId}>
+          {isGenerating ? (
+            <>
+              <LoaderCircle className="w-5 h-5 animate-spin" />
+              Generating quiz...
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-5 h-5" />
+              Generate Quiz
+            </>
+          )}
         </button>
-      </div>
+      </form>
     </section>
   );
 }
