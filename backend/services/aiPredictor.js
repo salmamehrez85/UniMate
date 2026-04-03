@@ -3,11 +3,11 @@
  * Replicates Python prediction logic with Google Gemini API
  */
 
-require("dotenv").config();
+require("dotenv").config({ override: true });
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const GOOGLE_API_KEY = process.env.GEMINI_API_KEY;
-const MODEL_ID = "gemini-2.0-flash";
+const MODEL_ID = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
 // Initialize Gemini Client
 let genAI;

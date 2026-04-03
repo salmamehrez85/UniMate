@@ -64,12 +64,9 @@ const callGeminiUploadSummary = async (parts) => {
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const candidateModels = [
-    process.env.GEMINI_OCR_MODEL,
-    "gemini-2.5-flash",
-    "gemini-1.5-flash",
-    "gemini-2.0-flash",
-  ].filter(Boolean);
+  const candidateModels = [process.env.GEMINI_MODEL, "gemini-2.5-flash"].filter(
+    Boolean,
+  );
 
   let lastError;
 

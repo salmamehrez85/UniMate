@@ -3,9 +3,8 @@ const Course = require("../model/Course");
 const Quiz = require("../model/Quiz");
 
 const GEMINI_MODEL_CANDIDATES = [
-  process.env.GEMINI_QUIZ_MODEL,
+  process.env.GEMINI_MODEL,
   "gemini-2.5-flash",
-  "gemini-2.0-flash",
 ].filter(Boolean);
 
 const QUIZ_GENERATION_SYSTEM_PROMPT = `You are UniMate's expert professor-grade quiz generator.
