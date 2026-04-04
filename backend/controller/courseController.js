@@ -1,4 +1,5 @@
 const Course = require("../model/Course");
+const User = require("../model/User");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const {
   calculateAIPrediction,
@@ -553,205 +554,217 @@ const predictFinalGradeFallback = (currentAverage) => {
   };
 };
 
-// @desc    Calculate predicted GPA
-// @route   GET /api/courses/predicted-gpa
-// @access  Private
-exports.getPredictedGPA = async (req, res) => {
-  try {
-    const courses = await Course.find({ userId: req.user._id });
+// Shared helper — runs the full AI-powered GPA prediction and returns the result object
+const computePredictedGPA = async (userId) => {
+  const courses = await Course.find({ userId });
 
-    // Separate completed and active courses
-    const completedCourses = courses.filter((c) => c.isOldCourse === true);
-    const activeCourses = courses.filter((c) => c.isOldCourse !== true);
+  const completedCourses = courses.filter((c) => c.isOldCourse === true);
+  const activeCourses = courses.filter((c) => c.isOldCourse !== true);
 
-    // Calculate GPA from completed courses
-    let completedWeightedGrade = 0;
-    let completedCredits = 0;
+  let completedWeightedGrade = 0;
+  let completedCredits = 0;
+  const pastCoursesForAI = [];
 
-    // Prepare past courses data for AI prediction
-    const pastCoursesForAI = [];
+  completedCourses.forEach((course) => {
+    const finalAssessment = (course.assessments || []).find(
+      (a) => a.type === "final",
+    );
 
-    completedCourses.forEach((course) => {
-      const finalAssessment = (course.assessments || []).find(
-        (a) => a.type === "final",
-      );
+    let finalGradePercentage = course.finalGrade;
+    if (
+      (finalGradePercentage === null || finalGradePercentage === undefined) &&
+      finalAssessment
+    ) {
+      finalGradePercentage =
+        (finalAssessment.score / finalAssessment.maxScore) * 100;
+    }
 
-      // Prefer stored finalGrade. Fall back to final assessment if needed.
-      let finalGradePercentage = course.finalGrade;
-      if (
-        (finalGradePercentage === null || finalGradePercentage === undefined) &&
-        finalAssessment
-      ) {
-        finalGradePercentage =
-          (finalAssessment.score / finalAssessment.maxScore) * 100;
-      }
+    if (finalGradePercentage === null || finalGradePercentage === undefined) {
+      return;
+    }
 
-      // Skip completed courses that still don't have a usable final grade.
-      if (finalGradePercentage === null || finalGradePercentage === undefined) {
-        return;
-      }
+    const credits = parseFloat(course.credits) || 3;
+    const gradePoints = gradeToGPA(finalGradePercentage);
 
-      const credits = parseFloat(course.credits) || 3;
-      const gradePoints = gradeToGPA(finalGradePercentage);
+    completedWeightedGrade += gradePoints * credits;
+    completedCredits += credits;
 
-      completedWeightedGrade += gradePoints * credits;
-      completedCredits += credits;
+    const currentPerformance = calculateCurrentPerformance(
+      course.assessments || [],
+    );
 
-      // Calculate the performance before final (for AI)
-      const currentPerformance = calculateCurrentPerformance(
-        course.assessments || [],
-      );
-
-      // Add to past courses dataset for AI
-      pastCoursesForAI.push({
-        code: course.code,
-        name: course.name,
-        outline: course.outlineText || course.name,
-        currentPerformance: currentPerformance ?? finalGradePercentage,
-        finalGrade: finalGradePercentage,
-      });
+    pastCoursesForAI.push({
+      code: course.code,
+      name: course.name,
+      outline: course.outlineText || course.name,
+      currentPerformance: currentPerformance ?? finalGradePercentage,
+      finalGrade: finalGradePercentage,
     });
+  });
 
-    // Process active courses and predict their final grades using AI
-    const activeCoursePredictions = [];
+  const activeCoursePredictions = [];
 
-    for (const course of activeCourses) {
-      const currentPerformance = calculateCurrentPerformance(
-        course.assessments || [],
-      );
-      const credits = parseFloat(course.credits) || 3;
+  for (const course of activeCourses) {
+    const currentPerformance = calculateCurrentPerformance(
+      course.assessments || [],
+    );
+    const credits = parseFloat(course.credits) || 3;
 
-      let prediction;
+    let prediction;
 
-      // Call AI whenever we have past courses data, even if this course has no assessments yet.
-      if (pastCoursesForAI.length > 0) {
-        try {
-          // Call Gemini AI predictor
-          const aiResult = await calculateAIPrediction(
-            {
-              code: course.code,
-              name: course.name,
-              outline_text: course.outlineText || course.name,
-              current_performance: currentPerformance ?? 0,
-            },
-            pastCoursesForAI.map((c) => ({
-              code: c.code,
-              name: c.name,
-              outline_text: c.outline, // Already has proper fallback from pastCoursesForAI setup
-              current_performance: c.currentPerformance,
-              final_grade: c.finalGrade,
-            })),
-          );
+    if (pastCoursesForAI.length > 0) {
+      try {
+        const aiResult = await calculateAIPrediction(
+          {
+            code: course.code,
+            name: course.name,
+            outline_text: course.outlineText || course.name,
+            current_performance: currentPerformance ?? 0,
+          },
+          pastCoursesForAI.map((c) => ({
+            code: c.code,
+            name: c.name,
+            outline_text: c.outline,
+            current_performance: c.currentPerformance,
+            final_grade: c.finalGrade,
+          })),
+        );
 
-          // Convert AI prediction to min/max range (±3% confidence range)
-          const predictedScore = aiResult.predicted_score_pct;
-          const validPrediction = Number.isFinite(predictedScore)
-            ? predictedScore
-            : (currentPerformance ?? 0);
-          const predictionMin = Math.max(Math.round(validPrediction - 3), 0);
-          const predictionMax = Math.min(Math.round(validPrediction + 3), 100);
+        const predictedScore = aiResult.predicted_score_pct;
+        const validPrediction = Number.isFinite(predictedScore)
+          ? predictedScore
+          : (currentPerformance ?? 0);
+        const predictionMin = Math.max(Math.round(validPrediction - 3), 0);
+        const predictionMax = Math.min(Math.round(validPrediction + 3), 100);
 
-          // Transform similar_courses to match frontend expectations
-          const transformedSimilarCourses = (
-            aiResult.similar_courses || []
-          ).map((sc) => ({
+        const transformedSimilarCourses = (aiResult.similar_courses || []).map(
+          (sc) => ({
             name: sc.name || sc.courseId,
             similarity: sc.similarity || sc.similarity_score || 0,
             reason: sc.reason,
-          }));
+          }),
+        );
 
-          prediction = {
-            min: predictionMin,
-            max: predictionMax,
-            confidence: aiResult.confidence,
-            similarCourses: transformedSimilarCourses,
-            usedAI: !aiResult.error,
-          };
-        } catch (error) {
-          console.error("AI prediction failed for course:", course.code, error);
-          // Fall back to rule-based prediction
-          prediction = predictFinalGradeFallback(currentPerformance);
-          prediction.usedAI = false;
-
-          // Recalculate confidence based on fallback prediction quality
-          const qualityConfidence = calculateConfidenceFromPrediction(
-            currentPerformance,
-            prediction.min,
-            prediction.max,
-          );
-          prediction.confidence = qualityConfidence;
-        }
-      } else {
-        // Not enough data for AI, use fallback
+        prediction = {
+          min: predictionMin,
+          max: predictionMax,
+          confidence: aiResult.confidence,
+          similarCourses: transformedSimilarCourses,
+          usedAI: !aiResult.error,
+        };
+      } catch (error) {
+        console.error("AI prediction failed for course:", course.code, error);
         prediction = predictFinalGradeFallback(currentPerformance);
         prediction.usedAI = false;
-
-        // Apply quality-based confidence calculation
-        const qualityConfidence = calculateConfidenceFromPrediction(
+        prediction.confidence = calculateConfidenceFromPrediction(
           currentPerformance,
           prediction.min,
           prediction.max,
         );
-        prediction.confidence = qualityConfidence;
       }
-
-      activeCoursePredictions.push({
-        courseId: course._id,
-        courseName: course.name,
-        courseCode: course.code,
+    } else {
+      prediction = predictFinalGradeFallback(currentPerformance);
+      prediction.usedAI = false;
+      prediction.confidence = calculateConfidenceFromPrediction(
         currentPerformance,
-        prediction,
-        credits,
-      });
+        prediction.min,
+        prediction.max,
+      );
     }
 
-    // Calculate predicted GPA (minimum scenario)
-    let minWeightedGrade = completedWeightedGrade;
-    let minTotalCredits = completedCredits;
-
-    activeCoursePredictions.forEach((pred) => {
-      const minGradePoints = gradeToGPA(pred.prediction.min);
-      minWeightedGrade += minGradePoints * pred.credits;
-      minTotalCredits += pred.credits;
+    activeCoursePredictions.push({
+      courseId: course._id,
+      courseName: course.name,
+      courseCode: course.code,
+      currentPerformance,
+      prediction,
+      credits,
     });
+  }
 
-    // Calculate predicted GPA (maximum scenario)
-    let maxWeightedGrade = completedWeightedGrade;
-    let maxTotalCredits = completedCredits;
+  let minWeightedGrade = completedWeightedGrade;
+  let minTotalCredits = completedCredits;
+  activeCoursePredictions.forEach((pred) => {
+    minWeightedGrade += gradeToGPA(pred.prediction.min) * pred.credits;
+    minTotalCredits += pred.credits;
+  });
 
-    activeCoursePredictions.forEach((pred) => {
-      const maxGradePoints = gradeToGPA(pred.prediction.max);
-      maxWeightedGrade += maxGradePoints * pred.credits;
-      maxTotalCredits += pred.credits;
-    });
+  let maxWeightedGrade = completedWeightedGrade;
+  let maxTotalCredits = completedCredits;
+  activeCoursePredictions.forEach((pred) => {
+    maxWeightedGrade += gradeToGPA(pred.prediction.max) * pred.credits;
+    maxTotalCredits += pred.credits;
+  });
 
-    const minGPA = minTotalCredits > 0 ? minWeightedGrade / minTotalCredits : 0;
-    const maxGPA = maxTotalCredits > 0 ? maxWeightedGrade / maxTotalCredits : 0;
+  const minGPA = minTotalCredits > 0 ? minWeightedGrade / minTotalCredits : 0;
+  const maxGPA = maxTotalCredits > 0 ? maxWeightedGrade / maxTotalCredits : 0;
+  const currentGPA =
+    completedCredits > 0 ? completedWeightedGrade / completedCredits : 0;
 
-    // Calculate current GPA (completed courses only)
-    const currentGPA =
-      completedCredits > 0 ? completedWeightedGrade / completedCredits : 0;
+  return {
+    success: true,
+    currentGPA: Math.round(currentGPA * 100) / 100,
+    predictedGPA: {
+      min: Math.round(minGPA * 100) / 100,
+      max: Math.round(maxGPA * 100) / 100,
+    },
+    breakdown: {
+      completedCourses: completedCourses.length,
+      activeCourses: activeCourses.length,
+      totalCredits: minTotalCredits,
+    },
+    activeCoursePredictions,
+  };
+};
 
-    res.status(200).json({
+// @desc    Get predicted GPA (returns cached result from DB — no Gemini call)
+// @route   GET /api/courses/predicted-gpa
+// @access  Private
+exports.getPredictedGPA = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (user && user.gpaCache && user.gpaCache.data) {
+      return res.status(200).json({
+        ...user.gpaCache.data,
+        cachedAt: user.gpaCache.cachedAt,
+        fromCache: true,
+      });
+    }
+    // No cache yet — return empty-state response so frontend can prompt user to refresh
+    return res.status(200).json({
       success: true,
-      currentGPA: Math.round(currentGPA * 100) / 100,
-      predictedGPA: {
-        min: Math.round(minGPA * 100) / 100,
-        max: Math.round(maxGPA * 100) / 100,
-      },
-      breakdown: {
-        completedCourses: completedCourses.length,
-        activeCourses: activeCourses.length,
-        totalCredits: minTotalCredits,
-      },
-      activeCoursePredictions,
+      currentGPA: 0,
+      predictedGPA: { min: 0, max: 0 },
+      breakdown: { completedCourses: 0, activeCourses: 0, totalCredits: 0 },
+      activeCoursePredictions: [],
+      cachedAt: null,
+      fromCache: false,
     });
   } catch (error) {
     console.error("Predicted GPA error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error calculating predicted GPA",
+    res
+      .status(500)
+      .json({ success: false, message: "Error fetching predicted GPA" });
+  }
+};
+
+// @desc    Refresh predicted GPA — runs Gemini AI and saves result to DB
+// @route   POST /api/courses/predicted-gpa/refresh
+// @access  Private
+exports.refreshPredictedGPA = async (req, res) => {
+  try {
+    const result = await computePredictedGPA(req.user._id);
+    const now = new Date();
+    await User.findByIdAndUpdate(req.user._id, {
+      "gpaCache.data": result,
+      "gpaCache.cachedAt": now,
     });
+    return res.status(200).json({ ...result, cachedAt: now, fromCache: false });
+  } catch (error) {
+    console.error("Refresh predicted GPA error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Error refreshing predicted GPA" });
   }
 };
 

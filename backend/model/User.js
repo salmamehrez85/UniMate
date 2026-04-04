@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema(
       required: [true, "Please provide your university"],
       trim: true,
     },
+    gpaCache: {
+      data: { type: mongoose.Schema.Types.Mixed, default: null },
+      cachedAt: { type: Date, default: null },
+    },
   },
   {
     timestamps: true,

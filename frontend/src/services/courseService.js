@@ -120,6 +120,30 @@ export const getPredictedGPA = async () => {
   }
 };
 
+// Trigger a fresh AI-powered GPA prediction and save to DB
+export const refreshPredictedGPA = async () => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/courses/predicted-gpa/refresh`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+      },
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to refresh predicted GPA");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error refreshing predicted GPA:", error);
+    throw error;
+  }
+};
+
 // Get GPA trend by semester from backend
 export const getGPATrend = async () => {
   try {
