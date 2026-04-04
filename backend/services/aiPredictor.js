@@ -203,14 +203,11 @@ const SummarySchema = {
 // ==========================================
 
 /**
- * Call LLM with exponential backoff retry for 429 errors
+ * Call LLM — on 429/rate-limit, throw immediately (caller handles fallback)
  */
 const callLLMWithRetry = async (prompt, schema, maxRetries = 3) => {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      // Add 1 second delay before each attempt to prevent rate limiting
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
       const response = await model.generateContent({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         generationConfig: {
@@ -225,11 +222,17 @@ const callLLMWithRetry = async (prompt, schema, maxRetries = 3) => {
     } catch (error) {
       const errorMessage = error.message || "";
 
-      // Handle 429 rate limit errors
-      if (errorMessage.includes("429") || errorMessage.includes("exhausted")) {
-        const backoffMs = 4000 * (attempt + 1);
-        console.warn(`Rate limited. Waiting ${backoffMs}ms before retry...`);
-        await new Promise((resolve) => setTimeout(resolve, backoffMs));
+      // On 429 / quota exhausted — throw immediately, no waiting
+      // Retrying on free tier rate limits wastes 4-12 seconds and never succeeds
+      if (
+        errorMessage.includes("429") ||
+        errorMessage.includes("exhausted") ||
+        errorMessage.includes("quota") ||
+        errorMessage.includes("RESOURCE_EXHAUSTED")
+      ) {
+        const rateLimitError = new Error("RATE_LIMITED");
+        rateLimitError.code = "RATE_LIMITED";
+        throw rateLimitError;
       } else if (attempt === maxRetries - 1) {
         // Last attempt failed, throw error
         throw error;

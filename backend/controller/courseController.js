@@ -602,58 +602,68 @@ const computePredictedGPA = async (userId) => {
     });
   });
 
-  const activeCoursePredictions = [];
+  const pastCoursesForAIInput = pastCoursesForAI.map((c) => ({
+    code: c.code,
+    name: c.name,
+    outline_text: c.outline,
+    current_performance: c.currentPerformance,
+    final_grade: c.finalGrade,
+  }));
 
-  for (const course of activeCourses) {
-    const currentPerformance = calculateCurrentPerformance(
-      course.assessments || [],
-    );
-    const credits = parseFloat(course.credits) || 3;
+  const activeCoursePredictions = await Promise.all(
+    activeCourses.map(async (course) => {
+      const currentPerformance = calculateCurrentPerformance(
+        course.assessments || [],
+      );
+      const credits = parseFloat(course.credits) || 3;
 
-    let prediction;
+      let prediction;
 
-    if (pastCoursesForAI.length > 0) {
-      try {
-        const aiResult = await calculateAIPrediction(
-          {
-            code: course.code,
-            name: course.name,
-            outline_text: course.outlineText || course.name,
-            current_performance: currentPerformance ?? 0,
-          },
-          pastCoursesForAI.map((c) => ({
-            code: c.code,
-            name: c.name,
-            outline_text: c.outline,
-            current_performance: c.currentPerformance,
-            final_grade: c.finalGrade,
-          })),
-        );
+      if (pastCoursesForAI.length > 0) {
+        try {
+          const aiResult = await calculateAIPrediction(
+            {
+              code: course.code,
+              name: course.name,
+              outline_text: course.outlineText || course.name,
+              current_performance: currentPerformance ?? 0,
+            },
+            pastCoursesForAIInput,
+          );
 
-        const predictedScore = aiResult.predicted_score_pct;
-        const validPrediction = Number.isFinite(predictedScore)
-          ? predictedScore
-          : (currentPerformance ?? 0);
-        const predictionMin = Math.max(Math.round(validPrediction - 3), 0);
-        const predictionMax = Math.min(Math.round(validPrediction + 3), 100);
+          const predictedScore = aiResult.predicted_score_pct;
+          const validPrediction = Number.isFinite(predictedScore)
+            ? predictedScore
+            : (currentPerformance ?? 0);
+          const predictionMin = Math.max(Math.round(validPrediction - 3), 0);
+          const predictionMax = Math.min(Math.round(validPrediction + 3), 100);
 
-        const transformedSimilarCourses = (aiResult.similar_courses || []).map(
-          (sc) => ({
+          const transformedSimilarCourses = (
+            aiResult.similar_courses || []
+          ).map((sc) => ({
             name: sc.name || sc.courseId,
             similarity: sc.similarity || sc.similarity_score || 0,
             reason: sc.reason,
-          }),
-        );
+          }));
 
-        prediction = {
-          min: predictionMin,
-          max: predictionMax,
-          confidence: aiResult.confidence,
-          similarCourses: transformedSimilarCourses,
-          usedAI: !aiResult.error,
-        };
-      } catch (error) {
-        console.error("AI prediction failed for course:", course.code, error);
+          prediction = {
+            min: predictionMin,
+            max: predictionMax,
+            confidence: aiResult.confidence,
+            similarCourses: transformedSimilarCourses,
+            usedAI: !aiResult.error,
+          };
+        } catch (error) {
+          console.error("AI prediction failed for course:", course.code, error);
+          prediction = predictFinalGradeFallback(currentPerformance);
+          prediction.usedAI = false;
+          prediction.confidence = calculateConfidenceFromPrediction(
+            currentPerformance,
+            prediction.min,
+            prediction.max,
+          );
+        }
+      } else {
         prediction = predictFinalGradeFallback(currentPerformance);
         prediction.usedAI = false;
         prediction.confidence = calculateConfidenceFromPrediction(
@@ -662,25 +672,17 @@ const computePredictedGPA = async (userId) => {
           prediction.max,
         );
       }
-    } else {
-      prediction = predictFinalGradeFallback(currentPerformance);
-      prediction.usedAI = false;
-      prediction.confidence = calculateConfidenceFromPrediction(
-        currentPerformance,
-        prediction.min,
-        prediction.max,
-      );
-    }
 
-    activeCoursePredictions.push({
-      courseId: course._id,
-      courseName: course.name,
-      courseCode: course.code,
-      currentPerformance,
-      prediction,
-      credits,
-    });
-  }
+      return {
+        courseId: course._id,
+        courseName: course.name,
+        courseCode: course.code,
+        currentPerformance,
+        prediction,
+        credits,
+      };
+    }),
+  );
 
   let minWeightedGrade = completedWeightedGrade;
   let minTotalCredits = completedCredits;
@@ -1011,14 +1013,12 @@ exports.refreshAIRecommendations = async (req, res) => {
       "recommendationsCache.data": recommendations,
       "recommendationsCache.cachedAt": now,
     });
-    return res
-      .status(200)
-      .json({
-        success: true,
-        data: recommendations,
-        cachedAt: now,
-        fromCache: false,
-      });
+    return res.status(200).json({
+      success: true,
+      data: recommendations,
+      cachedAt: now,
+      fromCache: false,
+    });
   } catch (error) {
     console.error("❌ Refresh AI recommendations error:", error);
     res
