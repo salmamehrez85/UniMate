@@ -89,3 +89,12 @@ export const submitQuiz = async ({
 
   return parseJsonResponse(response, "Failed to submit quiz");
 };
+
+export const getQuizResultsByCourse = async (courseId) => {
+  const response = await fetch(`${API_BASE_URL}/quizzes/results/${courseId}`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+
+  return parseJsonResponse(response, "Failed to fetch quiz results");
+};

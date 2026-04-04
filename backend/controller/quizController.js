@@ -1,6 +1,8 @@
 const { evaluateQuizSubmission } = require("../services/quizEvaluationService");
 const { generatePracticeQuiz } = require("../services/quizGenerationService");
 const { getAvailableQuizzes } = require("../services/recommendationService");
+const QuizResult = require("../model/QuizResult");
+const Quiz = require("../model/Quiz");
 
 const parseSourceContext = (value) => {
   if (!value) {
@@ -206,6 +208,94 @@ exports.getAvailable = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to fetch available quizzes",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Get all quiz results for a course with aggregated weak areas
+// @route   GET /api/quizzes/results/:courseId
+// @access  Private
+exports.getResultsByCourse = async (req, res) => {
+  try {
+    const userId = req.user?._id;
+    const { courseId } = req.params;
+
+    if (!userId) {
+      return res
+        .status(401)
+        .json({ success: false, message: "User authentication is required" });
+    }
+    if (!courseId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "courseId is required" });
+    }
+
+    // Fetch all results for this user + course, newest first
+    const results = await QuizResult.find({ userId, courseId })
+      .sort({ completedAt: -1 })
+      .lean();
+
+    // Attach quiz title to each result
+    const quizIds = [...new Set(results.map((r) => r.quizId.toString()))];
+    const quizDocs = await Quiz.find(
+      { _id: { $in: quizIds } },
+      "title difficulty",
+    ).lean();
+    const quizMap = Object.fromEntries(
+      quizDocs.map((q) => [q._id.toString(), q]),
+    );
+
+    const enrichedResults = results.map((r) => ({
+      _id: r._id,
+      quizId: r.quizId,
+      quizTitle: quizMap[r.quizId.toString()]?.title || "Practice Quiz",
+      difficulty: quizMap[r.quizId.toString()]?.difficulty || "mixed",
+      score: r.score,
+      correctAnswers: r.correctAnswers,
+      totalQuestions: r.totalQuestions,
+      weakAreas: r.weakAreas || [],
+      completedAt: r.completedAt,
+      attemptNumber: r.attemptNumber,
+      submissionSource: r.submissionSource,
+    }));
+
+    // Aggregate weak areas across all results
+    const weakAreaFrequency = {};
+    results.forEach((r) => {
+      (r.weakAreas || []).forEach((topic) => {
+        weakAreaFrequency[topic] = (weakAreaFrequency[topic] || 0) + 1;
+      });
+    });
+
+    const aggregatedWeakAreas = Object.entries(weakAreaFrequency)
+      .map(([topic, count]) => ({ topic, count }))
+      .sort((a, b) => b.count - a.count);
+
+    // Compute overall stats
+    const totalAttempts = results.length;
+    const avgScore =
+      totalAttempts > 0
+        ? Math.round(
+            results.reduce((sum, r) => sum + r.score, 0) / totalAttempts,
+          )
+        : 0;
+    const bestScore =
+      totalAttempts > 0 ? Math.max(...results.map((r) => r.score)) : 0;
+    const latestScore = totalAttempts > 0 ? results[0].score : null;
+
+    return res.status(200).json({
+      success: true,
+      stats: { totalAttempts, avgScore, bestScore, latestScore },
+      results: enrichedResults,
+      aggregatedWeakAreas,
+    });
+  } catch (error) {
+    console.error("Get quiz results error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch quiz results",
       error: error.message,
     });
   }

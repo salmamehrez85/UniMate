@@ -5,6 +5,7 @@ import { AssessmentsTab } from "../components/CourseDetails/AssessmentsTab";
 import { TasksTab } from "../components/CourseDetails/TasksTab";
 import { ProjectPhasesTab } from "../components/CourseDetails/ProjectPhasesTab";
 import { SettingsTab } from "../components/CourseDetails/SettingsTab";
+import { AIPracticeTab } from "../components/CourseDetails/AIPracticeTab";
 import { updateCourse, deleteCourse } from "../services/courseService";
 
 export function CourseDetails({
@@ -22,6 +23,7 @@ export function CourseDetails({
     { id: "assessments", label: "Assessments" },
     { id: "tasks", label: "Tasks" },
     { id: "phases", label: "Project Phases" },
+    { id: "ai-practice", label: " AI Practice" },
     { id: "settings", label: "Settings" },
   ];
 
@@ -61,6 +63,8 @@ export function CourseDetails({
             onCourseUpdate={handleCourseUpdate}
           />
         );
+      case "ai-practice":
+        return <AIPracticeTab course={courseData} />;
       case "settings":
         return (
           <SettingsTab
