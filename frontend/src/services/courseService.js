@@ -186,6 +186,30 @@ export const getAIRecommendations = async () => {
   }
 };
 
+// Trigger a fresh AI recommendations calculation and save to DB
+export const refreshAIRecommendations = async () => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/courses/recommendations/refresh`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+      },
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to refresh AI recommendations");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error refreshing AI recommendations:", error);
+    throw error;
+  }
+};
+
 // Save a summary to a specific course
 export const saveSummaryToCourse = async (courseId, { mode, text }) => {
   const response = await fetch(

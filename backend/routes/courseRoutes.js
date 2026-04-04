@@ -22,6 +22,9 @@ router.route("/gpa-trend").get(courseController.getGPATrend);
 
 // AI Recommendations route (must come before /:id to avoid conflicts)
 router.route("/recommendations").get(courseController.getAIRecommendations);
+router
+  .route("/recommendations/refresh")
+  .post(courseController.refreshAIRecommendations);
 
 // Summarizer route
 router.route("/summarize").post(courseController.summarizeCourseContent);

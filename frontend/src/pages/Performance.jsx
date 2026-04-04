@@ -11,11 +11,7 @@ import {
   Zap,
   ChevronDown,
 } from "lucide-react";
-import {
-  getCourses,
-  getPredictedGPA,
-  getAIRecommendations,
-} from "../services/courseService";
+import { getCourses, getPredictedGPA } from "../services/courseService";
 
 function PredictionSkeleton() {
   return (
@@ -321,7 +317,6 @@ export function Performance() {
   const [selectedInsight, setSelectedInsight] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [aiAdvice, setAiAdvice] = useState({});
 
   // Fetch active courses from MongoDB on component mount
   useEffect(() => {
@@ -361,25 +356,6 @@ export function Performance() {
 
         setCourses(activeCourses);
         setError(null);
-
-        // Fetch AI recommendations and convert to lookup object
-        try {
-          const recommendationsData = await getAIRecommendations();
-          const recommendationsArray = recommendationsData.data || [];
-
-          // Convert array to object keyed by course code
-          const adviceLookup = {};
-          recommendationsArray.forEach((rec) => {
-            if (rec.courseCode && rec.detailedAnalysis) {
-              adviceLookup[rec.courseCode] = rec.detailedAnalysis;
-            }
-          });
-
-          setAiAdvice(adviceLookup);
-        } catch (recErr) {
-          console.error(" Error fetching AI recommendations:", recErr);
-          // If recommendations fail, we'll use the fallback text in handlePredictClick
-        }
       } catch (err) {
         console.error(" Error fetching courses:", err);
         setError(err.message || "Failed to fetch courses");
@@ -434,9 +410,7 @@ export function Performance() {
           status = "At Risk";
         }
 
-        const adviceText =
-          aiAdvice[course.code] ||
-          "Keep up consistent effort to improve your grade.";
+        const adviceText = "Keep up consistent effort to improve your grade.";
 
         const prediction = {
           predictedRange: {

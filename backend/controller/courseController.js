@@ -947,97 +947,83 @@ exports.getGPATrend = async (req, res) => {
 // @desc    Get AI recommendations for active courses
 // @route   GET /api/courses/recommendations
 // @access  Private
+// Shared helper — runs the full AI recommendations calculation and returns the result array
+const computeAIRecommendations = async (userId) => {
+  const courses = await Course.find({ userId });
+  const activeCourses = courses.filter((c) => c.isOldCourse !== true);
+
+  if (activeCourses.length === 0) {
+    return [];
+  }
+
+  const mappedActiveCourses = activeCourses.map((course) => {
+    const currentPerf = calculateCurrentPerformance(course.assessments || []);
+    return {
+      code: course.code,
+      name: course.name,
+      currentPerformance: currentPerf,
+      tasks: course.tasks || [],
+      assessments: course.assessments || [],
+      phases: course.phases || [],
+    };
+  });
+
+  const aiResult = await generateActionableRecommendations(mappedActiveCourses);
+  return aiResult.recommendations || [];
+};
+
+// @desc    Get AI recommendations (returns cached result from DB — no Gemini call)
+// @route   GET /api/courses/recommendations
+// @access  Private
 exports.getAIRecommendations = async (req, res) => {
   try {
-    console.log(
-      "📋 AI Recommendations endpoint called for user:",
-      req.user._id,
-    );
-
-    const courses = await Course.find({ userId: req.user._id });
-    console.log(`📚 Total courses found: ${courses.length}`);
-
-    if (courses.length > 0) {
-      console.log(
-        "Courses:",
-        courses.map((c) => ({
-          code: c.code,
-          name: c.name,
-          isOldCourse: c.isOldCourse,
-          hasAssessments: c.assessments && c.assessments.length > 0,
-          assessmentCount: c.assessments ? c.assessments.length : 0,
-        })),
-      );
-    }
-
-    // Filter for active courses only
-    const activeCourses = courses.filter((c) => c.isOldCourse !== true);
-    console.log(`✅ Active courses found: ${activeCourses.length}`);
-
-    if (activeCourses.length === 0) {
-      console.log("⚠️  No active courses to generate recommendations");
+    const user = await User.findById(req.user._id);
+    if (user && user.recommendationsCache && user.recommendationsCache.data) {
       return res.status(200).json({
         success: true,
-        data: [],
-        debug: {
-          totalCourses: courses.length,
-          activeCourses: 0,
-          message: "No active courses found",
-        },
+        data: user.recommendationsCache.data,
+        cachedAt: user.recommendationsCache.cachedAt,
+        fromCache: true,
       });
     }
-
-    // Map active courses with calculated current performance and tasks
-    const mappedActiveCourses = activeCourses.map((course) => {
-      const currentPerf = calculateCurrentPerformance(course.assessments || []);
-      console.log(
-        `  📖 ${course.code}: currentPerformance=${currentPerf}, tasks=${(course.tasks || []).length}, assessments=${(course.assessments || []).length}`,
-      );
-
-      return {
-        code: course.code,
-        name: course.name,
-        currentPerformance: currentPerf,
-        tasks: course.tasks || [],
-        assessments: course.assessments || [],
-        phases: course.phases || [],
-      };
-    });
-
-    console.log(
-      "📊 Mapped active courses for AI:",
-      JSON.stringify(mappedActiveCourses, null, 2),
-    );
-
-    // Call AI to generate recommendations
-    console.log("🤖 Calling generateActionableRecommendations...");
-    const aiResult =
-      await generateActionableRecommendations(mappedActiveCourses);
-
-    console.log("🤖 AI Result returned:", aiResult);
-    console.log(
-      "🤖 Recommendations count:",
-      aiResult.recommendations ? aiResult.recommendations.length : 0,
-    );
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      data: aiResult.recommendations || [],
-      debug: {
-        activeCourses: activeCourses.length,
-        recommendationsReturned: aiResult.recommendations
-          ? aiResult.recommendations.length
-          : 0,
-      },
+      data: [],
+      cachedAt: null,
+      fromCache: false,
     });
   } catch (error) {
     console.error("❌ AI recommendations error:", error);
-    console.error("Stack trace:", error.stack);
-    res.status(500).json({
-      success: false,
-      message: "Error generating recommendations",
-      error: error.message,
+    res
+      .status(500)
+      .json({ success: false, message: "Error fetching recommendations" });
+  }
+};
+
+// @desc    Refresh AI recommendations — runs Gemini and saves to DB
+// @route   POST /api/courses/recommendations/refresh
+// @access  Private
+exports.refreshAIRecommendations = async (req, res) => {
+  try {
+    const recommendations = await computeAIRecommendations(req.user._id);
+    const now = new Date();
+    await User.findByIdAndUpdate(req.user._id, {
+      "recommendationsCache.data": recommendations,
+      "recommendationsCache.cachedAt": now,
     });
+    return res
+      .status(200)
+      .json({
+        success: true,
+        data: recommendations,
+        cachedAt: now,
+        fromCache: false,
+      });
+  } catch (error) {
+    console.error("❌ Refresh AI recommendations error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Error refreshing recommendations" });
   }
 };
 

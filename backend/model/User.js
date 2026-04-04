@@ -34,6 +34,10 @@ const userSchema = new mongoose.Schema(
       data: { type: mongoose.Schema.Types.Mixed, default: null },
       cachedAt: { type: Date, default: null },
     },
+    recommendationsCache: {
+      data: { type: mongoose.Schema.Types.Mixed, default: null },
+      cachedAt: { type: Date, default: null },
+    },
   },
   {
     timestamps: true,
