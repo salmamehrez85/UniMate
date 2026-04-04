@@ -164,15 +164,22 @@ export function OverviewTab({ course }) {
                 const isExpanded = expandedSummaryKey === summaryKey;
 
                 return (
-                  <button
-                    type="button"
+                  <div
+                    role="button"
+                    tabIndex={0}
                     key={summaryKey}
                     onClick={() =>
                       setExpandedSummaryKey((prev) =>
                         prev === summaryKey ? null : summaryKey,
                       )
                     }
-                    className="w-full text-left border border-gray-100 rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition">
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ")
+                        setExpandedSummaryKey((prev) =>
+                          prev === summaryKey ? null : summaryKey,
+                        );
+                    }}
+                    className="w-full text-left border border-gray-100 rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition cursor-pointer">
                     <div className="flex items-center justify-between gap-3 mb-2">
                       <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold bg-teal-100 text-teal-700 uppercase">
                         {summary.mode || "quick"}
@@ -202,7 +209,7 @@ export function OverviewTab({ course }) {
                         ? "Click to collapse"
                         : "Click to read full summary"}
                     </p>
-                  </button>
+                  </div>
                 );
               })(),
             )}
