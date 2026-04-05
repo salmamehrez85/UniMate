@@ -37,11 +37,13 @@ function formatSingleTime(token) {
   return `${hour}:${String(m).padStart(2, "0")} ${period}`;
 }
 
-// Format a time range "10:00-11:30" → "10:00 AM – 11:30 AM"
+// Format a time range "10:00-11:30", "10:00 AM-11:30 AM", "1:00 PM - 2:30 PM" → "10:00 AM – 11:30 AM"
 // Falls back to just start time if no end found
 function formatTimeRange(raw) {
   if (!raw) return "";
-  const parts = raw.split(/[-–]/);
+  // Split on dash/en-dash that is NOT inside a time token
+  // We split on a dash surrounded by non-digit chars or at a space-dash-space boundary
+  const parts = raw.split(/\s*[-–]\s*(?=\d)/);
   const start = formatSingleTime(parts[0].trim());
   if (parts.length < 2) return start;
   const end = formatSingleTime(parts[1].trim());
@@ -72,28 +74,28 @@ function ClassRow({ entry }) {
         {entry.code}
       </span>
 
-      {/* Course name – grows to fill space */}
-      <p className="flex-1 min-w-0 text-sm font-semibold text-gray-900 truncate">
-        {entry.name}
-      </p>
-
-      {/* Location / link on the right */}
-      {hasLocation &&
-        (locationIsUrl ? (
-          <a
-            href={entry.location}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-shrink-0 flex items-center gap-1.5 text-xs font-medium text-teal-600 hover:text-teal-700 bg-teal-50 hover:bg-teal-100 px-2.5 py-1 rounded-lg transition-colors whitespace-nowrap">
-            <ExternalLink className="w-3.5 h-3.5" />
-            Join
-          </a>
-        ) : (
-          <span className="flex-shrink-0 flex items-center gap-1.5 text-xs text-gray-400 whitespace-nowrap">
-            <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
-            {entry.location}
-          </span>
-        ))}
+      {/* Course name + location stacked */}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-gray-900 truncate">
+          {entry.name}
+        </p>
+        {hasLocation &&
+          (locationIsUrl ? (
+            <a
+              href={entry.location}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs font-medium text-teal-600 hover:text-teal-700 mt-0.5">
+              <ExternalLink className="w-3 h-3" />
+              Join online
+            </a>
+          ) : (
+            <span className="inline-flex items-center gap-1 text-xs text-gray-500 mt-0.5">
+              <MapPin className="w-3 h-3 flex-shrink-0" />
+              {entry.location}
+            </span>
+          ))}
+      </div>
     </div>
   );
 }

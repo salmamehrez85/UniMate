@@ -39,11 +39,12 @@ const DAY_MAP = {
 function parseSchedule(raw) {
   if (!raw) return { days: [], time: "", location: "" };
 
-  // Extract time portion (optionally with AM/PM suffix)
+  // Extract time portion — handles all formats:
+  // "10:00-11:30", "10:00 AM - 11:30 AM", "1:00 PM", "13:00-14:30"
   const timeMatch = raw.match(
-    /\d{1,2}:\d{2}(?:\s*[-–]\s*\d{1,2}:\d{2})?\s*(?:[AaPp][Mm])?/,
+    /\d{1,2}:\d{2}\s*(?:[AaPp][Mm])?\s*(?:[-–]\s*\d{1,2}:\d{2}\s*(?:[AaPp][Mm])?)?/,
   );
-  const time = timeMatch ? timeMatch[0].replace(/\s+/g, "") : "";
+  const time = timeMatch ? timeMatch[0].trim() : "";
 
   // Remove time, then split what remains into day tokens vs location
   let remaining = raw.replace(timeMatch ? timeMatch[0] : "", "").trim();
