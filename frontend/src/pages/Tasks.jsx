@@ -9,7 +9,6 @@ import { getDaysUntil } from "../components/Tasks/taskUtils";
 const STATUS_OPTIONS = [
   { value: "all", label: "All" },
   { value: "todo", label: "To Do" },
-  { value: "doing", label: "In Progress" },
   { value: "done", label: "Done" },
 ];
 
