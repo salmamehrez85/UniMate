@@ -18,12 +18,25 @@ function badgeColorFor(code) {
   return colorCache[code];
 }
 
-// Format "10:00" → "10:00 AM" or "14:00" → "2:00 PM"
+// Format "10:00" → "10:00 AM", "14:00" → "2:00 PM", "1:00PM" → "1:00 PM"
 function formatTime(raw) {
   if (!raw) return "";
-  const start = raw.split(/[-–]/)[0].trim();
+  // Check if the full string ends with AM/PM (covers ranges like "1:00-2:30PM")
+  const ampmSuffix = raw.match(/([AaPp][Mm])$/);
+  const explicitPeriod = ampmSuffix ? ampmSuffix[1].toUpperCase() : null;
+  // Take only the start time and strip any embedded AM/PM
+  const start = raw
+    .split(/[-–]/)[0]
+    .trim()
+    .replace(/\s*[AaPp][Mm]$/, "");
   const [h, m] = start.split(":").map(Number);
   if (isNaN(h)) return raw;
+  if (explicitPeriod) {
+    // Already 12-hour format – just normalise display
+    const hour = h === 0 ? 12 : h;
+    return `${hour}:${String(m).padStart(2, "0")} ${explicitPeriod}`;
+  }
+  // 24-hour format
   const period = h >= 12 ? "PM" : "AM";
   const hour = h % 12 || 12;
   return `${hour}:${String(m).padStart(2, "0")} ${period}`;
@@ -36,11 +49,14 @@ function ClassRow({ entry }) {
       <span className="w-24 flex-shrink-0 text-sm text-gray-400 font-medium">
         {formatTime(entry.time)}
       </span>
-      <span className={`flex-shrink-0 text-xs font-bold px-3 py-1 rounded-md ${badge}`}>
+      <span
+        className={`flex-shrink-0 text-xs font-bold px-3 py-1 rounded-md ${badge}`}>
         {entry.code}
       </span>
       <div className="min-w-0">
-        <p className="text-sm font-semibold text-gray-900 truncate">{entry.name}</p>
+        <p className="text-sm font-semibold text-gray-900 truncate">
+          {entry.name}
+        </p>
         {entry.location && (
           <p className="text-xs text-gray-400 mt-0.5">{entry.location}</p>
         )}
@@ -82,8 +98,10 @@ export function WeekGrid({ schedule }) {
               isToday ? "border-teal-300" : "border-gray-100"
             }`}>
             {/* Day header */}
-            <div className={`px-5 py-3 flex items-center gap-3 ${isToday ? "bg-teal-50/60" : ""}`}>
-              <h2 className={`text-base font-bold ${isToday ? "text-teal-600" : "text-gray-800"}`}>
+            <div
+              className={`px-5 py-3 flex items-center gap-3 ${isToday ? "bg-teal-50/60" : ""}`}>
+              <h2
+                className={`text-base font-bold ${isToday ? "text-teal-600" : "text-gray-800"}`}>
                 {day}
               </h2>
               {isToday && (
@@ -95,7 +113,9 @@ export function WeekGrid({ schedule }) {
 
             {/* Class rows */}
             {entries.length === 0 ? (
-              <p className="px-5 py-4 text-sm text-gray-300">No classes today</p>
+              <p className="px-5 py-4 text-sm text-gray-300">
+                No classes today
+              </p>
             ) : (
               entries.map((entry, i) => <ClassRow key={i} entry={entry} />)
             )}
@@ -105,4 +125,3 @@ export function WeekGrid({ schedule }) {
     </div>
   );
 }
-

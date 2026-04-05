@@ -39,9 +39,11 @@ const DAY_MAP = {
 function parseSchedule(raw) {
   if (!raw) return { days: [], time: "", location: "" };
 
-  // Extract time portion
-  const timeMatch = raw.match(/\d{1,2}:\d{2}(?:\s*[-–]\s*\d{1,2}:\d{2})?/);
-  const time = timeMatch ? timeMatch[0].replace(/\s/g, "") : "";
+  // Extract time portion (optionally with AM/PM suffix)
+  const timeMatch = raw.match(
+    /\d{1,2}:\d{2}(?:\s*[-–]\s*\d{1,2}:\d{2})?\s*(?:[AaPp][Mm])?/,
+  );
+  const time = timeMatch ? timeMatch[0].replace(/\s+/g, "") : "";
 
   // Remove time, then split what remains into day tokens vs location
   let remaining = raw.replace(timeMatch ? timeMatch[0] : "", "").trim();
@@ -55,6 +57,8 @@ function parseSchedule(raw) {
     const key = token.toLowerCase().replace(/\./g, "");
     if (DAY_MAP[key]) {
       days.push(DAY_MAP[key]);
+    } else if (/^[ap]m$/i.test(token)) {
+      // skip stray AM/PM tokens (already captured in time string)
     } else {
       locationTokens.push(token);
     }
