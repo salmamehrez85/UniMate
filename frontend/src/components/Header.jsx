@@ -18,7 +18,7 @@ export function Header({ activeView, onLogout }) {
       case "chat":
         return "AI Chat";
       case "schedule":
-        return "Weekly Schedule";
+        return "Schedule";
       case "settings":
         return "Settings";
       default:

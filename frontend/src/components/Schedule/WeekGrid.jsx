@@ -1,3 +1,5 @@
+import { MapPin, ExternalLink } from "lucide-react";
+
 const BADGE_COLORS = [
   "bg-sky-100 text-sky-700",
   "bg-teal-100 text-teal-700",
@@ -18,49 +20,80 @@ function badgeColorFor(code) {
   return colorCache[code];
 }
 
-// Format "10:00" → "10:00 AM", "14:00" → "2:00 PM", "1:00PM" → "1:00 PM"
-function formatTime(raw) {
-  if (!raw) return "";
-  // Check if the full string ends with AM/PM (covers ranges like "1:00-2:30PM")
-  const ampmSuffix = raw.match(/([AaPp][Mm])$/);
-  const explicitPeriod = ampmSuffix ? ampmSuffix[1].toUpperCase() : null;
-  // Take only the start time and strip any embedded AM/PM
-  const start = raw
-    .split(/[-–]/)[0]
-    .trim()
-    .replace(/\s*[AaPp][Mm]$/, "");
-  const [h, m] = start.split(":").map(Number);
-  if (isNaN(h)) return raw;
+// Convert a single time token like "10:00", "14:00", or "1:00PM" → "10:00 AM" / "2:00 PM"
+function formatSingleTime(token) {
+  if (!token) return "";
+  const ampmMatch = token.match(/([AaPp][Mm])$/);
+  const explicitPeriod = ampmMatch ? ampmMatch[1].toUpperCase() : null;
+  const clean = token.replace(/\s*[AaPp][Mm]$/, "").trim();
+  const [h, m] = clean.split(":").map(Number);
+  if (isNaN(h)) return token;
   if (explicitPeriod) {
-    // Already 12-hour format – just normalise display
     const hour = h === 0 ? 12 : h;
     return `${hour}:${String(m).padStart(2, "0")} ${explicitPeriod}`;
   }
-  // 24-hour format
   const period = h >= 12 ? "PM" : "AM";
   const hour = h % 12 || 12;
   return `${hour}:${String(m).padStart(2, "0")} ${period}`;
 }
 
+// Format a time range "10:00-11:30" → "10:00 AM – 11:30 AM"
+// Falls back to just start time if no end found
+function formatTimeRange(raw) {
+  if (!raw) return "";
+  const parts = raw.split(/[-–]/);
+  const start = formatSingleTime(parts[0].trim());
+  if (parts.length < 2) return start;
+  const end = formatSingleTime(parts[1].trim());
+  return `${start} – ${end}`;
+}
+
+function isUrl(str) {
+  return /^https?:\/\//i.test(str);
+}
+
 function ClassRow({ entry }) {
   const badge = badgeColorFor(entry.code);
+  const hasLocation = Boolean(entry.location);
+  const locationIsUrl = hasLocation && isUrl(entry.location);
+
   return (
     <div className="flex items-center gap-4 py-4 px-5 border-b border-gray-100 last:border-0">
-      <span className="w-24 flex-shrink-0 text-sm text-gray-400 font-medium">
-        {formatTime(entry.time)}
-      </span>
+      {/* Time range */}
+      <div className="w-36 flex-shrink-0">
+        <span className="text-sm text-gray-400 font-medium whitespace-nowrap">
+          {formatTimeRange(entry.time)}
+        </span>
+      </div>
+
+      {/* Badge */}
       <span
         className={`flex-shrink-0 text-xs font-bold px-3 py-1 rounded-md ${badge}`}>
         {entry.code}
       </span>
-      <div className="min-w-0">
-        <p className="text-sm font-semibold text-gray-900 truncate">
-          {entry.name}
-        </p>
-        {entry.location && (
-          <p className="text-xs text-gray-400 mt-0.5">{entry.location}</p>
-        )}
-      </div>
+
+      {/* Course name – grows to fill space */}
+      <p className="flex-1 min-w-0 text-sm font-semibold text-gray-900 truncate">
+        {entry.name}
+      </p>
+
+      {/* Location / link on the right */}
+      {hasLocation &&
+        (locationIsUrl ? (
+          <a
+            href={entry.location}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-shrink-0 flex items-center gap-1.5 text-xs font-medium text-teal-600 hover:text-teal-700 bg-teal-50 hover:bg-teal-100 px-2.5 py-1 rounded-lg transition-colors whitespace-nowrap">
+            <ExternalLink className="w-3.5 h-3.5" />
+            Join
+          </a>
+        ) : (
+          <span className="flex-shrink-0 flex items-center gap-1.5 text-xs text-gray-400 whitespace-nowrap">
+            <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+            {entry.location}
+          </span>
+        ))}
     </div>
   );
 }

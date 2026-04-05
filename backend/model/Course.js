@@ -63,6 +63,10 @@ const courseSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    location: {
+      type: String,
+      trim: true,
+    },
     credits: {
       type: String,
       trim: true,

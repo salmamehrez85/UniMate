@@ -15,6 +15,7 @@ export function SettingsTab({
     name: course.name || course.title || "",
     instructor: course.instructor || "",
     schedule: course.schedule || "",
+    location: course.location || "",
     credits: course.credits || "",
     semester: course.semester || "",
     outlineText: course.outlineText || "",
@@ -133,7 +134,21 @@ export function SettingsTab({
                   name="schedule"
                   value={formData.schedule}
                   onChange={handleChange}
-                  placeholder="e.g., Mon & Wed 10:00 AM"
+                  placeholder="e.g., Mon & Wed 10:00 AM - 11:30 AM"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Location
+                </label>
+                <input
+                  type="text"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleChange}
+                  placeholder="e.g., Bldg 4, Room 101 or https://zoom.us/..."
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                 />
               </div>
@@ -202,6 +217,7 @@ export function SettingsTab({
                     name: course.name || course.title || "",
                     instructor: course.instructor || "",
                     schedule: course.schedule || "",
+                    location: course.location || "",
                     credits: course.credits || "",
                     semester: course.semester || "",
                     outlineText: course.outlineText || "",
@@ -247,6 +263,14 @@ export function SettingsTab({
                 </p>
                 <p className="text-lg font-semibold text-primary-900">
                   {course.schedule || "Not specified"}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">
+                  Location
+                </p>
+                <p className="text-lg font-semibold text-primary-900">
+                  {course.location || "Not specified"}
                 </p>
               </div>
               <div>

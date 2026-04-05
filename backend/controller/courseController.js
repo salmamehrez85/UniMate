@@ -265,8 +265,16 @@ exports.getCourse = async (req, res) => {
 // @access  Private
 exports.createCourse = async (req, res) => {
   try {
-    const { code, name, instructor, schedule, credits, semester, outlineText } =
-      req.body;
+    const {
+      code,
+      name,
+      instructor,
+      schedule,
+      location,
+      credits,
+      semester,
+      outlineText,
+    } = req.body;
 
     // Add userId to course data
     const courseData = {
@@ -275,6 +283,7 @@ exports.createCourse = async (req, res) => {
       name,
       instructor: instructor || "",
       schedule: schedule || "",
+      location: location || "",
       credits: credits || "",
       semester: semester || getCurrentSemester(), // Auto-assign semester if not provided
       outlineText: outlineText || "",

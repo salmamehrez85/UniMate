@@ -49,7 +49,7 @@ function parseSchedule(raw) {
   let remaining = raw.replace(timeMatch ? timeMatch[0] : "", "").trim();
 
   // Collect day tokens first
-  const tokens = remaining.split(/[/,\s]+/).filter(Boolean);
+  const tokens = remaining.split(/[/,&\s]+/).filter(Boolean);
   const days = [];
   const locationTokens = [];
 
@@ -74,7 +74,13 @@ function parseSchedule(raw) {
 function buildScheduleMap(courses) {
   const map = {};
   courses.forEach((course) => {
-    const { days, time, location } = parseSchedule(course.schedule);
+    const {
+      days,
+      time,
+      location: parsedLocation,
+    } = parseSchedule(course.schedule);
+    // Prefer the dedicated location field; fall back to whatever was parsed from schedule
+    const location = course.location || parsedLocation;
     days.forEach((day) => {
       if (!map[day]) map[day] = [];
       map[day].push({

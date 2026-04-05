@@ -56,6 +56,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
     name: "",
     instructor: "",
     schedule: "",
+    location: "",
     credits: "",
     semester: currentSemester, // Auto-select current semester
     outlineText: "",
@@ -91,6 +92,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
         name: "",
         instructor: "",
         schedule: "",
+        location: "",
         credits: "",
         semester: currentSemester, // Reset to current semester
         outlineText: "",
@@ -192,7 +194,26 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
               value={formData.schedule}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-              placeholder="e.g., Mon & Wed 10:00 AM"
+              placeholder="e.g., Mon & Wed 10:00 AM - 11:30 AM"
+              disabled={loading}
+            />
+          </div>
+
+          {/* Location */}
+          <div>
+            <label
+              htmlFor="location"
+              className="block text-sm font-medium text-gray-700 mb-2">
+              Location
+            </label>
+            <input
+              id="location"
+              name="location"
+              type="text"
+              value={formData.location}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+              placeholder="e.g., Bldg 4, Room 101 or https://zoom.us/..."
               disabled={loading}
             />
           </div>
