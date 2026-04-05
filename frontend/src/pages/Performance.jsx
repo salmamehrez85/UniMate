@@ -360,7 +360,7 @@ export function Performance() {
 
         setCourses(activeCourses);
 
-        // Restore any already-saved predictions from DB into the predictions state
+        // Restore saved predictions — skip any that are stale (course updated after prediction)
         const savedPredictions = {};
         (data.courses || [])
           .filter(
@@ -370,6 +370,11 @@ export function Performance() {
               c.aiPrediction.predictedAt,
           )
           .forEach((c) => {
+            const predictedAt = new Date(c.aiPrediction.predictedAt);
+            const updatedAt = new Date(c.updatedAt);
+            // If course was updated after the prediction, skip it (stale)
+            if (updatedAt > predictedAt) return;
+
             const p = c.aiPrediction;
             const predictedMin = p.min;
             let status = "On Track";
