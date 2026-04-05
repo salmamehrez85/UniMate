@@ -100,6 +100,14 @@ const courseSchema = new mongoose.Schema(
       ],
       default: [],
     },
+    aiPrediction: {
+      min: { type: Number, default: null },
+      max: { type: Number, default: null },
+      confidence: { type: String, default: null },
+      similarCourses: { type: mongoose.Schema.Types.Mixed, default: [] },
+      usedAI: { type: Boolean, default: false },
+      predictedAt: { type: Date, default: null },
+    },
   },
   {
     timestamps: true,

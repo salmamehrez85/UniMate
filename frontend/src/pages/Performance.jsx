@@ -11,7 +11,11 @@ import {
   Zap,
   ChevronDown,
 } from "lucide-react";
-import { getCourses, getPredictedGPA } from "../services/courseService";
+import {
+  getCourses,
+  getPredictedGPA,
+  predictCourse,
+} from "../services/courseService";
 
 function PredictionSkeleton() {
   return (
@@ -355,6 +359,42 @@ export function Performance() {
           });
 
         setCourses(activeCourses);
+
+        // Restore any already-saved predictions from DB into the predictions state
+        const savedPredictions = {};
+        (data.courses || [])
+          .filter(
+            (c) =>
+              c.isOldCourse !== true &&
+              c.aiPrediction &&
+              c.aiPrediction.predictedAt,
+          )
+          .forEach((c) => {
+            const p = c.aiPrediction;
+            const predictedMin = p.min;
+            let status = "On Track";
+            if (predictedMin < 60) status = "At Risk";
+            else if (predictedMin < 70) status = "Watch";
+            savedPredictions[c._id] = {
+              predictedRange: { min: p.min, max: p.max },
+              status,
+              confidence: p.confidence,
+              usedAI: p.usedAI,
+              currentPerformance: 0,
+              predictionReason: null,
+              similarCoursesUsed: (p.similarCourses || []).map((sc) => ({
+                name: sc.name,
+                similarity: Math.round((sc.similarity || 0) * 100),
+                reason: sc.reason,
+              })),
+              recommendation:
+                "Keep up consistent effort to improve your grade.",
+            };
+          });
+        if (Object.keys(savedPredictions).length > 0) {
+          setPredictions(savedPredictions);
+        }
+
         setError(null);
       } catch (err) {
         console.error(" Error fetching courses:", err);
@@ -368,55 +408,30 @@ export function Performance() {
   }, []);
 
   const handlePredictClick = async (courseId) => {
-    // Set loading state
     setCourses((prev) =>
       prev.map((c) => (c.id === courseId ? { ...c, isLoading: true } : c)),
     );
 
     try {
-      const response = await getPredictedGPA();
-
-      // Find the prediction data for this specific course
-      const courseActivePredictions = response.activeCoursePredictions || [];
-      const coursePrediction = courseActivePredictions.find(
-        (p) => p.courseId === courseId,
-      );
+      const response = await predictCourse(courseId);
+      const coursePrediction = response;
 
       if (coursePrediction) {
-        const course = courses.find((c) => c.id === courseId);
         const currentPerf = Math.round(
           coursePrediction.currentPerformance || 0,
         );
         const predictedMin = coursePrediction.prediction.min;
         const predictedMax = coursePrediction.prediction.max;
-        const avgPredicted = (predictedMin + predictedMax) / 2;
 
-        // Determine status based on predicted grade and confidence
         let status = "On Track";
-        if (predictedMin >= 85 && currentPerf >= 75) {
-          status = "On Track";
-        } else if (predictedMin >= 75 && currentPerf >= 65) {
-          status = "On Track";
-        } else if (predictedMin >= 65 && currentPerf >= 55) {
-          status = "Watch";
-        } else if (predictedMin >= 60 && currentPerf >= 50) {
-          status = "Watch";
-        } else {
-          status = "At Risk";
-        }
-
-        // Override to At Risk if predicted minimum is below 60
         if (predictedMin < 60) {
           status = "At Risk";
+        } else if (predictedMin < 70) {
+          status = "Watch";
         }
 
-        const adviceText = "Keep up consistent effort to improve your grade.";
-
         const prediction = {
-          predictedRange: {
-            min: predictedMin,
-            max: predictedMax,
-          },
+          predictedRange: { min: predictedMin, max: predictedMax },
           status,
           confidence: coursePrediction.prediction.confidence,
           usedAI: coursePrediction.prediction.usedAI,
@@ -429,18 +444,14 @@ export function Performance() {
             similarity: Math.round(sc.similarity * 100),
             reason: sc.reason,
           })),
-          recommendation: adviceText,
+          recommendation: "Keep up consistent effort to improve your grade.",
         };
 
-        setPredictions((prev) => ({
-          ...prev,
-          [courseId]: prediction,
-        }));
+        setPredictions((prev) => ({ ...prev, [courseId]: prediction }));
       }
     } catch (err) {
-      console.error(" Error fetching predictions:", err);
+      console.error(" Error predicting course:", err);
     } finally {
-      // Clear loading state
       setCourses((prev) =>
         prev.map((c) => (c.id === courseId ? { ...c, isLoading: false } : c)),
       );

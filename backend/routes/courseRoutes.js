@@ -37,4 +37,6 @@ router
   .put(courseController.updateCourse)
   .delete(courseController.deleteCourse);
 
+router.route("/:id/predict").post(courseController.predictSingleCourse);
+
 module.exports = router;

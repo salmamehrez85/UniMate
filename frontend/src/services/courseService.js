@@ -120,6 +120,27 @@ export const getPredictedGPA = async () => {
   }
 };
 
+// Run AI prediction for one active course and save result to its DB document
+export const predictCourse = async (courseId) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/courses/${courseId}/predict`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+      },
+    );
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to predict course grade");
+    }
+    return data;
+  } catch (error) {
+    console.error("Error predicting course:", error);
+    throw error;
+  }
+};
+
 // Trigger a fresh AI-powered GPA prediction and save to DB
 export const refreshPredictedGPA = async () => {
   try {
