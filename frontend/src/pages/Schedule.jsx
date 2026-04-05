@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { ScheduleHeader } from "../components/Schedule/ScheduleHeader";
 import { WeekGrid } from "../components/Schedule/WeekGrid";
+import { CalendarGrid } from "../components/Schedule/CalendarGrid";
 import { EmptySchedule } from "../components/Schedule/EmptySchedule";
 import { getCourses } from "../services/courseService";
+import { List, LayoutGrid } from "lucide-react";
 
 // Maps abbreviated day tokens to full day names
 const DAY_MAP = {
@@ -99,6 +101,7 @@ function buildScheduleMap(courses) {
 export function Schedule() {
   const [activeCourses, setActiveCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [view, setView] = useState("list");
 
   useEffect(() => {
     getCourses()
@@ -133,9 +136,44 @@ export function Schedule() {
 
   return (
     <div className="mt-20 px-6 pb-24 md:pb-6 space-y-6">
-      <ScheduleHeader />
+      {/* Header + toggle */}
+      <div className="flex items-start justify-between gap-4">
+        <ScheduleHeader />
+        {hasAnySchedule && (
+          <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1 flex-shrink-0 mt-1">
+            <button
+              onClick={() => setView("list")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                view === "list"
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}>
+              <List className="w-4 h-4" />
+              List
+            </button>
+            <button
+              onClick={() => setView("grid")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                view === "grid"
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}>
+              <LayoutGrid className="w-4 h-4" />
+              Grid
+            </button>
+          </div>
+        )}
+      </div>
 
-      {hasAnySchedule ? <WeekGrid schedule={scheduleMap} /> : <EmptySchedule />}
+      {hasAnySchedule ? (
+        view === "grid" ? (
+          <CalendarGrid schedule={scheduleMap} />
+        ) : (
+          <WeekGrid schedule={scheduleMap} />
+        )
+      ) : (
+        <EmptySchedule />
+      )}
     </div>
   );
 }
