@@ -10,7 +10,7 @@ import { Register } from "./pages/Register";
 import { Tasks } from "./pages/Tasks";
 import { AIChat } from "./components/AIChat";
 import { Settings } from "./components/Settings";
-import { WeeklySchedule } from "./components/WeeklySchedule";
+import { Schedule } from "./pages/Schedule";
 import { Navigation } from "./components/Navigation";
 import { Header } from "./components/Header";
 import { getAuthToken, logout as logoutService } from "./services/authService";
@@ -105,7 +105,7 @@ export default function App() {
       case "chat":
         return <AIChat />;
       case "schedule":
-        return <WeeklySchedule />;
+        return <Schedule />;
       case "settings":
         return <Settings onLogout={handleLogout} />;
       default:

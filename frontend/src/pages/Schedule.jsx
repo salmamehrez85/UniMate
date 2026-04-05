@@ -1,0 +1,130 @@
+import { useEffect, useState } from "react";
+import { ScheduleHeader } from "../components/Schedule/ScheduleHeader";
+import { WeekGrid } from "../components/Schedule/WeekGrid";
+import { EmptySchedule } from "../components/Schedule/EmptySchedule";
+import { getCourses } from "../services/courseService";
+
+// Maps abbreviated day tokens to full day names
+const DAY_MAP = {
+  // Full names
+  monday: "Monday",
+  tuesday: "Tuesday",
+  wednesday: "Wednesday",
+  thursday: "Thursday",
+  friday: "Friday",
+  saturday: "Saturday",
+  sunday: "Sunday",
+  // 3-letter abbreviations
+  mon: "Monday",
+  tue: "Tuesday",
+  wed: "Wednesday",
+  thu: "Thursday",
+  fri: "Friday",
+  sat: "Saturday",
+  sun: "Sunday",
+  // Short codes
+  m: "Monday",
+  t: "Tuesday",
+  w: "Wednesday",
+  th: "Thursday",
+  f: "Friday",
+  sa: "Saturday",
+  su: "Sunday",
+};
+
+/**
+ * Parse a course.schedule string like "Mon/Wed 10:00-11:30 Room 204"
+ * Returns: { days: ["Monday","Wednesday"], time: "10:00-11:30", location: "Room 204" }
+ */
+function parseSchedule(raw) {
+  if (!raw) return { days: [], time: "", location: "" };
+
+  // Extract time portion
+  const timeMatch = raw.match(/\d{1,2}:\d{2}(?:\s*[-–]\s*\d{1,2}:\d{2})?/);
+  const time = timeMatch ? timeMatch[0].replace(/\s/g, "") : "";
+
+  // Remove time, then split what remains into day tokens vs location
+  let remaining = raw.replace(timeMatch ? timeMatch[0] : "", "").trim();
+
+  // Collect day tokens first
+  const tokens = remaining.split(/[/,\s]+/).filter(Boolean);
+  const days = [];
+  const locationTokens = [];
+
+  tokens.forEach((token) => {
+    const key = token.toLowerCase().replace(/\./g, "");
+    if (DAY_MAP[key]) {
+      days.push(DAY_MAP[key]);
+    } else {
+      locationTokens.push(token);
+    }
+  });
+
+  const location = locationTokens.join(" ");
+  return { days, time, location };
+}
+
+/**
+ * Build a schedule map: { Monday: [{name, code, instructor, time}], ... }
+ */
+function buildScheduleMap(courses) {
+  const map = {};
+  courses.forEach((course) => {
+    const { days, time, location } = parseSchedule(course.schedule);
+    days.forEach((day) => {
+      if (!map[day]) map[day] = [];
+      map[day].push({
+        name: course.name,
+        code: course.code,
+        instructor: course.instructor || "",
+        time,
+        location,
+      });
+    });
+  });
+  return map;
+}
+
+export function Schedule() {
+  const [activeCourses, setActiveCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getCourses()
+      .then((data) => {
+        const courses = (data.courses || []).filter(
+          (c) => c.isOldCourse !== true,
+        );
+        setActiveCourses(courses);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const scheduleMap = buildScheduleMap(activeCourses);
+  const hasAnySchedule = activeCourses.some((c) => c.schedule);
+
+  if (loading) {
+    return (
+      <div className="mt-20 px-6">
+        <ScheduleHeader />
+        <div className="space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-32 rounded-xl border border-gray-100 bg-gray-50 animate-pulse"
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-20 px-6 pb-24 md:pb-6 space-y-6">
+      <ScheduleHeader />
+
+      {hasAnySchedule ? <WeekGrid schedule={scheduleMap} /> : <EmptySchedule />}
+    </div>
+  );
+}
