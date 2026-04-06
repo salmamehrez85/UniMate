@@ -164,6 +164,29 @@ export function GenerateEmailModal({
     const [subjectLine, ...rest] = draft.split("\n");
     const subject = subjectLine.replace(/^Subject:\s*/i, "").trim();
     const body = rest.join("\n").trim();
+
+    // Save to shared Email Professor history so it appears on the dashboard
+    try {
+      const saved = localStorage.getItem("emailProfessorHistory");
+      const history = saved ? JSON.parse(saved) : [];
+      const entry = {
+        id: Date.now().toString(),
+        courseCode: selected?.code || "",
+        courseName: selected?.name || selected?.title || "",
+        professor: selected?.instructor || "Professor",
+        purpose,
+        draft,
+        status: "awaiting_reply",
+        createdAt: new Date().toISOString(),
+      };
+      localStorage.setItem(
+        "emailProfessorHistory",
+        JSON.stringify([entry, ...history]),
+      );
+    } catch (_) {
+      // non-critical — don't block the email from opening
+    }
+
     const mailto = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = mailto;
   };
