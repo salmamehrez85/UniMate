@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { X, Mail, Sparkles, Copy, Send } from "lucide-react";
 
-const EMAIL_PURPOSES = [
+export const EMAIL_PURPOSES = [
   "Request Deadline Extension",
   "Ask Question / Clarification",
   "Notify Absence",
@@ -17,7 +17,7 @@ const getCourseLabel = (course) => {
   return `${code} - ${name} (${instructor})`;
 };
 
-const buildEmailDraft = ({
+export const buildEmailDraft = ({
   purpose,
   course,
   additionalContext,

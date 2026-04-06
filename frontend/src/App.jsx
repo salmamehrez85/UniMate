@@ -11,6 +11,7 @@ import { Tasks } from "./pages/Tasks";
 import { AIChat } from "./components/AIChat";
 import { Settings } from "./components/Settings";
 import { Schedule } from "./pages/Schedule";
+import { EmailProfessor } from "./pages/EmailProfessor";
 import { Navigation } from "./components/Navigation";
 import { Header } from "./components/Header";
 import { getAuthToken, logout as logoutService } from "./services/authService";
@@ -106,6 +107,8 @@ export default function App() {
         return <AIChat />;
       case "schedule":
         return <Schedule />;
+      case "email":
+        return <EmailProfessor />;
       case "settings":
         return <Settings onLogout={handleLogout} />;
       default:
