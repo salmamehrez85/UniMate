@@ -433,6 +433,9 @@ export function EmailProfessor() {
   // ── Stats ──────────────────────────────────────────────────────────────────
   const totalDrafts = history.length;
   const totalPending = history.filter((e) => e.status === "pending").length;
+  const totalAwaiting = history.filter(
+    (e) => e.status === "awaiting_reply",
+  ).length;
   const totalOpened = history.filter(
     (e) => e.status === "awaiting_reply" || e.status === "replied",
   ).length;
@@ -493,7 +496,7 @@ export function EmailProfessor() {
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3">
           <div className="p-2 bg-teal-50 rounded-lg">
             <Sparkles className="w-5 h-5 text-teal-500" />
@@ -519,6 +522,15 @@ export function EmailProfessor() {
           <div>
             <p className="text-2xl font-bold text-gray-800">{totalOpened}</p>
             <p className="text-xs text-gray-500">Sent</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3">
+          <div className="p-2 bg-amber-50 rounded-lg">
+            <Hourglass className="w-5 h-5 text-amber-500" />
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-gray-800">{totalAwaiting}</p>
+            <p className="text-xs text-gray-500">Awaiting Reply</p>
           </div>
         </div>
       </div>
