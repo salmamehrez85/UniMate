@@ -101,7 +101,7 @@ function buildScheduleMap(courses) {
 export function Schedule() {
   const [activeCourses, setActiveCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState("list");
+  const [view, setView] = useState("grid");
 
   useEffect(() => {
     getCourses()
