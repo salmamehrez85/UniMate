@@ -8,7 +8,7 @@ import { Summarizer } from "./pages/Summarizer";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 import { Tasks } from "./pages/Tasks";
-import { AIChat } from "./components/AIChat";
+import { AIChat } from "./pages/AIChat";
 import { Settings } from "./components/Settings";
 import { Schedule } from "./pages/Schedule";
 import { EmailProfessor } from "./pages/EmailProfessor";
