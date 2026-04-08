@@ -18,10 +18,12 @@ const authRoutes = require("./routes/authRoutes");
 const courseRoutes = require("./routes/courseRoutes");
 const quizRoutes = require("./routes/quizRoutes");
 const summarizeRoutes = require("./routes/summarizeRoutes");
+const chatRoutes = require("./routes/chatRoutes");
 app.use("/api/auth", authRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/quizzes", quizRoutes);
 app.use("/api/summarize", summarizeRoutes);
+app.use("/api/chat", chatRoutes);
 
 // Health check endpoint
 app.get("/health", (req, res) => {
