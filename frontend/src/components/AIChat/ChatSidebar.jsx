@@ -1,4 +1,13 @@
-import { MessageSquare, Trash2, Plus, Clock } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import {
+  MessageSquare,
+  Trash2,
+  Plus,
+  Clock,
+  Pencil,
+  Check,
+  X,
+} from "lucide-react";
 
 function timeAgo(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -12,12 +21,136 @@ function timeAgo(dateStr) {
   return new Date(dateStr).toLocaleDateString();
 }
 
+function SessionItem({ session, isActive, onSelect, onDelete, onRename }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(session.title);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (editing) {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }
+  }, [editing]);
+
+  const startEdit = (e) => {
+    e.stopPropagation();
+    setDraft(session.title);
+    setEditing(true);
+  };
+
+  const confirmEdit = () => {
+    const trimmed = draft.trim();
+    if (trimmed && trimmed !== session.title) {
+      onRename(session._id, trimmed);
+    }
+    setEditing(false);
+  };
+
+  const cancelEdit = () => {
+    setDraft(session.title);
+    setEditing(false);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      confirmEdit();
+    }
+    if (e.key === "Escape") cancelEdit();
+  };
+
+  return (
+    <div
+      onClick={() => !editing && onSelect(session._id)}
+      className={`group mx-2 mb-1 flex items-start gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-all ${
+        isActive
+          ? "bg-primary-50 border border-primary-100"
+          : "hover:bg-gray-50"
+      }`}>
+      <MessageSquare
+        className={`w-4 h-4 mt-0.5 shrink-0 ${isActive ? "text-primary-600" : "text-gray-400"}`}
+      />
+
+      <div className="flex-1 min-w-0">
+        {editing ? (
+          <input
+            ref={inputRef}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onClick={(e) => e.stopPropagation()}
+            maxLength={100}
+            className="w-full text-xs font-medium text-primary-700 bg-white border border-primary-300 rounded px-1.5 py-0.5 outline-none focus:ring-1 focus:ring-primary-400"
+          />
+        ) : (
+          <p
+            className={`text-xs font-medium truncate ${isActive ? "text-primary-700" : "text-gray-700"}`}>
+            {session.title}
+          </p>
+        )}
+        {!editing && (
+          <div className="flex items-center gap-1 mt-0.5">
+            <Clock className="w-3 h-3 text-gray-300" />
+            <span className="text-[10px] text-gray-400">
+              {timeAgo(session.updatedAt)}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Action buttons */}
+      {editing ? (
+        <div className="flex items-center gap-0.5 shrink-0">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              confirmEdit();
+            }}
+            className="p-1 rounded-md hover:bg-primary-50 text-primary-500 transition-all cursor-pointer"
+            title="Confirm rename">
+            <Check className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              cancelEdit();
+            }}
+            className="p-1 rounded-md hover:bg-gray-100 text-gray-400 transition-all cursor-pointer"
+            title="Cancel">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 shrink-0 transition-all">
+          <button
+            onClick={startEdit}
+            className="p-1 rounded-md hover:bg-primary-50 hover:text-primary-500 text-gray-400 transition-all cursor-pointer"
+            title="Rename chat">
+            <Pencil className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(session._id);
+            }}
+            className="p-1 rounded-md hover:bg-red-50 hover:text-red-500 text-gray-400 transition-all cursor-pointer"
+            title="Delete chat">
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function ChatSidebar({
   sessions,
   activeSessionId,
   onSelectSession,
   onNewChat,
   onDeleteSession,
+  onRenameSession,
   isLoading,
 }) {
   return (
@@ -29,7 +162,7 @@ export function ChatSidebar({
         </span>
         <button
           onClick={onNewChat}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors cursor-pointer"
           title="New chat">
           <Plus className="w-3.5 h-3.5" />
           New
@@ -56,47 +189,14 @@ export function ChatSidebar({
           </div>
         ) : (
           sessions.map((session) => (
-            <div
+            <SessionItem
               key={session._id}
-              onClick={() => onSelectSession(session._id)}
-              className={`group mx-2 mb-1 flex items-start gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-all ${
-                activeSessionId === session._id
-                  ? "bg-primary-50 border border-primary-100"
-                  : "hover:bg-gray-50"
-              }`}>
-              <MessageSquare
-                className={`w-4 h-4 mt-0.5 shrink-0 ${
-                  activeSessionId === session._id
-                    ? "text-primary-600"
-                    : "text-gray-400"
-                }`}
-              />
-              <div className="flex-1 min-w-0">
-                <p
-                  className={`text-xs font-medium truncate ${
-                    activeSessionId === session._id
-                      ? "text-primary-700"
-                      : "text-gray-700"
-                  }`}>
-                  {session.title}
-                </p>
-                <div className="flex items-center gap-1 mt-0.5">
-                  <Clock className="w-3 h-3 text-gray-300" />
-                  <span className="text-[10px] text-gray-400">
-                    {timeAgo(session.updatedAt)}
-                  </span>
-                </div>
-              </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDeleteSession(session._id);
-                }}
-                className="opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-red-50 hover:text-red-500 text-gray-400 transition-all shrink-0"
-                title="Delete chat">
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
+              session={session}
+              isActive={activeSessionId === session._id}
+              onSelect={onSelectSession}
+              onDelete={onDeleteSession}
+              onRename={onRenameSession}
+            />
           ))
         )}
       </div>

@@ -59,6 +59,22 @@ export const loadChatSession = async (sessionId) => {
   return data.session;
 };
 
+export const renameChatSession = async (sessionId, title) => {
+  const response = await fetch(`${API_BASE_URL}/chat/sessions/${sessionId}`, {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ title }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to rename chat session");
+  }
+
+  return data.session;
+};
+
 export const deleteChatSession = async (sessionId) => {
   const response = await fetch(`${API_BASE_URL}/chat/sessions/${sessionId}`, {
     method: "DELETE",

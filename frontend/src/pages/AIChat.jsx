@@ -9,6 +9,7 @@ import {
   getChatSessions,
   loadChatSession,
   deleteChatSession,
+  renameChatSession,
 } from "../services/chatService";
 
 export function AIChat() {
@@ -65,6 +66,20 @@ export function AIChat() {
       setSessions((prev) => prev.filter((s) => s._id !== sessionId));
       if (activeSessionId === sessionId) {
         handleNewChat();
+      }
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleRenameSession = async (sessionId, newTitle) => {
+    try {
+      await renameChatSession(sessionId, newTitle);
+      setSessions((prev) =>
+        prev.map((s) => (s._id === sessionId ? { ...s, title: newTitle } : s)),
+      );
+      if (activeSessionId === sessionId) {
+        setActiveSessionTitle(newTitle);
       }
     } catch (err) {
       setError(err.message);
@@ -139,6 +154,7 @@ export function AIChat() {
           onSelectSession={handleSelectSession}
           onNewChat={handleNewChat}
           onDeleteSession={handleDeleteSession}
+          onRenameSession={handleRenameSession}
           isLoading={sessionsLoading}
         />
 

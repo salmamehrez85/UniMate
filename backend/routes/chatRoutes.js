@@ -85,6 +85,28 @@ router.delete("/sessions/:id", protect, async (req, res) => {
   }
 });
 
+// PATCH /api/chat/sessions/:id — rename a session
+router.patch("/sessions/:id", protect, async (req, res) => {
+  const { title } = req.body;
+  if (!title || !title.trim()) {
+    return res.status(400).json({ error: "Title is required" });
+  }
+  try {
+    const session = await ChatSession.findOneAndUpdate(
+      { _id: req.params.id, user: req.user._id },
+      { title: title.trim().slice(0, 100) },
+      { new: true },
+    );
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+    return res.status(200).json({ session });
+  } catch (error) {
+    console.error("[Chat Session Rename Error]", error);
+    return res.status(500).json({ error: "Failed to rename chat session" });
+  }
+});
+
 // POST /api/chat/message — send a message; creates or updates a session
 router.post("/message", protect, async (req, res) => {
   const { messages, sessionId } = req.body;
