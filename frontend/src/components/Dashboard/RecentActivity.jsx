@@ -1,44 +1,12 @@
-import { CheckCircle2, BookOpen, FileText, Activity } from "lucide-react";
-
-const ACTIVITIES = [
-  {
-    id: 1,
-    title: "Completed Quiz: Data Structures",
-    subtitle: "Computer Science • 2 hours ago",
-    badge: "95%",
-    badgeColor: "text-emerald-600",
-    bgColor: "bg-emerald-100",
-    Icon: CheckCircle2,
-    iconColor: "text-emerald-600",
-  },
-  {
-    id: 2,
-    title: "Started new course: Advanced Calculus",
-    subtitle: "Mathematics • Yesterday",
-    badge: null,
-    bgColor: "bg-blue-100",
-    Icon: BookOpen,
-    iconColor: "text-primary-600",
-  },
-  {
-    id: 3,
-    title: "Submitted Assignment: Lab Report",
-    subtitle: "Physics • 2 days ago",
-    badge: "On time",
-    badgeColor: "text-purple-600",
-    bgColor: "bg-purple-100",
-    Icon: FileText,
-    iconColor: "text-purple-600",
-  },
-];
+import { Activity } from "lucide-react";
 
 function ActivityItem({ activity }) {
-  const IconComponent = activity.Icon;
+  const IconComponent = activity.Icon || Activity;
 
   return (
     <div className="flex items-start gap-4 pb-5 border-b border-gray-100 last:border-0 last:pb-0 hover:bg-gray-50 px-3 py-3 rounded transition-colors">
       <div
-        className={`w-12 h-12 ${activity.bgColor} rounded-full flex items-center justify-center flex-shrink-0`}>
+        className={`w-12 h-12 ${activity.bgColor} rounded-full flex items-center justify-center shrink-0`}>
         <IconComponent className={`w-6 h-6 ${activity.iconColor}`} />
       </div>
       <div className="flex-1 min-w-0">
@@ -49,7 +17,7 @@ function ActivityItem({ activity }) {
       </div>
       {activity.badge && (
         <span
-          className={`text-sm font-bold ${activity.badgeColor} bg-opacity-10 px-3 py-1.5 rounded-full flex-shrink-0`}>
+          className={`text-sm font-bold ${activity.badgeColor} bg-opacity-10 px-3 py-1.5 rounded-full shrink-0`}>
           {activity.badge}
         </span>
       )}
@@ -57,7 +25,7 @@ function ActivityItem({ activity }) {
   );
 }
 
-export function RecentActivity() {
+export function RecentActivity({ activities = [], loading = false }) {
   return (
     <div className="bg-white rounded-lg p-7 shadow-sm border border-gray-200">
       <h3 className="text-lg font-bold text-primary-900 mb-7 flex items-center gap-2">
@@ -65,9 +33,22 @@ export function RecentActivity() {
         Recent Activity
       </h3>
       <div className="space-y-5">
-        {ACTIVITIES.map((activity) => (
-          <ActivityItem key={activity.id} activity={activity} />
-        ))}
+        {loading ? (
+          [1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-16 bg-gray-100 rounded-lg animate-pulse"
+            />
+          ))
+        ) : activities.length === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-6">
+            No recent activity yet. Start studying!
+          </p>
+        ) : (
+          activities.map((activity) => (
+            <ActivityItem key={activity.id} activity={activity} />
+          ))
+        )}
       </div>
     </div>
   );

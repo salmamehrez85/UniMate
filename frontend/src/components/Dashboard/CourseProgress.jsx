@@ -1,18 +1,11 @@
 import { BookOpen } from "lucide-react";
 
-const COURSES_DATA = [
-  { id: 1, name: "Mathematics", progress: 75, color: "bg-blue-500" },
-  { id: 2, name: "Physics", progress: 60, color: "bg-teal-500" },
-  { id: 3, name: "Computer Science", progress: 80, color: "bg-purple-500" },
-  { id: 4, name: "Chemistry", progress: 45, color: "bg-orange-500" },
-];
-
 function CourseItem({ course }) {
   return (
     <div className="pb-1">
       <div className="flex items-center justify-between mb-3">
         <span className="font-semibold text-gray-900 text-base">
-          {course.name || course.title}
+          {course.name}
         </span>
         <span className="text-sm font-bold text-primary-600 bg-primary-50 px-3 py-1.5 rounded-full">
           {course.progress}%
@@ -28,7 +21,7 @@ function CourseItem({ course }) {
   );
 }
 
-export function CourseProgress() {
+export function CourseProgress({ courses = [], loading = false }) {
   return (
     <div className="bg-white rounded-lg p-7 shadow-sm border border-gray-200">
       <div className="flex items-center justify-between mb-7">
@@ -41,9 +34,22 @@ export function CourseProgress() {
         </button>
       </div>
       <div className="space-y-6">
-        {COURSES_DATA.map((course) => (
-          <CourseItem key={course.id} course={course} />
-        ))}
+        {loading ? (
+          [1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="h-10 bg-gray-100 rounded-lg animate-pulse"
+            />
+          ))
+        ) : courses.length === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-6">
+            No active courses found.
+          </p>
+        ) : (
+          courses.map((course) => (
+            <CourseItem key={course.id} course={course} />
+          ))
+        )}
       </div>
     </div>
   );
