@@ -1,6 +1,7 @@
 const express = require("express");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { protect } = require("../middleware/auth");
+const ChatSession = require("../model/ChatSession");
 
 const router = express.Router();
 
@@ -22,8 +23,71 @@ Guidelines:
 - If a question is outside your knowledge, say so honestly
 - Maintain context across the conversation`;
 
+// Generate a short title from the first user message using Gemini
+async function generateTitle(firstUserMessage, genAI) {
+  try {
+    const model = genAI.getGenerativeModel({
+      model: process.env.GEMINI_MODEL || "gemini-2.5-flash",
+    });
+    const result = await model.generateContent(
+      `Generate a short (max 6 words) chat title for this message. Return ONLY the title, no punctuation, no quotes:\n\n"${firstUserMessage.slice(0, 200)}"`,
+    );
+    return result.response.text().trim().slice(0, 100);
+  } catch {
+    return firstUserMessage.slice(0, 60);
+  }
+}
+
+// GET /api/chat/sessions — list all sessions for the user
+router.get("/sessions", protect, async (req, res) => {
+  try {
+    const sessions = await ChatSession.find({ user: req.user._id })
+      .select("_id title createdAt updatedAt")
+      .sort({ updatedAt: -1 });
+    return res.status(200).json({ sessions });
+  } catch (error) {
+    console.error("[Chat Sessions List Error]", error);
+    return res.status(500).json({ error: "Failed to fetch chat sessions" });
+  }
+});
+
+// GET /api/chat/sessions/:id — load a single session with messages
+router.get("/sessions/:id", protect, async (req, res) => {
+  try {
+    const session = await ChatSession.findOne({
+      _id: req.params.id,
+      user: req.user._id,
+    });
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+    return res.status(200).json({ session });
+  } catch (error) {
+    console.error("[Chat Session Load Error]", error);
+    return res.status(500).json({ error: "Failed to load chat session" });
+  }
+});
+
+// DELETE /api/chat/sessions/:id — delete a session
+router.delete("/sessions/:id", protect, async (req, res) => {
+  try {
+    const session = await ChatSession.findOneAndDelete({
+      _id: req.params.id,
+      user: req.user._id,
+    });
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("[Chat Session Delete Error]", error);
+    return res.status(500).json({ error: "Failed to delete chat session" });
+  }
+});
+
+// POST /api/chat/message — send a message; creates or updates a session
 router.post("/message", protect, async (req, res) => {
-  const { messages } = req.body;
+  const { messages, sessionId } = req.body;
 
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: "Messages array is required" });
@@ -41,20 +105,48 @@ router.post("/message", protect, async (req, res) => {
       systemInstruction: SYSTEM_PROMPT,
     });
 
-    // Convert messages to Gemini history format
-    // All messages except the last one become history
     const history = messages.slice(0, -1).map((msg) => ({
       role: msg.role === "user" ? "user" : "model",
       parts: [{ text: msg.content }],
     }));
 
     const lastMessage = messages[messages.length - 1];
-
     const chat = model.startChat({ history });
     const result = await chat.sendMessage(lastMessage.content);
     const responseText = result.response.text();
 
-    return res.status(200).json({ reply: responseText });
+    // Persist to DB
+    const allMessages = [
+      ...messages,
+      { role: "assistant", content: responseText },
+    ];
+
+    let session;
+    if (sessionId) {
+      session = await ChatSession.findOneAndUpdate(
+        { _id: sessionId, user: req.user._id },
+        { messages: allMessages, updatedAt: new Date() },
+        { new: true },
+      );
+    }
+
+    if (!session) {
+      // New session — generate a title from the first user message
+      const firstUserMsg =
+        messages.find((m) => m.role === "user")?.content || "New Chat";
+      const title = await generateTitle(firstUserMsg, genAI);
+      session = await ChatSession.create({
+        user: req.user._id,
+        title,
+        messages: allMessages,
+      });
+    }
+
+    return res.status(200).json({
+      reply: responseText,
+      sessionId: session._id,
+      title: session.title,
+    });
   } catch (error) {
     console.error("[Chat Error]", error);
     return res.status(500).json({ error: "Failed to get AI response" });

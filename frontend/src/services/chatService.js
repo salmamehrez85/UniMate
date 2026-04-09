@@ -13,11 +13,11 @@ const getAuthHeaders = () => {
   };
 };
 
-export const sendChatMessage = async (messages) => {
+export const sendChatMessage = async (messages, sessionId = null) => {
   const response = await fetch(`${API_BASE_URL}/chat/message`, {
     method: "POST",
     headers: getAuthHeaders(),
-    body: JSON.stringify({ messages }),
+    body: JSON.stringify({ messages, sessionId }),
   });
 
   const data = await response.json();
@@ -26,5 +26,50 @@ export const sendChatMessage = async (messages) => {
     throw new Error(data.error || "Failed to get AI response");
   }
 
-  return data.reply;
+  return { reply: data.reply, sessionId: data.sessionId, title: data.title };
+};
+
+export const getChatSessions = async () => {
+  const response = await fetch(`${API_BASE_URL}/chat/sessions`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to fetch chat sessions");
+  }
+
+  return data.sessions;
+};
+
+export const loadChatSession = async (sessionId) => {
+  const response = await fetch(`${API_BASE_URL}/chat/sessions/${sessionId}`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to load chat session");
+  }
+
+  return data.session;
+};
+
+export const deleteChatSession = async (sessionId) => {
+  const response = await fetch(`${API_BASE_URL}/chat/sessions/${sessionId}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to delete chat session");
+  }
+
+  return data;
 };
