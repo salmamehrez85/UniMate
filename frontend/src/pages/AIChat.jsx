@@ -11,6 +11,7 @@ import {
   deleteChatSession,
   renameChatSession,
 } from "../services/chatService";
+import { getCourses } from "../services/courseService";
 
 export function AIChat() {
   const [messages, setMessages] = useState([]);
@@ -22,6 +23,7 @@ export function AIChat() {
   const [activeSessionId, setActiveSessionId] = useState(null);
   const [activeSessionTitle, setActiveSessionTitle] = useState(null);
   const [sessionsLoading, setSessionsLoading] = useState(true);
+  const [activeCourses, setActiveCourses] = useState([]);
 
   // Load session list on mount
   const fetchSessions = useCallback(async () => {
@@ -35,9 +37,21 @@ export function AIChat() {
     }
   }, []);
 
+  // Load active courses on mount for dynamic suggestion cards
+  const fetchActiveCourses = useCallback(async () => {
+    try {
+      const data = await getCourses();
+      const active = (data.courses || []).filter((c) => !c.isOldCourse);
+      setActiveCourses(active);
+    } catch {
+      // non-critical, falls back to static prompts
+    }
+  }, []);
+
   useEffect(() => {
     fetchSessions();
-  }, [fetchSessions]);
+    fetchActiveCourses();
+  }, [fetchSessions, fetchActiveCourses]);
 
   const handleSelectSession = async (sessionId) => {
     if (sessionId === activeSessionId) return;
@@ -161,7 +175,10 @@ export function AIChat() {
         {/* Chat panel */}
         <div className="flex-1 flex flex-col bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           {messages.length === 0 && !isLoading ? (
-            <WelcomeScreen onSelectPrompt={handleSelectPrompt} />
+            <WelcomeScreen
+              onSelectPrompt={handleSelectPrompt}
+              courses={activeCourses}
+            />
           ) : (
             <MessageList messages={messages} isLoading={isLoading} />
           )}
