@@ -73,26 +73,29 @@ export function ChatInput({
           />
         )}
 
-        {/* ── Send button ── */}
-        <button
-          onClick={onSend}
-          disabled={isLoading || (!value.trim() && !isRecording)}
-          className="w-9 h-9 rounded-xl bg-primary-600 text-white flex items-center justify-center hover:bg-primary-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0">
-          <Send className="w-4 h-4" />
-        </button>
+        {/* ── Send button — visible only when there is text to send ── */}
+        {(value.trim() || isRecording) && (
+          <button
+            onClick={onSend}
+            disabled={isLoading}
+            title="Send message"
+            aria-label="Send message"
+            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0 bg-primary-600 text-gray-500 hover:bg-gray-200 hover:scale-105 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed animate-in fade-in zoom-in-75 duration-150">
+            <Send className="w-4 h-4" />
+          </button>
+        )}
 
-        {/* ── Mic button ── */}
+        {/* ── Mic button — always visible; hides when recording shows above ── */}
         <button
           onClick={onToggleRecording}
           disabled={isLoading}
           title={isRecording ? "Stop recording" : "Start voice input"}
           aria-label={isRecording ? "Stop recording" : "Start voice input"}
-          className={`relative w-9 h-9 rounded-xl flex items-center justify-center transition-colors shrink-0 disabled:opacity-40 disabled:cursor-not-allowed ${
+          className={`relative w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0 cursor-pointer hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${
             isRecording
               ? "bg-red-500 text-white hover:bg-red-600"
               : "bg-gray-100 text-gray-500 hover:bg-gray-200"
           }`}>
-          {/* Expanding pulse ring shown only while recording */}
           {isRecording && (
             <span className="absolute inset-0 rounded-xl bg-red-400 animate-pulse-ring" />
           )}

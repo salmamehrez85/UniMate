@@ -1,8 +1,17 @@
-import { Bot, User, Volume2 } from "lucide-react";
+import { Bot, User, Volume2, Copy, Check } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { useState } from "react";
 
 export function MessageBubble({ message, onSpeak }) {
   const isUser = message.role === "user";
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(message.content).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   return (
     <div
@@ -30,17 +39,38 @@ export function MessageBubble({ message, onSpeak }) {
               <ReactMarkdown>{message.content}</ReactMarkdown>
             </div>
           </div>
-          {/* Speaker replay button — appears on hover */}
-          {onSpeak && (
+          {/* Action buttons — appear on hover */}
+          <div className="absolute -bottom-2.5 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+            {/* Copy */}
             <button
-              onClick={() => onSpeak(message.content)}
-              title="Read aloud"
-              aria-label="Read message aloud"
-              className="absolute -bottom-2.5 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 px-2 py-0.5 bg-white border border-gray-200 rounded-full text-gray-400 hover:text-primary-600 hover:border-primary-300 shadow-sm text-xs">
-              <Volume2 className="w-3 h-3" />
-              Read aloud
+              onClick={handleCopy}
+              title={copied ? "Copied!" : "Copy message"}
+              aria-label={copied ? "Copied!" : "Copy message"}
+              className={`flex items-center gap-1 px-2 py-0.5 bg-white border rounded-full shadow-sm text-xs transition-all cursor-pointer active:scale-95 ${
+                copied
+                  ? "border-green-300 text-green-600"
+                  : "border-gray-200 text-gray-400 hover:text-primary-600 hover:border-primary-300"
+              }`}>
+              {copied ? (
+                <Check className="w-3 h-3" />
+              ) : (
+                <Copy className="w-3 h-3" />
+              )}
+              {copied ? "Copied!" : "Copy"}
             </button>
-          )}
+
+            {/* Read aloud */}
+            {onSpeak && (
+              <button
+                onClick={() => onSpeak(message.content)}
+                title="Read aloud"
+                aria-label="Read message aloud"
+                className="flex items-center gap-1 px-2 py-0.5 bg-white border border-gray-200 rounded-full text-gray-400 hover:text-primary-600 hover:border-primary-300 shadow-sm text-xs transition-all cursor-pointer active:scale-95">
+                <Volume2 className="w-3 h-3" />
+                Read aloud
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>
