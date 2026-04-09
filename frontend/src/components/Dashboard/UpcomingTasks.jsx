@@ -1,29 +1,5 @@
 import { ListTodo } from "lucide-react";
 
-const UPCOMING_TASKS = [
-  {
-    id: 1,
-    title: "Submit Math Assignment",
-    course: "Mathematics",
-    daysLeft: 0,
-    priority: "high",
-  },
-  {
-    id: 2,
-    title: "Read Chapter 5",
-    course: "Physics",
-    daysLeft: 1,
-    priority: "medium",
-  },
-  {
-    id: 3,
-    title: "Prepare Presentation",
-    course: "Computer Science",
-    daysLeft: 2,
-    priority: "high",
-  },
-];
-
 function getDaysLeftText(daysLeft) {
   if (daysLeft === 0) return "Due today";
   if (daysLeft === 1) return "1 day left";
@@ -55,7 +31,7 @@ function TaskItem({ task }) {
   );
 }
 
-export function UpcomingTasks() {
+export function UpcomingTasks({ tasks = [], loading = false }) {
   return (
     <div className="bg-white rounded-lg p-7 shadow-sm border border-gray-200">
       <div className="flex items-center justify-between mb-7">
@@ -68,9 +44,20 @@ export function UpcomingTasks() {
         </button>
       </div>
       <div className="space-y-4">
-        {UPCOMING_TASKS.map((task) => (
-          <TaskItem key={task.id} task={task} />
-        ))}
+        {loading ? (
+          [1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-20 bg-gray-100 rounded-lg animate-pulse"
+            />
+          ))
+        ) : tasks.length === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-6">
+            No upcoming tasks. You&apos;re all caught up!
+          </p>
+        ) : (
+          tasks.map((task) => <TaskItem key={task.id} task={task} />)
+        )}
       </div>
     </div>
   );
