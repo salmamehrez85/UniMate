@@ -7,9 +7,10 @@ export function ChatInput({
   onChange,
   onSend,
   isLoading,
-  // Voice props (wired up in Phase 2 & 3; safe to omit until then)
+  // Voice props
   isRecording = false,
   onToggleRecording = () => {},
+  barHeights, // live mic bar data from useSpeechRecognition
   isSpeaking = false,
   onStopSpeaking = () => {},
 }) {
@@ -54,7 +55,7 @@ export function ChatInput({
         {/* Textarea OR waveform+status while recording */}
         {isRecording ? (
           <div className="flex-1 flex items-center gap-3 min-h-7">
-            <WaveformVisualizer isActive />
+            <WaveformVisualizer isActive barHeights={barHeights} />
             <span className="text-sm text-red-500 font-medium animate-pulse select-none">
               Listening…
             </span>

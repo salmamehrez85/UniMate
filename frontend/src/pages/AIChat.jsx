@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { ChatHeader } from "../components/AIChat/ChatHeader";
 import { MessageList } from "../components/AIChat/MessageList";
 import { ChatInput } from "../components/AIChat/ChatInput";
 import { WelcomeScreen } from "../components/AIChat/WelcomeScreen";
 import { ChatSidebar } from "../components/AIChat/ChatSidebar";
+import { useSpeechRecognition } from "../hooks/useSpeechRecognition";
 import {
   sendChatMessage,
   getChatSessions,
@@ -19,9 +20,29 @@ export function AIChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Voice UI state (behaviour wired in Phases 2 & 3)
-  const [isRecording, setIsRecording] = useState(false);
+  // Phase 3 — TTS speaking state (stub until Phase 3)
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const handleStopSpeaking = () => setIsSpeaking(false);
+
+  // Phase 2 — Speech-to-Text
+  // inputAtRecordStart captures whatever the user had typed before hitting the mic,
+  // so voice transcript is appended rather than replacing existing text.
+  const inputAtRecordStart = useRef("");
+  const {
+    isRecording,
+    barHeights,
+    toggle: voiceToggle,
+  } = useSpeechRecognition({
+    onTranscript: (text) => setInput(text),
+  });
+
+  const handleToggleRecording = () => {
+    // Pass the current input as a prefix so the hook prepends it
+    voiceToggle(inputAtRecordStart.current);
+    if (!isRecording) {
+      inputAtRecordStart.current = input.trim();
+    }
+  };
 
   const [sessions, setSessions] = useState([]);
   const [activeSessionId, setActiveSessionId] = useState(null);
@@ -152,10 +173,6 @@ export function AIChat() {
     handleSend(prompt);
   };
 
-  // Voice handlers — stub implementations replaced in Phases 2 & 3
-  const handleToggleRecording = () => setIsRecording((prev) => !prev);
-  const handleStopSpeaking = () => setIsSpeaking(false);
-
   return (
     <div
       className="mt-20 flex flex-col"
@@ -204,6 +221,7 @@ export function AIChat() {
             isLoading={isLoading}
             isRecording={isRecording}
             onToggleRecording={handleToggleRecording}
+            barHeights={barHeights}
             isSpeaking={isSpeaking}
             onStopSpeaking={handleStopSpeaking}
           />
