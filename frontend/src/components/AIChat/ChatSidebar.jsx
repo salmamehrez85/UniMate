@@ -125,7 +125,7 @@ function SessionItem({ session, isActive, onSelect, onDelete, onRename }) {
         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 shrink-0 transition-all">
           <button
             onClick={startEdit}
-            className="p-1 rounded-md hover:bg-primary-50 hover:text-primary-500 text-gray-400 transition-all cursor-pointer"
+            className="p-1 rounded-md hover:bg-primary-500 hover:text-teal-600 text-gray-400 transition-all cursor-pointer"
             title="Rename chat">
             <Pencil className="w-3.5 h-3.5" />
           </button>
@@ -162,7 +162,7 @@ export function ChatSidebar({
         </span>
         <button
           onClick={onNewChat}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-primary-600 bg-primary-100 hover:text-teal-600 hover:bg-primary-200 rounded-lg transition-colors cursor-pointer"
           title="New chat">
           <Plus className="w-3.5 h-3.5" />
           New
