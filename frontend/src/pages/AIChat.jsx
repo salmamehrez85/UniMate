@@ -19,6 +19,10 @@ export function AIChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Voice UI state (behaviour wired in Phases 2 & 3)
+  const [isRecording, setIsRecording] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
   const [sessions, setSessions] = useState([]);
   const [activeSessionId, setActiveSessionId] = useState(null);
   const [activeSessionTitle, setActiveSessionTitle] = useState(null);
@@ -148,6 +152,10 @@ export function AIChat() {
     handleSend(prompt);
   };
 
+  // Voice handlers — stub implementations replaced in Phases 2 & 3
+  const handleToggleRecording = () => setIsRecording((prev) => !prev);
+  const handleStopSpeaking = () => setIsSpeaking(false);
+
   return (
     <div
       className="mt-20 flex flex-col"
@@ -194,6 +202,10 @@ export function AIChat() {
             onChange={setInput}
             onSend={() => handleSend()}
             isLoading={isLoading}
+            isRecording={isRecording}
+            onToggleRecording={handleToggleRecording}
+            isSpeaking={isSpeaking}
+            onStopSpeaking={handleStopSpeaking}
           />
         </div>
       </div>
