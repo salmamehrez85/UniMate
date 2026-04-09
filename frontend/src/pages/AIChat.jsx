@@ -5,6 +5,7 @@ import { ChatInput } from "../components/AIChat/ChatInput";
 import { WelcomeScreen } from "../components/AIChat/WelcomeScreen";
 import { ChatSidebar } from "../components/AIChat/ChatSidebar";
 import { useSpeechRecognition } from "../hooks/useSpeechRecognition";
+import { useSpeechSynthesis } from "../hooks/useSpeechSynthesis";
 import {
   sendChatMessage,
   getChatSessions,
@@ -20,9 +21,12 @@ export function AIChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Phase 3 — TTS speaking state (stub until Phase 3)
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const handleStopSpeaking = () => setIsSpeaking(false);
+  // Phase 3 — Text-to-Speech
+  const { isSpeaking, speak: ttsSpeak, stop: ttsStop } = useSpeechSynthesis();
+  const handleStopSpeaking = ttsStop;
+
+  // Track whether the last message was sent via voice so we auto-speak the reply
+  const sentViaVoiceRef = useRef(false);
 
   // Phase 2 — Speech-to-Text
   // inputAtRecordStart captures whatever the user had typed before hitting the mic,
@@ -37,11 +41,12 @@ export function AIChat() {
   });
 
   const handleToggleRecording = () => {
-    // Pass the current input as a prefix so the hook prepends it
-    voiceToggle(inputAtRecordStart.current);
     if (!isRecording) {
+      // Starting — capture existing input to prepend, mark as voice-send
       inputAtRecordStart.current = input.trim();
+      sentViaVoiceRef.current = true;
     }
+    voiceToggle(inputAtRecordStart.current);
   };
 
   const [sessions, setSessions] = useState([]);
@@ -147,6 +152,12 @@ export function AIChat() {
       setActiveSessionId(sessionId);
       setActiveSessionTitle(title);
 
+      // Auto-speak the reply only when the user sent via voice
+      if (sentViaVoiceRef.current) {
+        ttsSpeak(reply);
+        sentViaVoiceRef.current = false;
+      }
+
       // Refresh sidebar — upsert session in list
       setSessions((prev) => {
         const exists = prev.find((s) => s._id === sessionId);
@@ -205,7 +216,11 @@ export function AIChat() {
               courses={activeCourses}
             />
           ) : (
-            <MessageList messages={messages} isLoading={isLoading} />
+            <MessageList
+              messages={messages}
+              isLoading={isLoading}
+              onSpeak={ttsSpeak}
+            />
           )}
 
           {error && (

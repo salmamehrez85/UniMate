@@ -19,7 +19,7 @@ function TypingIndicator() {
   );
 }
 
-export function MessageList({ messages, isLoading }) {
+export function MessageList({ messages, isLoading, onSpeak }) {
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -29,7 +29,11 @@ export function MessageList({ messages, isLoading }) {
   return (
     <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
       {messages.map((msg, index) => (
-        <MessageBubble key={index} message={msg} />
+        <MessageBubble
+          key={index}
+          message={msg}
+          onSpeak={msg.role === "assistant" ? onSpeak : undefined}
+        />
       ))}
       {isLoading && <TypingIndicator />}
       <div ref={bottomRef} />
