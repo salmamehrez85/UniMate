@@ -39,9 +39,6 @@ export function UpcomingTasks({ tasks = [], loading = false }) {
           <ListTodo className="w-5 h-5" />
           Upcoming Tasks
         </h3>
-        <button className="text-sm text-primary-600 hover:text-primary-700 font-semibold transition-colors hover:underline">
-          View All
-        </button>
       </div>
       <div className="space-y-4">
         {loading ? (

@@ -6,7 +6,7 @@ import { RecentActivity } from "../components/Dashboard/RecentActivity";
 import { QuickActions } from "../components/Dashboard/QuickActions";
 import { useDashboardData } from "../hooks/useDashboardData";
 
-export function Dashboard() {
+export function Dashboard({ onNavigate }) {
   const {
     userName,
     tasksToday,
@@ -29,7 +29,7 @@ export function Dashboard() {
           <StatsCards stats={stats} loading={loading} />
         </div>
 
-        <QuickActions />
+        <QuickActions onNavigate={onNavigate} />
 
         {/* Main Content Grid */}
         <div className="grid md:grid-cols-2 gap-7 pt-2">

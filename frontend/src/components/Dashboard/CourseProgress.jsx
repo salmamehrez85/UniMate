@@ -29,9 +29,6 @@ export function CourseProgress({ courses = [], loading = false }) {
           <BookOpen className="w-5 h-5" />
           Course Progress
         </h3>
-        <button className="text-sm text-primary-600 hover:text-primary-700 font-semibold transition-colors hover:underline">
-          View All
-        </button>
       </div>
       <div className="space-y-6">
         {loading ? (
