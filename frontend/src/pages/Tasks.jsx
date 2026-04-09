@@ -3,6 +3,7 @@ import { TasksHeader } from "../components/Tasks/TasksHeader";
 import { TasksSummary } from "../components/Tasks/TasksSummary";
 import { TasksFilters } from "../components/Tasks/TasksFilters";
 import { TasksList } from "../components/Tasks/TasksList";
+import { AddTaskModal } from "../components/Tasks/AddTaskModal";
 import { getCourses, updateCourse } from "../services/courseService";
 import { getDaysUntil } from "../components/Tasks/taskUtils";
 
@@ -27,6 +28,13 @@ export function Tasks() {
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [query, setQuery] = useState("");
   const [updatingTaskId, setUpdatingTaskId] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+
+  // Active (non-old) courses available for the modal dropdown
+  const activeCourses = useMemo(
+    () => courses.filter((c) => c.isOldCourse !== true),
+    [courses],
+  );
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -102,6 +110,45 @@ export function Tasks() {
       });
   }, [tasks, statusFilter, priorityFilter, query]);
 
+  const handleAddTask = async ({
+    title,
+    description,
+    courseId,
+    priority,
+    dueDate,
+    status,
+  }) => {
+    const course = courses.find((c) => c._id === courseId);
+    if (!course) throw new Error("Course not found.");
+
+    const newTask = {
+      id: crypto.randomUUID(),
+      title,
+      description: description || null,
+      status: status || "todo",
+      priority,
+      dueDate: dueDate || null,
+    };
+
+    const updatedCourse = {
+      ...course,
+      tasks: [...(course.tasks || []), newTask],
+    };
+
+    // Optimistic update
+    setCourses((prev) =>
+      prev.map((c) => (c._id === courseId ? updatedCourse : c)),
+    );
+
+    try {
+      await updateCourse(courseId, updatedCourse);
+    } catch (err) {
+      // Roll back on failure
+      setCourses((prev) => prev.map((c) => (c._id === courseId ? course : c)));
+      throw err;
+    }
+  };
+
   const handleToggleStatus = async (task) => {
     if (!task?.courseId) return;
     const targetStatus = task.status === "done" ? "todo" : "done";
@@ -149,7 +196,7 @@ export function Tasks() {
 
   return (
     <div className="mt-20 space-y-6">
-      <TasksHeader />
+      <TasksHeader onAddTask={() => setShowAddModal(true)} />
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
@@ -176,6 +223,14 @@ export function Tasks() {
           updatingTaskId={updatingTaskId}
         />
       </div>
+
+      {showAddModal && activeCourses.length > 0 && (
+        <AddTaskModal
+          courses={activeCourses}
+          onClose={() => setShowAddModal(false)}
+          onAdd={handleAddTask}
+        />
+      )}
     </div>
   );
 }
