@@ -1298,12 +1298,47 @@ exports.summarizeUploadedDocument = async (req, res) => {
 - importantDefinitions: 5-7 must-know terms with definitions.
 - studyPlan: 3-4 steps — a tight revision plan for an upcoming test.
 - possibleQuestions: 5-6 realistic instructor-style exam questions.`,
-      custom: `CUSTOM MODE — balanced output:
-- overview: 2-3 sentences.
-- keyTopics: 4-6 items.
-- importantDefinitions: 4-6 terms.
-- studyPlan: 3-5 steps.
-- possibleQuestions: 3-5 questions.`,
+      custom: (() => {
+        const len = summaryOptions.length || "medium";
+        const focus = summaryOptions.focus || "general";
+        const counts = {
+          short: {
+            overview: "1-2",
+            topics: "3-4",
+            defs: "3-5",
+            plan: "2-3",
+            questions: "2-3",
+          },
+          medium: {
+            overview: "2-3",
+            topics: "4-5",
+            defs: "4-6",
+            plan: "3-4",
+            questions: "3-4",
+          },
+          long: {
+            overview: "3-4",
+            topics: "5-7",
+            defs: "6-8",
+            plan: "4-6",
+            questions: "4-6",
+          },
+        }[len] || {
+          overview: "2-3",
+          topics: "4-5",
+          defs: "4-6",
+          plan: "3-4",
+          questions: "3-4",
+        };
+        const skipPlan = focus === "exam";
+        const moreQuestions = focus === "exam";
+        return `CUSTOM MODE (length: ${len}, focus: ${focus}):
+- overview: ${counts.overview} sentences.
+- keyTopics: ${counts.topics} items${focus === "exam" ? " — emphasise what is most testable" : focus === "action" ? " — emphasise what to practise first" : ""}.
+- importantDefinitions: ${counts.defs} terms with short definitions.
+- studyPlan: ${skipPlan ? "return []" : `${counts.plan} ordered steps`}.
+- possibleQuestions: ${moreQuestions ? `${counts.questions} realistic exam-style questions` : `${counts.questions} likely questions`}.`;
+      })(),
     };
 
     const activeModeInstructions =
@@ -1321,11 +1356,7 @@ Rules:
 - If Arabic is selected, every response sentence must be Arabic.
 - If Arabic is selected, use natural academic Arabic phrasing and include original English technical terms in parentheses when relevant.
 - If the source lacks evidence for a field, return [] or "N/A" instead of inventing details.
-- Keep JSON keys in English exactly as requested.
-- keyTopics: 4-8 items
-- importantDefinitions: 4-8 items, each with concept + short definition
-- studyPlan: 3-6 actionable steps
-- possibleQuestions: 3-6 likely assessment questions`;
+- Keep JSON keys in English exactly as requested.`;
 
     const parts = [{ text: promptText }];
 

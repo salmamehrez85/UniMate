@@ -1590,21 +1590,74 @@ const generateStructuredSummary = async ({
 
     const modeInstructions = buildSummaryModeInstructions(mode);
     const modeOutputRules = buildSummaryModeOutputRules(mode);
-    const { instructionText } = buildSummaryOptionInstructions(
-      mode,
-      normalizedOptions,
-    );
+    const { instructionText, normalizedOptions: opts } =
+      buildSummaryOptionInstructions(mode, normalizedOptions);
     const contextLine = courseContext
       ? `Course context: ${courseContext.code || "N/A"} - ${courseContext.name || "N/A"}`
       : "Course context: Not provided";
+
+    // For custom mode: derive field counts from length + focus selections
+    const customModeBlock = (() => {
+      const len = opts.length || "medium";
+      const focus = opts.focus || "general";
+
+      // counts per length
+      const counts =
+        {
+          short: {
+            summary: "1-2",
+            outcomes: "3-4",
+            connections: "2-3",
+            terms: "3-5",
+            plan: "2-3",
+            questions: "2-3",
+            actions: "2-3",
+          },
+          medium: {
+            summary: "2-3",
+            outcomes: "4-5",
+            connections: "3-4",
+            terms: "5-7",
+            plan: "3-4",
+            questions: "3-4",
+            actions: "3-4",
+          },
+          long: {
+            summary: "3-4",
+            outcomes: "5-6",
+            connections: "4-5",
+            terms: "7-10",
+            plan: "5-6",
+            questions: "4-6",
+            actions: "4-5",
+          },
+        }[len] || counts.medium;
+
+      // which sections to emphasise vs. skip based on focus
+      const focusSections = {
+        general: { examFocus: true, connections: true, actions: true },
+        exam: { examFocus: true, connections: false, actions: false },
+        action: { examFocus: false, connections: false, actions: true },
+        detailed: { examFocus: false, connections: true, actions: false },
+        quick: { examFocus: false, connections: false, actions: true },
+      }[focus] || { examFocus: true, connections: true, actions: true };
+
+      return `CUSTOM MODE (length: ${len}, focus: ${focus}):
+- summary: ${counts.summary} sentences synthesizing the material.
+- plainLanguageSummary: explain in simpler words what this is really about.
+- learningOutcomes: ${counts.outcomes} bullets starting with verbs (explain, compare, apply, analyze).
+- conceptConnections: ${focusSections.connections ? `${counts.connections} bullets showing how topics relate` : "return []"}
+- examFocus: ${focusSections.examFocus ? `${counts.questions} specific bullets about what is most testable` : "return []"}
+- importantTerms: ${counts.terms} key terms.
+- studyPlan: ${counts.plan} ordered steps.
+- possibleQuestions: ${counts.questions} likely quiz/exam questions.
+- actionItems: ${focusSections.actions ? `${counts.actions} concrete next actions` : "return []"}`;
+    })();
 
     const prompt = `You are an academic study assistant. Create a structured study summary from the provided content.
 
 Summary mode: ${mode}
 Mode guidance: ${modeInstructions}
-Mode output style: ${modeOutputRules.summaryStyle}
-Mode-specific rules:
-- ${modeOutputRules.focusRules.join("\n- ")}
 Option guidance: ${instructionText}
 ${contextLine}
 
@@ -1615,8 +1668,7 @@ Return valid JSON with these fields only. Populate ONLY the fields listed for th
 
 ${
   mode === "quick"
-    ? `
-QUICK MODE — keep it scannable and fast:
+    ? `QUICK MODE — keep it scannable and fast:
 - summary: 1-2 sentences max, the core idea only.
 - plainLanguageSummary: return "N/A"
 - learningOutcomes: 4-6 short bullet points (key takeaways), start with a verb.
@@ -1625,11 +1677,9 @@ QUICK MODE — keep it scannable and fast:
 - importantTerms: return []
 - studyPlan: return []
 - possibleQuestions: return []
-- actionItems: 2-3 concrete next steps.
-`
+- actionItems: 2-3 concrete next steps.`
     : mode === "detailed"
-      ? `
-DETAILED MODE — comprehensive, nothing skipped:
+      ? `DETAILED MODE — comprehensive, nothing skipped:
 - summary: 3-4 sentences synthesizing the full picture.
 - plainLanguageSummary: explain in simpler words what this is really about and why it matters.
 - learningOutcomes: 5-6 bullets starting with verbs (explain, compare, apply, analyze).
@@ -1638,11 +1688,9 @@ DETAILED MODE — comprehensive, nothing skipped:
 - importantTerms: 7-10 key terms.
 - studyPlan: 5-6 ordered steps for deep learning.
 - possibleQuestions: 4-5 likely questions.
-- actionItems: return []
-`
+- actionItems: return []`
       : mode === "exam"
-        ? `
-EXAM FOCUS MODE — exam prep only, no fluff:
+        ? `EXAM FOCUS MODE — exam prep only, no fluff:
 - summary: 2 sentences max, what is most testable.
 - plainLanguageSummary: return "N/A"
 - learningOutcomes: return []
@@ -1651,20 +1699,8 @@ EXAM FOCUS MODE — exam prep only, no fluff:
 - importantTerms: 5-7 must-know terms with short definitions.
 - studyPlan: 3-4 steps — a tight revision plan for an upcoming test.
 - possibleQuestions: 5-6 realistic instructor-style exam questions.
-- actionItems: return []
-`
-        : `
-CUSTOM MODE — balanced, follow user options:
-- summary: 2-4 sentences synthesizing the material.
-- plainLanguageSummary: explain in simpler words what this content is really about.
-- learningOutcomes: 4-6 bullets starting with verbs.
-- conceptConnections: 3-5 bullets showing how topics connect.
-- examFocus: 3-5 bullets about what is most testable.
-- importantTerms: 5-10 key terms.
-- studyPlan: 3-6 ordered steps.
-- possibleQuestions: 3-6 likely quiz/exam questions.
-- actionItems: 3-6 concrete actions.
-`
+- actionItems: return []`
+        : customModeBlock
 }
 
 Constraints:
