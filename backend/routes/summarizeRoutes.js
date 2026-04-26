@@ -85,7 +85,8 @@ router.get("/test-key", async (req, res) => {
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 10 * 1024 * 1024,
+    fileSize: 10 * 1024 * 1024, // 10 MB per actual file
+    fieldSize: 50 * 1024 * 1024, // 50 MB for text fields (base64 images in ocrImages)
   },
   fileFilter: (req, file, cb) => {
     const allowedMimeTypes = [

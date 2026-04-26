@@ -24,6 +24,7 @@ const INITIAL_FORM = {
   fileText: "",
   isScannedPdf: false,
   ocrImages: [],
+  handwrittenImages: [],
 };
 
 const MODE_DEFAULTS = {
@@ -42,6 +43,14 @@ const SUPPORTED_UPLOAD_EXTENSIONS = [
   ".rtf",
   ".log",
 ];
+
+const SUPPORTED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+];
+const MAX_HANDWRITTEN_IMAGES = 10;
 
 const MAX_UPLOAD_SIZE_MB = 10;
 const MAX_UPLOAD_SIZE_BYTES = MAX_UPLOAD_SIZE_MB * 1024 * 1024;
@@ -141,6 +150,8 @@ export function Summarizer({ onNavigate }) {
         fileText: value === "file" ? prev.fileText : "",
         isScannedPdf: value === "file" ? prev.isScannedPdf : false,
         ocrImages: value === "file" ? prev.ocrImages : [],
+        handwrittenImages:
+          value === "handwritten" ? prev.handwrittenImages : [],
       }));
       return;
     }
@@ -179,6 +190,47 @@ export function Summarizer({ onNavigate }) {
 
   const handleToggleAdvanced = () => {
     setIsAdvancedOpen((prev) => !prev);
+  };
+
+  const handleHandwrittenSelect = (event) => {
+    const files = Array.from(event.target.files || []);
+
+    if (files.length === 0) {
+      setForm((prev) => ({ ...prev, handwrittenImages: [] }));
+      return;
+    }
+
+    if (files.length > MAX_HANDWRITTEN_IMAGES) {
+      setError(
+        `You can upload at most ${MAX_HANDWRITTEN_IMAGES} images at once.`,
+      );
+      event.target.value = "";
+      return;
+    }
+
+    const invalidType = files.find(
+      (f) => !SUPPORTED_IMAGE_TYPES.includes(f.type),
+    );
+    if (invalidType) {
+      setError(
+        `Unsupported image format: ${invalidType.name}. Use JPG, PNG, or WebP.`,
+      );
+      event.target.value = "";
+      return;
+    }
+
+    const oversized = files.find((f) => f.size > MAX_UPLOAD_SIZE_BYTES);
+    if (oversized) {
+      setError(
+        `Image too large: ${oversized.name}. Max size is ${MAX_UPLOAD_SIZE_MB} MB per image.`,
+      );
+      event.target.value = "";
+      return;
+    }
+
+    setForm((prev) => ({ ...prev, handwrittenImages: files }));
+    setSummaryResult(null);
+    setError("");
   };
 
   const handleFileSelect = async (event) => {
@@ -311,13 +363,49 @@ export function Summarizer({ onNavigate }) {
       return;
     }
 
+    if (
+      form.sourceType === "handwritten" &&
+      (!Array.isArray(form.handwrittenImages) ||
+        form.handwrittenImages.length === 0)
+    ) {
+      setError("Please upload at least one image of your handwritten notes.");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       setError("");
 
       let response;
 
-      if (form.sourceType === "file") {
+      if (form.sourceType === "handwritten") {
+        // Convert each image File to base64 and send via the existing OCR path
+        const imageDataArray = await Promise.all(
+          form.handwrittenImages.map(
+            (file) =>
+              new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                  const base64 = reader.result; // data:image/...;base64,...
+                  resolve({ mimeType: file.type, data: base64.split(",")[1] });
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+              }),
+          ),
+        );
+
+        const uploadData = new FormData();
+        uploadData.append("sourceType", "handwritten");
+        uploadData.append("mode", form.mode);
+        uploadData.append("language", form.language);
+        uploadData.append("length", form.length);
+        uploadData.append("focus", form.focus);
+        uploadData.append("isHandwritten", "true");
+        uploadData.append("ocrImages", JSON.stringify(imageDataArray));
+
+        response = await summarizeUploadedContent(uploadData);
+      } else if (form.sourceType === "file") {
         const uploadData = new FormData();
         uploadData.append("sourceType", "file");
         uploadData.append("mode", form.mode);
@@ -450,6 +538,7 @@ export function Summarizer({ onNavigate }) {
         onChange={handleFieldChange}
         onToggleAdvanced={handleToggleAdvanced}
         onFileSelect={handleFileSelect}
+        onHandwrittenSelect={handleHandwrittenSelect}
         onSubmit={handleSubmit}
       />
 

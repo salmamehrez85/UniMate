@@ -96,6 +96,16 @@ const callGeminiUploadSummary = async (parts) => {
 };
 
 const normalizeImageData = (imageData) => {
+  // Already a normalized { mimeType, data } object (sent by handwritten notes path)
+  if (
+    imageData &&
+    typeof imageData === "object" &&
+    typeof imageData.mimeType === "string" &&
+    typeof imageData.data === "string"
+  ) {
+    return { mimeType: imageData.mimeType, data: imageData.data };
+  }
+
   if (!imageData || typeof imageData !== "string") return null;
 
   const trimmed = imageData.trim();
@@ -1257,11 +1267,17 @@ exports.summarizeUploadedDocument = async (req, res) => {
       });
     }
 
-    // OCR-only path: images with no text layer
-    const systemInstructionText =
-      `You are an expert academic assistant. The input is a scanned document image. ` +
-      `First, transcribe the text accurately (ignoring noise/artifacts), then format it into ` +
-      `the UniMate study schema (overview, keyTopics, importantDefinitions, studyPlan, possibleQuestions).`;
+    // OCR-only path: images with no text layer OR handwritten notes
+    const isHandwritten = req.body.isHandwritten === "true";
+
+    const systemInstructionText = isHandwritten
+      ? `You are an expert academic assistant. The input is a photo of handwritten student notes. ` +
+        `First, carefully transcribe ALL handwritten text you can read (ignore ruled lines or paper artifacts), ` +
+        `then organise the content into the UniMate study schema ` +
+        `(overview, keyTopics, importantDefinitions, studyPlan, possibleQuestions).`
+      : `You are an expert academic assistant. The input is a scanned document image. ` +
+        `First, transcribe the text accurately (ignoring noise/artifacts), then format it into ` +
+        `the UniMate study schema (overview, keyTopics, importantDefinitions, studyPlan, possibleQuestions).`;
 
     const promptText = `${systemInstructionText}
 

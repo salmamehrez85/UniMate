@@ -33,6 +33,7 @@ export function SummarizerForm({
   onChange,
   onToggleAdvanced,
   onFileSelect,
+  onHandwrittenSelect,
   onSubmit,
   formId = "summarizer-form",
 }) {
@@ -53,6 +54,7 @@ export function SummarizerForm({
             <option value="text">Paste Text</option>
             <option value="courseOutline">Course Outline</option>
             <option value="file">Upload File</option>
+            <option value="handwritten">Handwritten Notes</option>
           </select>
         </label>
 
@@ -194,6 +196,45 @@ export function SummarizerForm({
               );
             })()}
         </label>
+      ) : form.sourceType === "handwritten" ? (
+        <div className="flex flex-col gap-3">
+          <label className="flex flex-col gap-2">
+            <span className="text-sm font-medium text-gray-700">
+              Upload Handwritten Notes
+            </span>
+            <input
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              multiple
+              onChange={onHandwrittenSelect}
+              className="px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 file:mr-3 file:px-3 file:py-1.5 file:rounded-md file:border-0 file:bg-primary-100 file:text-primary-800 file:font-medium hover:file:bg-primary-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
+            />
+            <span className="text-xs text-gray-500">
+              Supported: .jpg, .jpeg, .png, .webp — up to 10 images, max 10 MB
+              each.
+            </span>
+          </label>
+          {form.handwrittenImages && form.handwrittenImages.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {form.handwrittenImages.map((file, idx) => (
+                <div key={idx} className="relative">
+                  <img
+                    src={URL.createObjectURL(file)}
+                    alt={`Page ${idx + 1}`}
+                    className="w-20 h-24 object-cover rounded-lg border border-gray-200"
+                  />
+                  <span className="absolute bottom-1 left-1 bg-black/60 text-white text-[10px] px-1 rounded">
+                    {idx + 1}
+                  </span>
+                </div>
+              ))}
+              <span className="self-center text-xs text-primary-700 font-medium">
+                {form.handwrittenImages.length} image
+                {form.handwrittenImages.length > 1 ? "s" : ""} selected
+              </span>
+            </div>
+          )}
+        </div>
       ) : (
         <label className="flex flex-col gap-2">
           <span className="text-sm font-medium text-gray-700">
