@@ -38,6 +38,14 @@ const userSchema = new mongoose.Schema(
       data: { type: mongoose.Schema.Types.Mixed, default: null },
       cachedAt: { type: Date, default: null },
     },
+    resetPasswordToken: {
+      type: String,
+      select: false,
+    },
+    resetPasswordExpire: {
+      type: Date,
+      select: false,
+    },
   },
   {
     timestamps: true,

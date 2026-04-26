@@ -237,7 +237,7 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-gradient-to-r from-[#54B3A4] to-[#163C60] text-white py-3 rounded-lg font-semibold hover:from-[#48a094] hover:to-[#0f2a45] focus:outline-none focus:ring-2 focus:ring-[#54B3A4] focus:ring-offset-2 transition disabled:opacity-50 disabled:cursor-not-allowed">
+          className="w-full bg-gradient-to-r from-[#54B3A4] to-[#163C60] text-white py-3 rounded-lg font-semibold hover:from-[#48a094] hover:to-[#0f2a45] focus:outline-none focus:ring-2 focus:ring-[#54B3A4] focus:ring-offset-2 transition cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
           {loading ? "Creating account..." : "Create Account"}
         </button>
       </form>
@@ -259,7 +259,7 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
         <button
           type="button"
           onClick={onSwitchToLogin}
-          className="text-primary-600 hover:text-primary-700 font-semibold">
+          className="text-primary-600 hover:text-primary-800 font-semibold cursor-pointer hover:underline transition-colors duration-200">
           Sign in instead
         </button>
       </div>

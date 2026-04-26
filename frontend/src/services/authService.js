@@ -84,3 +84,27 @@ export const logout = () => {
   removeAuthToken();
   removeUserData();
 };
+
+// Request password reset email
+export const forgotPassword = async (email) => {
+  const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || "Failed to send reset email");
+  return data;
+};
+
+// Reset password with token
+export const resetPassword = async (token, password) => {
+  const response = await fetch(`${API_BASE_URL}/auth/reset-password/${token}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password }),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || "Failed to reset password");
+  return data;
+};

@@ -7,6 +7,7 @@ import { Quizzes } from "./pages/Quizzes";
 import { Summarizer } from "./pages/Summarizer";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
+import { ResetPassword } from "./pages/ResetPassword";
 import { Tasks } from "./pages/Tasks";
 import { AIChat } from "./pages/AIChat";
 import { Settings } from "./components/Settings";
@@ -22,12 +23,24 @@ export default function App() {
   const [authView, setAuthView] = useState("login"); // 'login' or 'register'
   const [activeView, setActiveView] = useState("dashboard");
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [resetToken, setResetToken] = useState(null);
 
   // Check for existing auth token on mount
   useEffect(() => {
+    // Check for password reset token in URL
+    const params = new URLSearchParams(window.location.search);
+    const urlResetToken = params.get("resetToken");
+    if (urlResetToken) {
+      setResetToken(urlResetToken);
+      return;
+    }
+
     const token = getAuthToken();
     if (token) {
       setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false);
+      setAuthView("login");
     }
   }, []);
 
@@ -49,6 +62,18 @@ export default function App() {
   };
 
   // Show authentication pages if not logged in
+  if (resetToken) {
+    return (
+      <ResetPassword
+        resetToken={resetToken}
+        onBackToLogin={() => {
+          setResetToken(null);
+          setAuthView("login");
+        }}
+      />
+    );
+  }
+
   if (!isAuthenticated) {
     if (authView === "login") {
       return (
