@@ -24,8 +24,486 @@ body {
     "Helvetica Neue",
     sans-serif;
   background-color: #faf9f6;
+  font-size: var(--app-font-size, 16px);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+}
+
+/* ── Themes ─────────────────────────────────────────────── */
+:root[data-theme="light"],
+:root:not([data-theme]) {
+  --bg-app: #f9fafb;
+  --bg-card: #ffffff;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+}
+
+:root[data-theme="dark"] {
+  --bg-app: #0d1117;
+  --bg-card: #161b22;
+  --bg-card-hover: #1c2128;
+  --bg-input: #0d1117;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-disabled: #484f58;
+  --border-color: #30363d;
+  --border-subtle: #21262d;
+  --accent-blue: #58a6ff;
+  --accent-teal: #3fb9a8;
+}
+
+body {
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+}
+
+/* ═══════════════════════════════════════════════════════
+   DARK MODE OVERRIDES
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Body ── */
+:root[data-theme="dark"] body {
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+}
+
+/* ── Backgrounds ── */
+:root[data-theme="dark"] .bg-white {
+  background-color: var(--bg-card) !important;
+}
+:root[data-theme="dark"] .bg-gray-50 {
+  background-color: #0d1117 !important;
+}
+:root[data-theme="dark"] .bg-gray-100 {
+  background-color: #1c2128 !important;
+}
+:root[data-theme="dark"] .bg-gray-200 {
+  background-color: #21262d !important;
+}
+
+/* Stat-card icon chips */
+:root[data-theme="dark"] .bg-blue-50 {
+  background-color: #1f3358 !important;
+}
+:root[data-theme="dark"] .bg-emerald-50 {
+  background-color: #12261e !important;
+}
+:root[data-theme="dark"] .bg-purple-50 {
+  background-color: #271d40 !important;
+}
+:root[data-theme="dark"] .bg-amber-50 {
+  background-color: #2d1f0e !important;
+}
+:root[data-theme="dark"] .bg-teal-50 {
+  background-color: #0d2e2b !important;
+}
+:root[data-theme="dark"] .bg-red-50 {
+  background-color: #3d1515 !important;
+}
+:root[data-theme="dark"] .bg-orange-50 {
+  background-color: #2d1f0e !important;
+}
+:root[data-theme="dark"] .bg-pink-50 {
+  background-color: #2e1030 !important;
+}
+:root[data-theme="dark"] .bg-indigo-50 {
+  background-color: #1a1f40 !important;
+}
+
+/* ── Borders ── */
+:root[data-theme="dark"] .border-gray-100,
+:root[data-theme="dark"] .border-gray-200,
+:root[data-theme="dark"] .border-gray-300 {
+  border-color: var(--border-color) !important;
+}
+:root[data-theme="dark"] .divide-gray-100 > * + *,
+:root[data-theme="dark"] .divide-y > * + * {
+  border-color: var(--border-subtle) !important;
+}
+
+/* ── Text ── */
+:root[data-theme="dark"] .text-gray-900,
+:root[data-theme="dark"] .text-gray-800,
+:root[data-theme="dark"] .text-gray-700 {
+  color: var(--text-primary) !important;
+}
+:root[data-theme="dark"] .text-gray-600,
+:root[data-theme="dark"] .text-gray-500 {
+  color: var(--text-secondary) !important;
+}
+:root[data-theme="dark"] .text-gray-400 {
+  color: var(--text-disabled) !important;
+}
+
+/* Brand accent text stays bright */
+:root[data-theme="dark"] .text-primary-600,
+:root[data-theme="dark"] .text-primary-700 {
+  color: var(--accent-blue) !important;
+}
+:root[data-theme="dark"] .text-primary-900 {
+  color: var(--text-primary) !important;
+}
+:root[data-theme="dark"] .text-teal-600,
+:root[data-theme="dark"] .text-teal-500 {
+  color: var(--accent-teal) !important;
+}
+
+/* ── Labels ── */
+:root[data-theme="dark"] label {
+  color: #adbac7 !important;
+}
+
+/* ── Header ── */
+:root[data-theme="dark"] header {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* ── Sidebar ── */
+:root[data-theme="dark"] aside {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+:root[data-theme="dark"] aside .border-b,
+:root[data-theme="dark"] aside .border-t {
+  border-color: var(--border-color) !important;
+}
+:root[data-theme="dark"] aside .bg-gradient-to-b {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--bg-card)
+  ) !important;
+}
+/* Nav items default */
+:root[data-theme="dark"] aside nav button {
+  color: #adbac7 !important;
+}
+:root[data-theme="dark"] aside nav button:hover {
+  background-color: var(--bg-card-hover) !important;
+  color: var(--text-primary) !important;
+}
+/* Nav items active */
+:root[data-theme="dark"] aside nav button.bg-primary-50 {
+  background-color: #1f3358 !important;
+  border-color: #388bfd44 !important;
+  color: #79c0ff !important;
+}
+/* Section labels */
+:root[data-theme="dark"] aside nav h3 {
+  color: #484f58 !important;
+}
+
+/* ── Mobile bottom nav ── */
+:root[data-theme="dark"] nav.md\:hidden {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+:root[data-theme="dark"] nav.md\:hidden button {
+  color: var(--text-secondary) !important;
+}
+:root[data-theme="dark"] nav.md\:hidden button.text-primary-600 {
+  color: var(--accent-blue) !important;
+}
+
+/* ── Inputs & selects ── */
+:root[data-theme="dark"]
+  input:not([type="checkbox"]):not([type="radio"]):not([disabled]),
+:root[data-theme="dark"] textarea,
+:root[data-theme="dark"] select {
+  background-color: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border-color: #30363d !important;
+}
+:root[data-theme="dark"] input::placeholder,
+:root[data-theme="dark"] textarea::placeholder {
+  color: var(--text-disabled) !important;
+}
+:root[data-theme="dark"] input[disabled] {
+  background-color: var(--bg-card) !important;
+  color: var(--text-disabled) !important;
+}
+:root[data-theme="dark"] select option {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+}
+
+/* ── Filter pills (Tasks / Courses) ── */
+:root[data-theme="dark"] .bg-gray-100.text-gray-700 {
+  background-color: #1c2128 !important;
+  color: #adbac7 !important;
+}
+
+/* ── Hover backgrounds ── */
+:root[data-theme="dark"] .hover\:bg-gray-50:hover {
+  background-color: var(--bg-card-hover) !important;
+}
+:root[data-theme="dark"] .hover\:bg-gray-100:hover {
+  background-color: #1c2128 !important;
+}
+:root[data-theme="dark"] .hover\:bg-gray-200:hover {
+  background-color: #21262d !important;
+}
+:root[data-theme="dark"] .hover\:bg-primary-50:hover {
+  background-color: #1f3358 !important;
+}
+
+/* ── Sign Out button ── */
+:root[data-theme="dark"] .bg-red-50 {
+  background-color: #3d1515 !important;
+}
+:root[data-theme="dark"] .hover\:bg-red-100:hover {
+  background-color: #4a1a1a !important;
+}
+:root[data-theme="dark"] .text-red-600 {
+  color: #ff7b72 !important;
+}
+
+/* ── Status / priority badges (keep colors readable) ── */
+:root[data-theme="dark"] .bg-red-100 {
+  background-color: #3d1515 !important;
+  color: #ff7b72 !important;
+}
+:root[data-theme="dark"] .bg-amber-100 {
+  background-color: #2d1f0e !important;
+  color: #e3b341 !important;
+}
+:root[data-theme="dark"] .bg-emerald-100 {
+  background-color: #12261e !important;
+  color: #56d364 !important;
+}
+:root[data-theme="dark"] .bg-blue-100 {
+  background-color: #1f3358 !important;
+  color: #79c0ff !important;
+}
+:root[data-theme="dark"] .bg-purple-100 {
+  background-color: #271d40 !important;
+  color: #bc8cff !important;
+}
+:root[data-theme="dark"] .bg-teal-100 {
+  background-color: #0d2e2b !important;
+  color: #3fb9a8 !important;
+}
+:root[data-theme="dark"] .bg-orange-100 {
+  background-color: #2d1f0e !important;
+  color: #ffa657 !important;
+}
+
+/* ── Progress bars ── */
+:root[data-theme="dark"] .bg-gray-200.rounded-full {
+  background-color: #21262d !important;
+}
+
+/* ── Modals / overlays ── */
+:root[data-theme="dark"] .bg-black\/50,
+:root[data-theme="dark"] .bg-black\/60 {
+  background-color: rgba(0, 0, 0, 0.75) !important;
+}
+
+/* ── Shadow softening on dark ── */
+:root[data-theme="dark"] .shadow-sm,
+:root[data-theme="dark"] .shadow {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* ── Tasks header banner (teal gradient → dark card) ── */
+:root[data-theme="dark"] .bg-linear-to-br.from-teal-50,
+:root[data-theme="dark"] .bg-gradient-to-br.from-teal-50 {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+:root[data-theme="dark"] .border-teal-100 {
+  border-color: var(--border-color) !important;
+}
+
+/* ── Schedule calendar ── */
+/* Course event blocks — replace pastel with dark saturated tones */
+:root[data-theme="dark"] .bg-sky-100 {
+  background-color: #1a3a5c !important;
+}
+:root[data-theme="dark"] .text-sky-800 {
+  color: #93c5fd !important;
+}
+:root[data-theme="dark"] .border-sky-200 {
+  border-color: #1e4976 !important;
+}
+
+:root[data-theme="dark"] .bg-teal-100 {
+  background-color: #0d3330 !important;
+}
+:root[data-theme="dark"] .text-teal-800 {
+  color: #5eead4 !important;
+}
+:root[data-theme="dark"] .border-teal-200 {
+  border-color: #134e48 !important;
+}
+
+:root[data-theme="dark"] .bg-violet-100 {
+  background-color: #2e1d5e !important;
+}
+:root[data-theme="dark"] .text-violet-800 {
+  color: #c4b5fd !important;
+}
+:root[data-theme="dark"] .border-violet-200 {
+  border-color: #3d2878 !important;
+}
+
+:root[data-theme="dark"] .bg-pink-100 {
+  background-color: #3b1240 !important;
+}
+:root[data-theme="dark"] .text-pink-800 {
+  color: #f9a8d4 !important;
+}
+:root[data-theme="dark"] .border-pink-200 {
+  border-color: #5c1d67 !important;
+}
+
+:root[data-theme="dark"] .bg-amber-100 {
+  background-color: #3a2510 !important;
+}
+:root[data-theme="dark"] .text-amber-800 {
+  color: #fcd34d !important;
+}
+:root[data-theme="dark"] .border-amber-100,
+:root[data-theme="dark"] .border-amber-200 {
+  border-color: #4a2e12 !important;
+}
+
+:root[data-theme="dark"] .bg-emerald-100 {
+  background-color: #0f3324 !important;
+}
+:root[data-theme="dark"] .text-emerald-800 {
+  color: #6ee7b7 !important;
+}
+:root[data-theme="dark"] .border-emerald-200 {
+  border-color: #145232 !important;
+}
+
+:root[data-theme="dark"] .bg-indigo-100 {
+  background-color: #1e2a52 !important;
+}
+:root[data-theme="dark"] .text-indigo-800 {
+  color: #a5b4fc !important;
+}
+:root[data-theme="dark"] .border-indigo-200 {
+  border-color: #283670 !important;
+}
+
+/* Today column highlight */
+:root[data-theme="dark"] .bg-teal-50\/60 {
+  background-color: rgba(13, 51, 48, 0.4) !important;
+}
+:root[data-theme="dark"] .bg-teal-50\/10 {
+  background-color: rgba(13, 51, 48, 0.15) !important;
+}
+
+/* ── AI Recommendations panel ── */
+:root[data-theme="dark"] .bg-blue-50 {
+  background-color: #161f30 !important;
+}
+:root[data-theme="dark"] .border-blue-100 {
+  border-color: #1e2e47 !important;
+}
+:root[data-theme="dark"] .text-blue-900 {
+  color: #93c5fd !important;
+}
+:root[data-theme="dark"] .text-blue-400 {
+  color: #60a5fa !important;
+}
+:root[data-theme="dark"] .bg-blue-100 {
+  background-color: #1e2e47 !important;
+}
+:root[data-theme="dark"] .text-blue-700 {
+  color: #93c5fd !important;
+}
+:root[data-theme="dark"] .text-blue-800 {
+  color: #93c5fd !important;
+}
+:root[data-theme="dark"] .hover\:bg-blue-200:hover {
+  background-color: #253b5e !important;
+}
+:root[data-theme="dark"] .border-blue-200 {
+  border-color: #1e2e47 !important;
+}
+
+/* ── Quizzes — Study Targets (amber) ── */
+:root[data-theme="dark"] .bg-amber-50 {
+  background-color: #211a08 !important;
+}
+:root[data-theme="dark"] .border-b.border-amber-100 {
+  border-color: #3a2a0f !important;
+}
+:root[data-theme="dark"] .text-amber-900 {
+  color: #fcd34d !important;
+}
+:root[data-theme="dark"] .text-amber-800 {
+  color: #fbbf24 !important;
+}
+:root[data-theme="dark"] .text-amber-700 {
+  color: #fcd34d !important;
+}
+:root[data-theme="dark"] .text-amber-600 {
+  color: #fbbf24 !important;
+}
+:root[data-theme="dark"] .border-amber-200 {
+  border-color: #4a2e12 !important;
+}
+:root[data-theme="dark"] .border-amber-300 {
+  border-color: #92400e !important;
+}
+
+/* ── Quizzes / Tasks — Weak Areas / error panels (red) ── */
+:root[data-theme="dark"] .bg-red-50 {
+  background-color: #1e0f0f !important;
+}
+:root[data-theme="dark"] .border-red-100 {
+  border-color: #3d1515 !important;
+}
+:root[data-theme="dark"] .border-red-200 {
+  border-color: #4a1a1a !important;
+}
+:root[data-theme="dark"] .text-red-700 {
+  color: #fca5a5 !important;
+}
+:root[data-theme="dark"] .text-red-600 {
+  color: #f87171 !important;
+}
+
+/* ── Form section headers (e.g., GenerateQuizForm) ── */
+:root[data-theme="dark"] section > div.border-b {
+  background-color: #398fac !important;
+}
+
+/* ── AI Prediction Insights — similar course gradient cards ── */
+:root[data-theme="dark"] .from-teal-50 {
+  --tw-gradient-from: #0d3330 !important;
+}
+:root[data-theme="dark"] .to-cyan-50 {
+  --tw-gradient-to: #0c2430 !important;
+}
+
+/* ── Missing gray text overrides ── */
+:root[data-theme="dark"] .text-gray-900 {
+  color: var(--text-primary) !important;
+}
+:root[data-theme="dark"] .text-gray-800 {
+  color: #adbac7 !important;
+}
+:root[data-theme="dark"] .text-gray-700 {
+  color: #adbac7 !important;
+}
+:root[data-theme="dark"] .hover\:bg-gray-200:hover {
+  background-color: #21262d !important;
+}
+
+/* ── Welcome banner: white text in dark mode ── */
+:root[data-theme="dark"] .welcome-banner h2,
+:root[data-theme="dark"] .welcome-banner p {
+  color: white !important;
 }
 
 * {

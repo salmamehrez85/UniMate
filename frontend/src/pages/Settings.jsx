@@ -1,7 +1,6 @@
 import { SettingsHeader } from "../components/Settings/SettingsHeader";
 import { ProfileSection } from "../components/Settings/ProfileSection";
 import { NotificationsSection } from "../components/Settings/NotificationsSection";
-import { PrivacySection } from "../components/Settings/PrivacySection";
 import { AppearanceSection } from "../components/Settings/AppearanceSection";
 import { SignOutSection } from "../components/Settings/SignOutSection";
 
@@ -14,7 +13,6 @@ export function Settings({ onLogout }) {
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 divide-y divide-gray-100">
           <ProfileSection />
           <NotificationsSection />
-          <PrivacySection />
           <AppearanceSection />
         </div>
 

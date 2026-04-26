@@ -16,7 +16,11 @@ import { EmailProfessor } from "./pages/EmailProfessor";
 import { Navigation } from "./components/Navigation";
 import { Header } from "./components/Header";
 import { getAuthToken, logout as logoutService } from "./services/authService";
+import { applyAppearance, getAppearancePrefs } from "./hooks/useAppearance";
 import "./App.css";
+
+// Apply saved appearance immediately on load
+applyAppearance(getAppearancePrefs());
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

@@ -1,22 +1,15 @@
-import { useState } from "react";
 import { Palette } from "lucide-react";
+import { useAppearance } from "../../hooks/useAppearance";
 
 const THEMES = [
   { id: "light", label: "Light", bg: "bg-white", border: "border-gray-200" },
-  {
-    id: "soft",
-    label: "Soft Cream",
-    bg: "bg-[#faf9f6]",
-    border: "border-amber-200",
-  },
   { id: "dark", label: "Dark", bg: "bg-gray-900", border: "border-gray-700" },
 ];
 
 const FONT_SIZES = ["Small", "Medium", "Large"];
 
 export function AppearanceSection() {
-  const [theme, setTheme] = useState("light");
-  const [fontSize, setFontSize] = useState("Medium");
+  const { prefs, setTheme, setFontSize } = useAppearance();
 
   return (
     <div className="p-6">
@@ -36,14 +29,14 @@ export function AppearanceSection() {
               className={`flex flex-col items-center gap-1 cursor-pointer group`}>
               <div
                 className={`w-12 h-8 rounded-md border-2 ${t.bg} ${
-                  theme === t.id
+                  prefs.theme === t.id
                     ? "border-primary-500 ring-2 ring-primary-200"
                     : t.border
                 } transition`}
               />
               <span
                 className={`text-xs font-medium ${
-                  theme === t.id ? "text-primary-600" : "text-gray-500"
+                  prefs.theme === t.id ? "text-primary-600" : "text-gray-500"
                 }`}>
                 {t.label}
               </span>
@@ -61,8 +54,8 @@ export function AppearanceSection() {
               key={size}
               onClick={() => setFontSize(size)}
               className={`px-4 py-1.5 rounded-lg text-sm font-medium border transition cursor-pointer ${
-                fontSize === size
-                  ? "bg-primary-600 text-white border-primary-600"
+                prefs.fontSize === size
+                  ? "bg-primary-600 text-black border-primary-600"
                   : "bg-white text-gray-600 border-gray-200 hover:border-primary-300"
               }`}>
               {size}
