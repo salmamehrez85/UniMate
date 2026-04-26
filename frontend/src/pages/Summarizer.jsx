@@ -438,17 +438,22 @@ export function Summarizer({ onNavigate }) {
       }
 
       const uploadResult = response?.data?.result;
+      const responseMode = response?.data?.mode || form.mode;
       const normalizedResult = uploadResult?.overview
         ? {
             summary: uploadResult.overview,
             plainLanguageSummary: uploadResult.overview,
-            learningOutcomes: uploadResult.keyTopics || [],
+            // For exam mode, keyTopics are exam focus topics; for others they are learning outcomes
+            learningOutcomes:
+              responseMode === "exam" ? [] : uploadResult.keyTopics || [],
             conceptConnections: [],
-            examFocus: [],
+            examFocus:
+              responseMode === "exam" ? uploadResult.keyTopics || [] : [],
             importantTerms: uploadResult.importantDefinitions || [],
             studyPlan: uploadResult.studyPlan || [],
             possibleQuestions: uploadResult.possibleQuestions || [],
-            actionItems: uploadResult.studyPlan || [],
+            actionItems:
+              responseMode === "quick" ? uploadResult.studyPlan || [] : [],
           }
         : response?.data?.result || null;
 

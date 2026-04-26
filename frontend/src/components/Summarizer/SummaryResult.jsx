@@ -21,6 +21,7 @@ const MODE_CONFIG = {
     accentClass: "text-sky-700",
     dividerClass: "border-sky-100",
     type: "prose",
+    // overview shown as prose above, then these sections below
     sections: [
       { key: "learningOutcomes", title: "Key Takeaways" },
       { key: "actionItems", title: "What To Do Next" },
@@ -31,8 +32,14 @@ const MODE_CONFIG = {
     badgeClass: "bg-violet-600 text-white",
     accentClass: "text-violet-700",
     dividerClass: "border-violet-100",
-    type: "prose-only",
-    sections: [],
+    type: "prose",
+    sections: [
+      { key: "learningOutcomes", title: "Learning Outcomes" },
+      { key: "conceptConnections", title: "Concept Connections" },
+      { key: "importantTerms", title: "Key Terms & Definitions" },
+      { key: "studyPlan", title: "Study Plan", numbered: true },
+      { key: "possibleQuestions", title: "Possible Questions", numbered: true },
+    ],
   },
   exam: {
     label: "Exam Focus",
@@ -41,14 +48,30 @@ const MODE_CONFIG = {
     dividerClass: "border-amber-100",
     type: "prose",
     sections: [
-      { key: "examFocus", title: "Most Likely Exam Focus" },
-      { key: "learningOutcomes", title: "What You Must Know" },
+      { key: "examFocus", title: "Most Likely Exam Topics" },
+      { key: "importantTerms", title: "Must-Know Terms" },
       {
         key: "possibleQuestions",
-        title: "Likely Exam Questions",
+        title: "Exam Questions",
         numbered: true,
       },
-      { key: "studyPlan", title: "Revision Plan" },
+      { key: "studyPlan", title: "Revision Plan", numbered: true },
+    ],
+  },
+  custom: {
+    label: "Custom",
+    badgeClass: "bg-teal-600 text-white",
+    accentClass: "text-teal-700",
+    dividerClass: "border-teal-100",
+    type: "prose",
+    sections: [
+      { key: "learningOutcomes", title: "Learning Outcomes" },
+      { key: "conceptConnections", title: "Concept Connections" },
+      { key: "examFocus", title: "Exam Focus" },
+      { key: "importantTerms", title: "Key Terms" },
+      { key: "studyPlan", title: "Study Plan", numbered: true },
+      { key: "possibleQuestions", title: "Possible Questions", numbered: true },
+      { key: "actionItems", title: "Action Items" },
     ],
   },
 };
@@ -290,8 +313,8 @@ export function SummaryResult({ summaryData, courses = [] }) {
         isArabic={isArabic}
       />
 
-      {/* Detailed mode extra paragraph */}
-      {config.type === "prose-only" &&
+      {/* Detailed mode: also show plainLanguageSummary as a second paragraph */}
+      {mode === "detailed" &&
         result.plainLanguageSummary &&
         result.plainLanguageSummary !== overviewText && (
           <div className="mt-3">

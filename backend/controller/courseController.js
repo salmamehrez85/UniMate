@@ -1279,10 +1279,40 @@ exports.summarizeUploadedDocument = async (req, res) => {
         `First, transcribe the text accurately (ignoring noise/artifacts), then format it into ` +
         `the UniMate study schema (overview, keyTopics, importantDefinitions, studyPlan, possibleQuestions).`;
 
+    const modeFieldInstructions = {
+      quick: `QUICK MODE — populate ONLY:
+- overview: 1-2 sentences, the core idea only.
+- keyTopics: 4-6 short key takeaways.
+- importantDefinitions: return []
+- studyPlan: return []
+- possibleQuestions: return []`,
+      detailed: `DETAILED MODE — populate ALL fields fully:
+- overview: 3-4 sentences synthesizing the full picture.
+- keyTopics: 6-8 topics/outcomes with verbs (explain, compare, apply).
+- importantDefinitions: 6-8 terms with short definitions.
+- studyPlan: 5-6 ordered steps for deep learning.
+- possibleQuestions: 4-5 likely questions.`,
+      exam: `EXAM FOCUS MODE — exam prep only:
+- overview: 2 sentences max, what is most testable.
+- keyTopics: 4-5 highly specific exam-focus bullets.
+- importantDefinitions: 5-7 must-know terms with definitions.
+- studyPlan: 3-4 steps — a tight revision plan for an upcoming test.
+- possibleQuestions: 5-6 realistic instructor-style exam questions.`,
+      custom: `CUSTOM MODE — balanced output:
+- overview: 2-3 sentences.
+- keyTopics: 4-6 items.
+- importantDefinitions: 4-6 terms.
+- studyPlan: 3-5 steps.
+- possibleQuestions: 3-5 questions.`,
+    };
+
+    const activeModeInstructions =
+      modeFieldInstructions[mode] || modeFieldInstructions.custom;
+
     const promptText = `${systemInstructionText}
 
 Summary mode: ${mode}
-Source type: ${sourceType}
+${activeModeInstructions}
 ${buildUploadOptionPrompt(mode, summaryOptions)}
 
 Rules:

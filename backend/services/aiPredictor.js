@@ -1611,30 +1611,71 @@ ${contextLine}
 SOURCE CONTENT:
 ${weightedSource}
 
-Return valid JSON with these fields only:
-- summary: 2-4 sentences that synthesize the material instead of repeating it.
-- plainLanguageSummary: explain in simpler words what this content is really about and why it matters.
-- learningOutcomes: 4-6 bullets starting with verbs like explain, compare, apply, analyze.
-- conceptConnections: 3-5 bullets showing how the major topics fit together or build on each other.
-- examFocus: 3-5 bullets about what an instructor is most likely to test or where students usually struggle.
-- importantTerms: 5-10 terms.
+Return valid JSON with these fields only. Populate ONLY the fields listed for this mode:
+
+${
+  mode === "quick"
+    ? `
+QUICK MODE — keep it scannable and fast:
+- summary: 1-2 sentences max, the core idea only.
+- plainLanguageSummary: return "N/A"
+- learningOutcomes: 4-6 short bullet points (key takeaways), start with a verb.
+- conceptConnections: return []
+- examFocus: return []
+- importantTerms: return []
+- studyPlan: return []
+- possibleQuestions: return []
+- actionItems: 2-3 concrete next steps.
+`
+    : mode === "detailed"
+      ? `
+DETAILED MODE — comprehensive, nothing skipped:
+- summary: 3-4 sentences synthesizing the full picture.
+- plainLanguageSummary: explain in simpler words what this is really about and why it matters.
+- learningOutcomes: 5-6 bullets starting with verbs (explain, compare, apply, analyze).
+- conceptConnections: 4-5 bullets showing how major topics relate or build on each other.
+- examFocus: return []
+- importantTerms: 7-10 key terms.
+- studyPlan: 5-6 ordered steps for deep learning.
+- possibleQuestions: 4-5 likely questions.
+- actionItems: return []
+`
+      : mode === "exam"
+        ? `
+EXAM FOCUS MODE — exam prep only, no fluff:
+- summary: 2 sentences max, what is most testable.
+- plainLanguageSummary: return "N/A"
+- learningOutcomes: return []
+- conceptConnections: return []
+- examFocus: 4-5 highly specific bullets about what instructors most likely test.
+- importantTerms: 5-7 must-know terms with short definitions.
+- studyPlan: 3-4 steps — a tight revision plan for an upcoming test.
+- possibleQuestions: 5-6 realistic instructor-style exam questions.
+- actionItems: return []
+`
+        : `
+CUSTOM MODE — balanced, follow user options:
+- summary: 2-4 sentences synthesizing the material.
+- plainLanguageSummary: explain in simpler words what this content is really about.
+- learningOutcomes: 4-6 bullets starting with verbs.
+- conceptConnections: 3-5 bullets showing how topics connect.
+- examFocus: 3-5 bullets about what is most testable.
+- importantTerms: 5-10 key terms.
 - studyPlan: 3-6 ordered steps.
 - possibleQuestions: 3-6 likely quiz/exam questions.
 - actionItems: 3-6 concrete actions.
+`
+}
 
 Constraints:
 - Keep language concise and student-friendly.
-- Respect language, length, and focus options while avoiding duplicate instructions already implied by the selected mode.
+- Respect language, length, and focus options.
 - If language is Arabic, every returned sentence in every field must be Arabic.
 - If source content lacks information for a specific field, return [] for arrays or "N/A" for text fields. Do not invent information.
-- Do not invent formulas, definitions, dates, or technical facts that are not grounded in the source content.
+- Do not invent formulas, definitions, dates, or technical facts not grounded in the source content.
 - For Arabic output, include the original English technical term in parentheses when relevant.
 - Keep JSON keys in English exactly as requested by the schema.
-- Avoid markdown.
-- Avoid generic filler.
-- Do not just copy the outline back.
-- Infer the teaching logic if the source looks like a comma-separated outline.
-- Focus on usefulness for studying and exam prep.`;
+- Avoid markdown. Avoid generic filler. Do not just copy the outline back.`;
 
     const result = await callLLMWithRetry(prompt, SummarySchema);
 
