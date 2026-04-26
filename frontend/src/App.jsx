@@ -10,7 +10,7 @@ import { Register } from "./pages/Register";
 import { ResetPassword } from "./pages/ResetPassword";
 import { Tasks } from "./pages/Tasks";
 import { AIChat } from "./pages/AIChat";
-import { Settings } from "./components/Settings";
+import { Settings } from "./pages/Settings";
 import { Schedule } from "./pages/Schedule";
 import { EmailProfessor } from "./pages/EmailProfessor";
 import { Navigation } from "./components/Navigation";
