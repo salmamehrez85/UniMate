@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { Bell } from "lucide-react";
+import { useNotificationPrefs } from "../../hooks/useNotificationPrefs";
 
 const NOTIFICATION_ITEMS = [
   {
@@ -42,13 +42,7 @@ function Toggle({ enabled, onChange }) {
 }
 
 export function NotificationsSection() {
-  const [prefs, setPrefs] = useState({
-    assignments: true,
-    quizzes: true,
-    performance: false,
-  });
-
-  const toggle = (id) => setPrefs((prev) => ({ ...prev, [id]: !prev[id] }));
+  const { prefs, toggle } = useNotificationPrefs();
 
   return (
     <div className="p-6">
