@@ -124,7 +124,9 @@ exports.forgotPassword = async (req, res) => {
     const { email } = req.body;
 
     if (!email) {
-      return res.status(400).json({ success: false, message: "Please provide an email address" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Please provide an email address" });
     }
 
     const user = await User.findOne({ email });
@@ -133,13 +135,17 @@ exports.forgotPassword = async (req, res) => {
       // Return generic message to avoid user enumeration
       return res.status(200).json({
         success: true,
-        message: "If an account with that email exists, a reset link has been sent.",
+        message:
+          "If an account with that email exists, a reset link has been sent.",
       });
     }
 
     // Generate raw token and its SHA-256 hash
     const rawToken = crypto.randomBytes(32).toString("hex");
-    const hashedToken = crypto.createHash("sha256").update(rawToken).digest("hex");
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(rawToken)
+      .digest("hex");
 
     user.resetPasswordToken = hashedToken;
     user.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
@@ -203,7 +209,8 @@ exports.forgotPassword = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "If an account with that email exists, a reset link has been sent.",
+      message:
+        "If an account with that email exists, a reset link has been sent.",
     });
   } catch (error) {
     console.error("Forgot password error:", error);
@@ -218,7 +225,12 @@ exports.forgotPassword = async (req, res) => {
       }
     } catch (_) {}
 
-    res.status(500).json({ success: false, message: "Failed to send reset email. Please try again." });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to send reset email. Please try again.",
+      });
   }
 };
 
@@ -231,7 +243,12 @@ exports.resetPassword = async (req, res) => {
     const { password } = req.body;
 
     if (!password || password.length < 8) {
-      return res.status(400).json({ success: false, message: "Password must be at least 8 characters" });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Password must be at least 8 characters",
+        });
     }
 
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
@@ -242,7 +259,9 @@ exports.resetPassword = async (req, res) => {
     }).select("+resetPasswordToken +resetPasswordExpire");
 
     if (!user) {
-      return res.status(400).json({ success: false, message: "Invalid or expired reset token" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid or expired reset token" });
     }
 
     user.password = password;
@@ -250,10 +269,17 @@ exports.resetPassword = async (req, res) => {
     user.resetPasswordExpire = undefined;
     await user.save();
 
-    res.status(200).json({ success: true, message: "Password reset successfully. You can now sign in." });
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: "Password reset successfully. You can now sign in.",
+      });
   } catch (error) {
     console.error("Reset password error:", error);
-    res.status(500).json({ success: false, message: "Error resetting password" });
+    res
+      .status(500)
+      .json({ success: false, message: "Error resetting password" });
   }
 };
 

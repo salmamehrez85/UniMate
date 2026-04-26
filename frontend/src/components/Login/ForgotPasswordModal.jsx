@@ -45,9 +45,12 @@ export function ForgotPasswordModal({ onClose }) {
             <div className="flex justify-center mb-4">
               <CheckCircle className="h-14 w-14 text-teal-500" />
             </div>
-            <h2 className="text-xl font-bold text-gray-800 mb-2">Check your inbox</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-2">
+              Check your inbox
+            </h2>
             <p className="text-gray-500 text-sm mb-6">
-              If an account exists for <span className="font-medium text-gray-700">{email}</span>, a
+              If an account exists for{" "}
+              <span className="font-medium text-gray-700">{email}</span>, a
               password reset link has been sent. The link expires in 15 minutes.
             </p>
             <button
@@ -64,14 +67,18 @@ export function ForgotPasswordModal({ onClose }) {
                 <Mail className="h-7 w-7 text-teal-600" />
               </div>
             </div>
-            <h2 className="text-xl font-bold text-gray-800 text-center mb-1">Forgot your password?</h2>
+            <h2 className="text-xl font-bold text-gray-800 text-center mb-1">
+              Forgot your password?
+            </h2>
             <p className="text-gray-500 text-sm text-center mb-6">
               Enter your email and we'll send you a link to reset your password.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="reset-email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="reset-email"
+                  className="block text-sm font-medium text-gray-700 mb-2">
                   Email Address
                 </label>
                 <div className="relative">

@@ -93,7 +93,8 @@ export const forgotPassword = async (email) => {
     body: JSON.stringify({ email }),
   });
   const data = await response.json();
-  if (!response.ok) throw new Error(data.message || "Failed to send reset email");
+  if (!response.ok)
+    throw new Error(data.message || "Failed to send reset email");
   return data;
 };
 

@@ -36,7 +36,9 @@ export function ResetPassword({ resetToken, onBackToLogin }) {
       // Clear token from URL without reloading
       window.history.replaceState({}, document.title, window.location.pathname);
     } catch (err) {
-      setError(err.message || "Failed to reset password. The link may have expired.");
+      setError(
+        err.message || "Failed to reset password. The link may have expired.",
+      );
     } finally {
       setLoading(false);
     }
@@ -53,9 +55,12 @@ export function ResetPassword({ resetToken, onBackToLogin }) {
               <div className="flex justify-center mb-4">
                 <CheckCircle className="h-14 w-14 text-teal-500" />
               </div>
-              <h2 className="text-xl font-bold text-gray-800 mb-2">Password updated!</h2>
+              <h2 className="text-xl font-bold text-gray-800 mb-2">
+                Password updated!
+              </h2>
               <p className="text-gray-500 text-sm mb-6">
-                Your password has been reset successfully. You can now sign in with your new password.
+                Your password has been reset successfully. You can now sign in
+                with your new password.
               </p>
               <button
                 onClick={onBackToLogin}
@@ -65,7 +70,9 @@ export function ResetPassword({ resetToken, onBackToLogin }) {
             </div>
           ) : (
             <>
-              <h2 className="text-xl font-bold text-gray-800 mb-1">Set a new password</h2>
+              <h2 className="text-xl font-bold text-gray-800 mb-1">
+                Set a new password
+              </h2>
               <p className="text-gray-500 text-sm mb-6">
                 Your new password must be at least 8 characters.
               </p>
@@ -73,7 +80,9 @@ export function ResetPassword({ resetToken, onBackToLogin }) {
               <form onSubmit={handleSubmit} className="space-y-5">
                 {/* New Password */}
                 <div>
-                  <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="new-password"
+                    className="block text-sm font-medium text-gray-700 mb-2">
                     New Password
                   </label>
                   <div className="relative">
@@ -106,7 +115,9 @@ export function ResetPassword({ resetToken, onBackToLogin }) {
 
                 {/* Confirm Password */}
                 <div>
-                  <label htmlFor="confirm-new-password" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="confirm-new-password"
+                    className="block text-sm font-medium text-gray-700 mb-2">
                     Confirm New Password
                   </label>
                   <div className="relative">
@@ -124,7 +135,9 @@ export function ResetPassword({ resetToken, onBackToLogin }) {
                     />
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
                       disabled={loading}>
                       {showConfirmPassword ? (
