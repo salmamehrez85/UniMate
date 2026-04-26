@@ -76,16 +76,16 @@ export function ProfileSection() {
               Email cannot be changed
             </p>
           </div>
-          <div className="flex gap-2 pt-1">
+          <div className="flex flex-col gap-2 pt-2">
             <button
               onClick={handleSave}
-              className="flex items-center gap-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg transition cursor-pointer">
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-gray-100 hover:bg-gray-200 text-black text-sm font-semibold rounded-lg transition cursor-pointer">
               <Check className="w-4 h-4" />
-              Save
+              Save Changes
             </button>
             <button
               onClick={handleCancel}
-              className="flex items-center gap-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-lg transition cursor-pointer">
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-lg transition cursor-pointer">
               <X className="w-4 h-4" />
               Cancel
             </button>

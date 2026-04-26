@@ -18,14 +18,20 @@ function Toggle({ enabled, onChange }) {
   return (
     <button
       onClick={() => onChange(!enabled)}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer focus:outline-none ${
-        enabled ? "bg-primary-600" : "bg-gray-200"
+      className={`relative inline-flex h-7 w-16 items-center rounded-full transition-colors cursor-pointer focus:outline-none ${
+        enabled ? "bg-teal-500" : "bg-gray-200"
       }`}>
       <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-          enabled ? "translate-x-6" : "translate-x-1"
+        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+          enabled ? "translate-x-9" : "translate-x-1"
         }`}
       />
+      <span
+        className={`absolute text-[10px] font-bold tracking-wide transition-all ${
+          enabled ? "left-2 text-white" : "right-2 text-gray-400"
+        }`}>
+        {enabled ? "ON" : "OFF"}
+      </span>
     </button>
   );
 }
