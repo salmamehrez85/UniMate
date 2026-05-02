@@ -26,7 +26,7 @@ export default {
         },
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
+        sans: ["Cairo", "Inter", "system-ui", "sans-serif"],
       },
     },
   },
