@@ -208,13 +208,14 @@ export const getAIRecommendations = async () => {
 };
 
 // Trigger a fresh AI recommendations calculation and save to DB
-export const refreshAIRecommendations = async () => {
+export const refreshAIRecommendations = async (language = "en") => {
   try {
     const response = await fetch(
       `${API_BASE_URL}/courses/recommendations/refresh`,
       {
         method: "POST",
         headers: getAuthHeaders(),
+        body: JSON.stringify({ language }),
       },
     );
 

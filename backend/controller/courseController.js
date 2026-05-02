@@ -1028,7 +1028,7 @@ exports.getGPATrend = async (req, res) => {
 // @route   GET /api/courses/recommendations
 // @access  Private
 // Shared helper — runs the full AI recommendations calculation and returns the result array
-const computeAIRecommendations = async (userId) => {
+const computeAIRecommendations = async (userId, language = "en") => {
   const courses = await Course.find({ userId });
   const activeCourses = courses.filter((c) => c.isOldCourse !== true);
 
@@ -1048,7 +1048,7 @@ const computeAIRecommendations = async (userId) => {
     };
   });
 
-  const aiResult = await generateActionableRecommendations(mappedActiveCourses);
+  const aiResult = await generateActionableRecommendations(mappedActiveCourses, language);
   return aiResult.recommendations || [];
 };
 
@@ -1085,7 +1085,9 @@ exports.getAIRecommendations = async (req, res) => {
 // @access  Private
 exports.refreshAIRecommendations = async (req, res) => {
   try {
-    const recommendations = await computeAIRecommendations(req.user._id);
+    const language = String(req.body?.language || "en").trim().toLowerCase();
+    const safeLanguage = ["en", "ar"].includes(language) ? language : "en";
+    const recommendations = await computeAIRecommendations(req.user._id, safeLanguage);
     const now = new Date();
     await User.findByIdAndUpdate(req.user._id, {
       "recommendationsCache.data": recommendations,
