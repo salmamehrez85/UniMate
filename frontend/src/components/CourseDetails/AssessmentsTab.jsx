@@ -1,12 +1,6 @@
 import { useEffect, useState } from "react";
 import { Plus, Edit2, Trash2, X } from "lucide-react";
-
-const ASSESSMENT_TYPES = [
-  { value: "quiz", label: "Quiz" },
-  { value: "midterm", label: "Midterm" },
-  { value: "final", label: "Final" },
-  { value: "assignment", label: "Assignment" },
-];
+import { useTranslation } from "react-i18next";
 
 const defaultFormData = {
   title: "",
@@ -31,6 +25,13 @@ const hasFinalAssessment = (list) =>
   list.some((assessment) => assessment.type === "final");
 
 function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
+  const { t } = useTranslation();
+  const ASSESSMENT_TYPES = [
+    { value: "quiz", label: t("courseDetails.assessments.quiz") },
+    { value: "midterm", label: t("courseDetails.assessments.midterm") },
+    { value: "final", label: t("courseDetails.assessments.final") },
+    { value: "assignment", label: t("courseDetails.assessments.assignment") },
+  ];
   const [formData, setFormData] = useState(defaultFormData);
   const [error, setError] = useState("");
 
@@ -75,15 +76,15 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
     e.preventDefault();
 
     if (!formData.title.trim()) {
-      setError("Title is required");
+      setError(t("courseDetails.assessments.titleRequired"));
       return;
     }
     if (!formData.score || !formData.maxScore) {
-      setError("Score and Max Score are required");
+      setError(t("courseDetails.assessments.scoreRequired"));
       return;
     }
     if (!formData.date) {
-      setError("Date is required");
+      setError(t("courseDetails.assessments.dateRequired"));
       return;
     }
 
@@ -104,7 +105,9 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
       <div className="bg-white rounded-xl shadow-lg max-w-md w-full">
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
           <h2 className="text-xl font-bold text-primary-900">
-            {initialData ? "Edit Assessment" : "Add Assessment"}
+            {initialData
+              ? t("courseDetails.assessments.editTitle")
+              : t("courseDetails.assessments.addTitle")}
           </h2>
           <button
             onClick={onClose}
@@ -122,21 +125,21 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Title *
+              {t("courseDetails.assessments.titleLabel")} *
             </label>
             <input
               type="text"
               name="title"
               value={formData.title}
               onChange={handleChange}
-              placeholder="e.g., Quiz 2"
+              placeholder={t("courseDetails.assessments.titlePlaceholder")}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Type *
+              {t("courseDetails.assessments.typeLabel")} *
             </label>
             <select
               name="type"
@@ -154,7 +157,7 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Score *
+                {t("courseDetails.assessments.scoreLabel")} *
               </label>
               <input
                 type="number"
@@ -168,7 +171,7 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Max Score *
+                {t("courseDetails.assessments.maxScoreLabel")} *
               </label>
               <input
                 type="number"
@@ -184,7 +187,7 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Date *
+              {t("courseDetails.assessments.dateLabel")} *
             </label>
             <input
               type="date"
@@ -197,7 +200,7 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Weight (%) - Optional
+              {t("courseDetails.assessments.weightLabel")}
             </label>
             <input
               type="number"
@@ -216,13 +219,15 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
             <button
               type="submit"
               className="flex-1 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
-              {initialData ? "Save Changes" : "Add Assessment"}
+              {initialData
+                ? t("courseDetails.assessments.save")
+                : t("courseDetails.assessments.add")}
             </button>
             <button
               type="button"
               onClick={onClose}
               className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
-              Cancel
+              {t("courseDetails.assessments.cancel")}
             </button>
           </div>
         </form>
@@ -232,6 +237,13 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
 }
 
 export function AssessmentsTab({ course, onCourseUpdate }) {
+  const { t } = useTranslation();
+  const ASSESSMENT_TYPES = [
+    { value: "quiz", label: t("courseDetails.assessments.quiz") },
+    { value: "midterm", label: t("courseDetails.assessments.midterm") },
+    { value: "final", label: t("courseDetails.assessments.final") },
+    { value: "assignment", label: t("courseDetails.assessments.assignment") },
+  ];
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAssessment, setEditingAssessment] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
@@ -292,17 +304,19 @@ export function AssessmentsTab({ course, onCourseUpdate }) {
           onClick={() => setIsModalOpen(true)}
           className="flex items-center gap-2 px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
           <Plus className="w-5 h-5" />
-          Add Assessment
+          {t("courseDetails.assessments.add")}
         </button>
       </div>
 
       {assessments.length === 0 ? (
         <div className="bg-white rounded-xl p-12 text-center border border-gray-100">
-          <p className="text-gray-600 mb-4">No assessments added yet</p>
+          <p className="text-gray-600 mb-4">
+            {t("courseDetails.assessments.noAssessments")}
+          </p>
           <button
             onClick={() => setIsModalOpen(true)}
             className="px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
-            Add Your First Assessment
+            {t("courseDetails.assessments.addFirst")}
           </button>
         </div>
       ) : (
@@ -311,22 +325,22 @@ export function AssessmentsTab({ course, onCourseUpdate }) {
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50">
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                  Title
+                  {t("courseDetails.assessments.titleHeader")}
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                  Type
+                  {t("courseDetails.assessments.typeHeader")}
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                  Score
+                  {t("courseDetails.assessments.scoreHeader")}
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                  Date
+                  {t("courseDetails.assessments.dateHeader")}
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                  Weight
+                  {t("courseDetails.assessments.weightHeader")}
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                  Actions
+                  {t("courseDetails.assessments.actionsHeader")}
                 </th>
               </tr>
             </thead>
@@ -376,11 +390,10 @@ export function AssessmentsTab({ course, onCourseUpdate }) {
         <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6">
             <h3 className="text-lg font-bold text-primary-900 mb-4">
-              Delete Assessment?
+              {t("courseDetails.assessments.deleteTitle")}
             </h3>
             <p className="text-gray-600 mb-6">
-              Are you sure you want to delete this assessment? This action
-              cannot be undone.
+              {t("courseDetails.assessments.deleteConfirm")}
             </p>
             <div className="flex gap-3">
               <button
@@ -391,7 +404,7 @@ export function AssessmentsTab({ course, onCourseUpdate }) {
               <button
                 onClick={() => setDeleteConfirm(null)}
                 className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
-                Cancel
+                {t("courseDetails.assessments.cancel")}
               </button>
             </div>
           </div>

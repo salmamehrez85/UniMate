@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Save, X } from "lucide-react";
 import { deleteCourse } from "../../services/courseService";
+import { useTranslation } from "react-i18next";
 
 export function SettingsTab({
   course,
@@ -8,6 +9,7 @@ export function SettingsTab({
   onCourseDelete,
   onBack,
 }) {
+  const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [formData, setFormData] = useState({
@@ -64,12 +66,12 @@ export function SettingsTab({
       {/* Edit Course Section */}
       <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-primary-900">Edit Course</h2>
+          <h2 className="text-2xl font-bold text-primary-900">{t("courseDetails.settingsTab.editCourse")}</h2>
           {!isEditing && (
             <button
               onClick={() => setIsEditing(true)}
               className="px-6 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
-              Edit Course
+              {t("courseDetails.settingsTab.editButton")}
             </button>
           )}
         </div>
@@ -85,7 +87,7 @@ export function SettingsTab({
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Course Code *
+                  {t("courseDetails.settingsTab.codeLabel")} *
                 </label>
                 <input
                   type="text"
@@ -99,7 +101,7 @@ export function SettingsTab({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Course Name *
+                  {t("courseDetails.settingsTab.nameLabel")} *
                 </label>
                 <input
                   type="text"
@@ -113,7 +115,7 @@ export function SettingsTab({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Instructor
+                  {t("courseDetails.settingsTab.instructorLabel")}
                 </label>
                 <input
                   type="text"
@@ -127,7 +129,7 @@ export function SettingsTab({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Schedule
+                  {t("courseDetails.settingsTab.scheduleLabel")}
                 </label>
                 <input
                   type="text"
@@ -141,7 +143,7 @@ export function SettingsTab({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Location
+                  {t("courseDetails.settingsTab.locationLabel")}
                 </label>
                 <input
                   type="text"
@@ -155,7 +157,7 @@ export function SettingsTab({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Credits
+                  {t("courseDetails.settingsTab.creditsLabel")}
                 </label>
                 <input
                   type="text"
@@ -169,7 +171,7 @@ export function SettingsTab({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Semester
+                  {t("courseDetails.settingsTab.semesterLabel")}
                 </label>
                 <input
                   type="text"
@@ -185,19 +187,18 @@ export function SettingsTab({
             {/* Course Outline / Syllabus */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Course Outline / Syllabus
+                {t("courseDetails.settingsTab.outlineLabel")}
               </label>
               <textarea
                 name="outlineText"
                 value={formData.outlineText}
                 onChange={handleChange}
-                placeholder="Paste the course syllabus or outline here... (helps AI make better predictions)"
+                placeholder={t("courseDetails.settingsTab.outlinePlaceholder")}
                 rows="6"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
               />
               <p className="text-xs text-gray-500 mt-2">
-                This helps the AI predictor understand course content for better
-                grade forecasts
+                {t("courseDetails.settingsTab.outlineHelper")}
               </p>
             </div>
 
@@ -206,7 +207,7 @@ export function SettingsTab({
                 type="submit"
                 className="flex items-center gap-2 px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
                 <Save className="w-5 h-5" />
-                Save Changes
+                {t("courseDetails.settingsTab.save")}
               </button>
               <button
                 type="button"
@@ -226,7 +227,7 @@ export function SettingsTab({
                 }}
                 className="flex items-center gap-2 px-6 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
                 <X className="w-5 h-5" />
-                Cancel
+                {t("courseDetails.settingsTab.cancel")}
               </button>
             </div>
           </form>
@@ -235,7 +236,7 @@ export function SettingsTab({
             <div className="grid md:grid-cols-2 gap-8">
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">
-                  Course Code
+                  {t("courseDetails.settingsTab.codeLabel")}
                 </p>
                 <p className="text-lg font-semibold text-primary-900">
                   {course.code}
@@ -243,7 +244,7 @@ export function SettingsTab({
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">
-                  Course Name
+                  {t("courseDetails.settingsTab.nameLabel")}
                 </p>
                 <p className="text-lg font-semibold text-primary-900">
                   {course.name || course.title}
@@ -251,42 +252,42 @@ export function SettingsTab({
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">
-                  Instructor
+                  {t("courseDetails.settingsTab.instructorLabel")}
                 </p>
                 <p className="text-lg font-semibold text-primary-900">
-                  {course.instructor || "Not specified"}
+                  {course.instructor || t("courseDetails.settingsTab.notSpecified")}
                 </p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">
-                  Schedule
+                  {t("courseDetails.settingsTab.scheduleLabel")}
                 </p>
                 <p className="text-lg font-semibold text-primary-900">
-                  {course.schedule || "Not specified"}
+                  {course.schedule || t("courseDetails.settingsTab.notSpecified")}
                 </p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">
-                  Location
+                  {t("courseDetails.settingsTab.locationLabel")}
                 </p>
                 <p className="text-lg font-semibold text-primary-900">
-                  {course.location || "Not specified"}
+                  {course.location || t("courseDetails.settingsTab.notSpecified")}
                 </p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">
-                  Credits
+                  {t("courseDetails.settingsTab.creditsLabel")}
                 </p>
                 <p className="text-lg font-semibold text-primary-900">
-                  {course.credits || "N/A"}
+                  {course.credits || t("courseDetails.settingsTab.na")}
                 </p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">
-                  Semester
+                  {t("courseDetails.settingsTab.semesterLabel")}
                 </p>
                 <p className="text-lg font-semibold text-primary-900">
-                  {course.semester || "Not specified"}
+                  {course.semester || t("courseDetails.settingsTab.notSpecified")}
                 </p>
               </div>
             </div>
@@ -294,7 +295,7 @@ export function SettingsTab({
             {/* Course Outline Display */}
             <div className="mt-8 pt-8 border-t border-gray-200">
               <p className="text-sm font-medium text-gray-600 mb-3">
-                Course Outline / Syllabus
+                {t("courseDetails.settingsTab.outlineLabel")}
               </p>
               {course.outlineText ? (
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 max-h-64 overflow-y-auto">
@@ -303,7 +304,7 @@ export function SettingsTab({
                   </p>
                 </div>
               ) : (
-                <p className="text-gray-500 italic">No outline provided</p>
+                <p className="text-gray-500 italic">{t("courseDetails.settingsTab.noOutline")}</p>
               )}
             </div>
           </div>
@@ -312,15 +313,15 @@ export function SettingsTab({
 
       {/* Delete Course Section - Danger Zone */}
       <div className="bg-red-50 rounded-xl p-8 border border-red-200">
-        <h2 className="text-2xl font-bold text-red-900 mb-2">Danger Zone</h2>
+        <h2 className="text-2xl font-bold text-red-900 mb-2">{t("courseDetails.settingsTab.dangerZone")}</h2>
         <p className="text-red-700 mb-6">
-          Once you delete a course, there is no going back. Please be certain.
+          {t("courseDetails.settingsTab.dangerWarning")}
         </p>
 
         <button
           onClick={() => setDeleteConfirm(true)}
           className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition">
-          Delete Course
+          {t("courseDetails.settingsTab.deleteCourse")}
         </button>
       </div>
 
@@ -329,24 +330,22 @@ export function SettingsTab({
         <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6">
             <h3 className="text-lg font-bold text-primary-900 mb-2">
-              Delete Course?
+              {t("courseDetails.settingsTab.deleteConfirmTitle")}
             </h3>
             <p className="text-gray-600 mb-4">
-              Are you sure you want to delete "{course.name || course.title}"?
-              This action will also delete all assessments, tasks, and project
-              phases associated with this course. This cannot be undone.
+              {t("courseDetails.settingsTab.deleteConfirmMessage")}
             </p>
 
             <div className="flex gap-3">
               <button
                 onClick={handleDelete}
                 className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition">
-                Yes, Delete Course
+                {t("courseDetails.settingsTab.confirmDelete")}
               </button>
               <button
                 onClick={() => setDeleteConfirm(false)}
                 className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
-                Cancel
+                {t("courseDetails.settingsTab.cancel")}
               </button>
             </div>
           </div>

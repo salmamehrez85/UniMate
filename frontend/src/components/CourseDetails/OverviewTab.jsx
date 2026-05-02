@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { CheckCircle, BookOpen, Zap } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export function OverviewTab({ course }) {
+  const { t } = useTranslation();
   const [expandedSummaryKey, setExpandedSummaryKey] = useState(null);
   const [copiedSummaryKey, setCopiedSummaryKey] = useState(null);
 
@@ -17,9 +19,10 @@ export function OverviewTab({ course }) {
   );
 
   const formatSavedAt = (dateValue) => {
-    if (!dateValue) return "Unknown date";
+    if (!dateValue) return t("courseDetails.overview.unknownDate");
     const date = new Date(dateValue);
-    if (Number.isNaN(date.getTime())) return "Unknown date";
+    if (Number.isNaN(date.getTime()))
+      return t("courseDetails.overview.unknownDate");
     return date.toLocaleString();
   };
 
@@ -42,21 +45,21 @@ export function OverviewTab({ course }) {
 
   const stats = [
     {
-      label: "Upcoming Tasks",
+      label: t("courseDetails.overview.upcomingTasks"),
       value: upcomingTasksCount,
       icon: Zap,
       color: "text-blue-600",
       bgColor: "bg-blue-50",
     },
     {
-      label: "Assessments",
+      label: t("courseDetails.overview.assessments"),
       value: assessmentsCount,
       icon: BookOpen,
       color: "text-purple-600",
       bgColor: "bg-purple-50",
     },
     {
-      label: "Project Phases",
+      label: t("courseDetails.overview.projectPhases"),
       value: phasesCount,
       icon: CheckCircle,
       color: "text-green-600",
@@ -95,13 +98,13 @@ export function OverviewTab({ course }) {
       {/* Course Info Block */}
       <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
         <h2 className="text-xl font-bold text-primary-900 mb-6">
-          Course Information
+          {t("courseDetails.overview.courseInfo")}
         </h2>
 
         <div className="grid md:grid-cols-2 gap-8">
           <div>
             <p className="text-sm font-medium text-gray-600 mb-1">
-              Course Code
+              {t("courseDetails.overview.courseCode")}
             </p>
             <p className="text-lg font-semibold text-primary-900">
               {course.code}
@@ -110,7 +113,7 @@ export function OverviewTab({ course }) {
 
           <div>
             <p className="text-sm font-medium text-gray-600 mb-1">
-              Course Name
+              {t("courseDetails.overview.courseName")}
             </p>
             <p className="text-lg font-semibold text-primary-900">
               {course.name || course.title}
@@ -118,30 +121,38 @@ export function OverviewTab({ course }) {
           </div>
 
           <div>
-            <p className="text-sm font-medium text-gray-600 mb-1">Instructor</p>
+            <p className="text-sm font-medium text-gray-600 mb-1">
+              {t("courseDetails.overview.instructor")}
+            </p>
             <p className="text-lg font-semibold text-primary-900">
-              {course.instructor || "Not specified"}
+              {course.instructor || t("courseDetails.overview.notSpecified")}
             </p>
           </div>
 
           <div>
-            <p className="text-sm font-medium text-gray-600 mb-1">Schedule</p>
+            <p className="text-sm font-medium text-gray-600 mb-1">
+              {t("courseDetails.overview.schedule")}
+            </p>
             <p className="text-lg font-semibold text-primary-900">
-              {course.schedule || "Not specified"}
+              {course.schedule || t("courseDetails.overview.notSpecified")}
             </p>
           </div>
 
           <div>
-            <p className="text-sm font-medium text-gray-600 mb-1">Credits</p>
+            <p className="text-sm font-medium text-gray-600 mb-1">
+              {t("courseDetails.overview.credits")}
+            </p>
             <p className="text-lg font-semibold text-primary-900">
-              {course.credits || "N/A"}
+              {course.credits || t("courseDetails.overview.na")}
             </p>
           </div>
 
           <div>
-            <p className="text-sm font-medium text-gray-600 mb-1">Semester</p>
+            <p className="text-sm font-medium text-gray-600 mb-1">
+              {t("courseDetails.overview.semester")}
+            </p>
             <p className="text-lg font-semibold text-primary-900">
-              {course.semester || "Not specified"}
+              {course.semester || t("courseDetails.overview.notSpecified")}
             </p>
           </div>
         </div>
@@ -149,12 +160,12 @@ export function OverviewTab({ course }) {
 
       <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
         <h2 className="text-xl font-bold text-primary-900 mb-6">
-          Saved Summaries
+          {t("courseDetails.overview.savedSummaries")}
         </h2>
 
         {savedSummaries.length === 0 ? (
           <p className="text-sm text-gray-500">
-            No summaries saved yet. Use Summarizer and choose “Save to Course”.
+            {t("courseDetails.overview.noSummaries")}
           </p>
         ) : (
           <div className="space-y-4">
@@ -195,7 +206,9 @@ export function OverviewTab({ course }) {
                             handleCopySummary(summaryKey, summary.text);
                           }}
                           className="text-xs font-medium text-teal-700 hover:text-teal-800 underline underline-offset-2">
-                          {copiedSummaryKey === summaryKey ? "Copied!" : "Copy"}
+                          {copiedSummaryKey === summaryKey
+                            ? t("courseDetails.overview.copied")
+                            : t("courseDetails.overview.copy")}
                         </button>
                       </div>
                     </div>

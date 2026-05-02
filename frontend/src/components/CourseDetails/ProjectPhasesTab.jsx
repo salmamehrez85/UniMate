@@ -8,8 +8,10 @@ import {
   CheckCircle,
   Circle,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 function AddPhaseModal({ isOpen, onClose, onAdd }) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     title: "",
     dueDate: "",
@@ -53,11 +55,11 @@ function AddPhaseModal({ isOpen, onClose, onAdd }) {
     e.preventDefault();
 
     if (!formData.title.trim()) {
-      setError("Phase title is required");
+      setError(t("courseDetails.projectPhases.titleRequired"));
       return;
     }
     if (!formData.dueDate) {
-      setError("Due date is required");
+      setError(t("courseDetails.projectPhases.dueDateRequired"));
       return;
     }
 
@@ -89,7 +91,7 @@ function AddPhaseModal({ isOpen, onClose, onAdd }) {
       <div className="bg-white rounded-xl shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-gray-100 sticky top-0 bg-white">
           <h2 className="text-xl font-bold text-primary-900">
-            Add Project Phase
+            {t("courseDetails.projectPhases.addTitle")}
           </h2>
           <button
             onClick={onClose}
@@ -107,21 +109,21 @@ function AddPhaseModal({ isOpen, onClose, onAdd }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Phase Title *
+              {t("courseDetails.projectPhases.phaseTitleLabel")} *
             </label>
             <input
               type="text"
               name="title"
               value={formData.title}
               onChange={handleChange}
-              placeholder="e.g., Phase 1: Requirements"
+              placeholder={t("courseDetails.projectPhases.phaseTitlePlaceholder")}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Due Date *
+              {t("courseDetails.projectPhases.dueDateLabel")} *
             </label>
             <input
               type="date"
@@ -135,13 +137,13 @@ function AddPhaseModal({ isOpen, onClose, onAdd }) {
           <div>
             <div className="flex items-center justify-between mb-3">
               <label className="block text-sm font-medium text-gray-700">
-                Requirements
+                {t("courseDetails.projectPhases.requirementsLabel")}
               </label>
               <button
                 type="button"
                 onClick={addRequirement}
                 className="text-xs text-teal-600 hover:text-teal-700 font-semibold">
-                + Add Requirement
+                {t("courseDetails.projectPhases.addRequirement")}
               </button>
             </div>
 
@@ -154,7 +156,7 @@ function AddPhaseModal({ isOpen, onClose, onAdd }) {
                     onChange={(e) =>
                       handleRequirementChange(index, e.target.value)
                     }
-                    placeholder={`Requirement ${index + 1}`}
+                    placeholder={t("courseDetails.projectPhases.requirementPlaceholder")}
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                   />
                   <button
@@ -172,13 +174,13 @@ function AddPhaseModal({ isOpen, onClose, onAdd }) {
             <button
               type="submit"
               className="flex-1 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
-              Add Phase
+              {t("courseDetails.projectPhases.addButton")}
             </button>
             <button
               type="button"
               onClick={onClose}
               className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
-              Cancel
+              {t("courseDetails.projectPhases.cancel")}
             </button>
           </div>
         </form>
@@ -188,6 +190,7 @@ function AddPhaseModal({ isOpen, onClose, onAdd }) {
 }
 
 export function ProjectPhasesTab({ course, onCourseUpdate }) {
+  const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [expandedPhase, setExpandedPhase] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
@@ -238,17 +241,17 @@ export function ProjectPhasesTab({ course, onCourseUpdate }) {
           onClick={() => setIsModalOpen(true)}
           className="flex items-center gap-2 px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
           <Plus className="w-5 h-5" />
-          Add Phase
+          {t("courseDetails.projectPhases.addButton")}
         </button>
       </div>
 
       {phases.length === 0 ? (
         <div className="bg-white rounded-xl p-12 text-center border border-gray-100">
-          <p className="text-gray-600 mb-4">No project phases added yet</p>
+          <p className="text-gray-600 mb-4">{t("courseDetails.projectPhases.noPhases")}</p>
           <button
             onClick={() => setIsModalOpen(true)}
             className="px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
-            Add Your First Phase
+            {t("courseDetails.projectPhases.addFirst")}
           </button>
         </div>
       ) : (
@@ -349,11 +352,10 @@ export function ProjectPhasesTab({ course, onCourseUpdate }) {
         <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6">
             <h3 className="text-lg font-bold text-primary-900 mb-4">
-              Delete Phase?
+              {t("courseDetails.projectPhases.deleteTitle")}
             </h3>
             <p className="text-gray-600 mb-6">
-              Are you sure you want to delete this phase? This action cannot be
-              undone.
+              {t("courseDetails.projectPhases.deleteConfirm")}
             </p>
             <div className="flex gap-3">
               <button
@@ -364,7 +366,7 @@ export function ProjectPhasesTab({ course, onCourseUpdate }) {
               <button
                 onClick={() => setDeleteConfirm(null)}
                 className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
-                Cancel
+                {t("courseDetails.projectPhases.cancel")}
               </button>
             </div>
           </div>

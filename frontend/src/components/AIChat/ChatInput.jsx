@@ -1,6 +1,7 @@
 import { useRef, useEffect } from "react";
 import { Send, Mic, MicOff, VolumeX } from "lucide-react";
 import { WaveformVisualizer } from "./WaveformVisualizer";
+import { useTranslation } from "react-i18next";
 
 export function ChatInput({
   value,
@@ -15,6 +16,7 @@ export function ChatInput({
   onStopSpeaking = () => {},
 }) {
   const textareaRef = useRef(null);
+  const { t } = useTranslation();
 
   // Auto-resize textarea
   useEffect(() => {
@@ -40,7 +42,7 @@ export function ChatInput({
             onClick={onStopSpeaking}
             className="flex items-center gap-1.5 px-4 py-1.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-full text-xs font-medium hover:bg-amber-100 active:bg-amber-200 transition-colors shadow-sm">
             <VolumeX className="w-3.5 h-3.5" />
-            Stop Speaking
+            {t("aiChat.input.stopSpeaking")}
           </button>
         </div>
       )}
@@ -57,7 +59,7 @@ export function ChatInput({
           <div className="flex-1 flex items-center gap-3 min-h-7">
             <WaveformVisualizer isActive barHeights={barHeights} />
             <span className="text-sm text-red-500 font-medium animate-pulse select-none">
-              Listening…
+              {t("aiChat.input.listening")}
             </span>
           </div>
         ) : (
@@ -66,7 +68,7 @@ export function ChatInput({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask anything about your studies… (Enter to send, Shift+Enter for new line)"
+            placeholder={t("aiChat.input.placeholder")}
             rows={1}
             disabled={isLoading}
             className="flex-1 bg-transparent resize-none outline-none text-sm text-gray-800 placeholder-gray-400 leading-relaxed disabled:opacity-60"
@@ -108,7 +110,7 @@ export function ChatInput({
       </div>
 
       <p className="text-xs text-gray-400 mt-2 text-center">
-        UniMate AI can make mistakes. Verify important information.
+        {t("aiChat.input.disclaimer")}
       </p>
     </div>
   );

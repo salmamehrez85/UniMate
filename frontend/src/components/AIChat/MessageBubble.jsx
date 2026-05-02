@@ -1,10 +1,12 @@
 import { Bot, User, Volume2, Copy, Check } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export function MessageBubble({ message, onSpeak }) {
   const isUser = message.role === "user";
   const [copied, setCopied] = useState(false);
+  const { t } = useTranslation();
 
   const handleCopy = () => {
     navigator.clipboard.writeText(message.content).then(() => {
@@ -44,8 +46,8 @@ export function MessageBubble({ message, onSpeak }) {
             {/* Copy */}
             <button
               onClick={handleCopy}
-              title={copied ? "Copied!" : "Copy message"}
-              aria-label={copied ? "Copied!" : "Copy message"}
+              title={copied ? t("aiChat.message.copied") : t("aiChat.message.copy")}
+              aria-label={copied ? t("aiChat.message.copied") : t("aiChat.message.copy")}
               className={`flex items-center gap-1 px-2 py-0.5 bg-white border rounded-full shadow-sm text-xs transition-all cursor-pointer active:scale-95 ${
                 copied
                   ? "border-green-300 text-green-600"
@@ -56,18 +58,18 @@ export function MessageBubble({ message, onSpeak }) {
               ) : (
                 <Copy className="w-3 h-3" />
               )}
-              {copied ? "Copied!" : "Copy"}
+              {copied ? t("aiChat.message.copied") : t("aiChat.message.copy")}
             </button>
 
             {/* Read aloud */}
             {onSpeak && (
               <button
                 onClick={() => onSpeak(message.content)}
-                title="Read aloud"
-                aria-label="Read message aloud"
+                title={t("aiChat.message.readAloud")}
+                aria-label={t("aiChat.message.readAloud")}
                 className="flex items-center gap-1 px-2 py-0.5 bg-white border border-gray-200 rounded-full text-gray-400 hover:text-primary-600 hover:border-primary-300 shadow-sm text-xs transition-all cursor-pointer active:scale-95">
                 <Volume2 className="w-3 h-3" />
-                Read aloud
+                {t("aiChat.message.readAloud")}
               </button>
             )}
           </div>

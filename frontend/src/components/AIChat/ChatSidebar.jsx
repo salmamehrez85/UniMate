@@ -8,6 +8,7 @@ import {
   Check,
   X,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 function timeAgo(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -153,19 +154,20 @@ export function ChatSidebar({
   onRenameSession,
   isLoading,
 }) {
+  const { t } = useTranslation();
   return (
     <div className="w-64 shrink-0 bg-white border border-gray-100 rounded-2xl shadow-sm flex flex-col overflow-hidden">
       {/* Header */}
       <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
         <span className="text-sm font-semibold text-primary-900">
-          Chat History
+          {t("aiChat.sidebar.title")}
         </span>
         <button
           onClick={onNewChat}
           className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-primary-600 bg-primary-100 hover:text-teal-600 hover:bg-primary-200 rounded-lg transition-colors cursor-pointer"
           title="New chat">
           <Plus className="w-3.5 h-3.5" />
-          New
+          {t("aiChat.sidebar.newChat")}
         </button>
       </div>
 
@@ -184,7 +186,7 @@ export function ChatSidebar({
           <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
             <MessageSquare className="w-8 h-8 text-gray-300 mb-2" />
             <p className="text-xs text-gray-400">
-              No saved chats yet. Start a conversation!
+              {t("aiChat.sidebar.empty")}
             </p>
           </div>
         ) : (

@@ -14,14 +14,15 @@ import {
   Zap,
 } from "lucide-react";
 import { getQuizResultsByCourse } from "../../services/quizService";
+import { useTranslation } from "react-i18next";
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
-const formatDate = (value) => {
-  if (!value) return "Unknown";
+const formatDate = (value, unknownLabel = "Unknown") => {
+  if (!value) return unknownLabel;
   const d = new Date(value);
   return isNaN(d.getTime())
-    ? "Unknown"
+    ? unknownLabel
     : d.toLocaleDateString(undefined, {
         year: "numeric",
         month: "short",
@@ -96,6 +97,7 @@ function StatCard({
 }
 
 function ScoreTrendBar({ results }) {
+  const { t } = useTranslation();
   if (!results || results.length < 2) return null;
 
   // Take last 6 attempts, oldest first
@@ -106,7 +108,7 @@ function ScoreTrendBar({ results }) {
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
       <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
         <TrendingUp className="w-4 h-4 text-teal-600" />
-        Score Trend (last {slice.length} attempts)
+        {t("courseDetails.aiPractice.scoreTrend", { count: slice.length })}
       </h3>
       <div className="flex items-end gap-2 h-20">
         {slice.map((r, i) => {
@@ -135,15 +137,16 @@ function ScoreTrendBar({ results }) {
 }
 
 function WeakAreasPanel({ weakAreas }) {
+  const { t } = useTranslation();
   if (!weakAreas || weakAreas.length === 0) {
     return (
       <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-6 text-center">
         <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
         <p className="font-semibold text-emerald-800">
-          No weak areas detected!
+          {t("courseDetails.aiPractice.noWeakAreas")}
         </p>
         <p className="text-sm text-emerald-600 mt-1">
-          Keep taking quizzes to track your topic mastery.
+          {t("courseDetails.aiPractice.keepTakingQuizzes")}
         </p>
       </div>
     );
@@ -163,7 +166,7 @@ function WeakAreasPanel({ weakAreas }) {
               </span>
             </div>
             <span className="bg-orange-200 text-orange-800 text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
-              {count}× missed
+              {t("courseDetails.aiPractice.missed", { count })}
             </span>
           </div>
           <div className="flex items-start gap-2 mt-2">
@@ -179,6 +182,7 @@ function WeakAreasPanel({ weakAreas }) {
 }
 
 function ResultCard({ result }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -208,7 +212,10 @@ function ResultCard({ result }) {
               </span>
               <span className="text-xs text-gray-500 flex items-center gap-1">
                 <Clock className="w-3 h-3" />
-                {formatDate(result.completedAt)}
+                {formatDate(
+                  result.completedAt,
+                  t("courseDetails.aiPractice.unknown"),
+                )}
               </span>
             </div>
           </div>
@@ -226,7 +233,7 @@ function ResultCard({ result }) {
           {result.weakAreas && result.weakAreas.length > 0 ? (
             <>
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                Weak areas in this attempt
+                {t("courseDetails.aiPractice.weakAreasInAttempt")}
               </p>
               <div className="flex flex-wrap gap-2">
                 {result.weakAreas.map((area, i) => (
@@ -240,8 +247,8 @@ function ResultCard({ result }) {
             </>
           ) : (
             <p className="text-xs text-emerald-600 flex items-center gap-1">
-              <CheckCircle2 className="w-3 h-3" /> No weak areas in this
-              attempt.
+              <CheckCircle2 className="w-3 h-3" />{" "}
+              {t("courseDetails.aiPractice.noWeakAreasInAttempt")}
             </p>
           )}
           <p className="text-xs text-gray-400">
@@ -256,6 +263,7 @@ function ResultCard({ result }) {
 // ── main component ─────────────────────────────────────────────────────────
 
 export function AIPracticeTab({ course }) {
+  const { t } = useTranslation();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -292,7 +300,9 @@ export function AIPracticeTab({ course }) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
         <AlertTriangle className="w-8 h-8 text-red-500 mx-auto mb-2" />
-        <p className="font-semibold text-red-800">Failed to load quiz data</p>
+        <p className="font-semibold text-red-800">
+          {t("courseDetails.aiPractice.loadError")}
+        </p>
         <p className="text-sm text-red-600 mt-1">{error}</p>
       </div>
     );
@@ -310,10 +320,10 @@ export function AIPracticeTab({ course }) {
         </div>
         <div>
           <h2 className="text-xl font-bold text-gray-900">
-            AI Practice Insights
+            {t("courseDetails.aiPractice.title")}
           </h2>
           <p className="text-sm text-gray-500">
-            Quiz performance, weak areas, and study recommendations for{" "}
+            {t("courseDetails.aiPractice.subtitle")}{" "}
             <span className="font-medium">{course?.name}</span>
           </p>
         </div>
@@ -324,12 +334,10 @@ export function AIPracticeTab({ course }) {
         <div className="bg-linear-to-br from-teal-50 to-cyan-50 border border-teal-200 rounded-2xl p-10 text-center">
           <Zap className="w-12 h-12 text-teal-400 mx-auto mb-3" />
           <h3 className="text-lg font-bold text-teal-800 mb-2">
-            No quizzes taken yet
+            {t("courseDetails.aiPractice.noQuizzesYet")}
           </h3>
           <p className="text-sm text-teal-600 max-w-sm mx-auto">
-            Go to the <span className="font-semibold">Quizzes</span> page, take
-            a practice quiz for this course, and your results will appear here
-            automatically.
+            {t("courseDetails.aiPractice.emptyMessage")}
           </p>
         </div>
       ) : (
@@ -338,28 +346,28 @@ export function AIPracticeTab({ course }) {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <StatCard
               icon={BarChart2}
-              label="Total Attempts"
+              label={t("courseDetails.aiPractice.totalAttempts")}
               value={stats.totalAttempts}
               color="text-teal-600"
               bg="bg-teal-50"
             />
             <StatCard
               icon={TrendingUp}
-              label="Average Score"
+              label={t("courseDetails.aiPractice.avgScore")}
               value={`${stats.avgScore}%`}
               color={stats.avgScore >= 70 ? "text-emerald-600" : "text-red-600"}
               bg={stats.avgScore >= 70 ? "bg-emerald-50" : "bg-red-50"}
             />
             <StatCard
               icon={Trophy}
-              label="Best Score"
+              label={t("courseDetails.aiPractice.bestScore")}
               value={`${stats.bestScore}%`}
               color="text-amber-600"
               bg="bg-amber-50"
             />
             <StatCard
               icon={Target}
-              label="Latest Score"
+              label={t("courseDetails.aiPractice.latestScore")}
               value={stats.latestScore !== null ? `${stats.latestScore}%` : "—"}
               color={
                 stats.latestScore >= 70 ? "text-emerald-600" : "text-red-600"
@@ -375,7 +383,7 @@ export function AIPracticeTab({ course }) {
           <div>
             <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-orange-500" />
-              Needs Practice
+              {t("courseDetails.aiPractice.needsPractice")}
               {aggregatedWeakAreas?.length > 0 && (
                 <span className="bg-orange-100 text-orange-700 text-xs font-bold px-2 py-0.5 rounded-full">
                   {aggregatedWeakAreas.length} topic
@@ -390,7 +398,7 @@ export function AIPracticeTab({ course }) {
           <div>
             <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
               <Clock className="w-4 h-4 text-gray-500" />
-              Quiz History
+              {t("courseDetails.aiPractice.quizHistory")}
               <span className="bg-gray-100 text-gray-600 text-xs font-bold px-2 py-0.5 rounded-full">
                 {results.length}
               </span>
