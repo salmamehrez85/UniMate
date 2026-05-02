@@ -6,8 +6,10 @@ import {
   setUserData,
 } from "../../services/authService";
 import { ForgotPasswordModal } from "./ForgotPasswordModal";
+import { useTranslation } from "react-i18next";
 
 export function LoginForm({ onSwitchToRegister, onLoginSuccess }) {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -20,28 +22,22 @@ export function LoginForm({ onSwitchToRegister, onLoginSuccess }) {
     setError("");
     setLoading(true);
 
-    // Basic validation
     if (!email || !password) {
-      setError("Please fill in all fields");
+      setError(t("auth.login.fillAllFields"));
       setLoading(false);
       return;
     }
 
     try {
-      // Call the actual login API
       const response = await loginUser({ email, password });
-
-      // Store token and user data
       setAuthToken(response.token);
       setUserData(response.user);
-
-      // Call success callback
       if (onLoginSuccess) {
         onLoginSuccess();
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError(err.message || "Invalid email or password");
+      setError(err.message || t("auth.login.invalidCredentials"));
     } finally {
       setLoading(false);
     }
@@ -55,10 +51,10 @@ export function LoginForm({ onSwitchToRegister, onLoginSuccess }) {
           <label
             htmlFor="email"
             className="block text-sm font-medium text-gray-700 mb-2">
-            Email Address
+            {t("auth.login.emailLabel")}
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
               <Mail className="h-5 w-5 text-gray-400" />
             </div>
             <input
@@ -66,8 +62,8 @@ export function LoginForm({ onSwitchToRegister, onLoginSuccess }) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
-              placeholder="you@university.edu"
+              className="block w-full ps-10 pe-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+              placeholder={t("auth.login.emailPlaceholder")}
               disabled={loading}
             />
           </div>
@@ -78,10 +74,10 @@ export function LoginForm({ onSwitchToRegister, onLoginSuccess }) {
           <label
             htmlFor="password"
             className="block text-sm font-medium text-gray-700 mb-2">
-            Password
+            {t("auth.login.passwordLabel")}
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
               <Lock className="h-5 w-5 text-gray-400" />
             </div>
             <input
@@ -89,14 +85,14 @@ export function LoginForm({ onSwitchToRegister, onLoginSuccess }) {
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
-              placeholder="Enter your password"
+              className="block w-full ps-10 pe-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+              placeholder={t("auth.login.passwordPlaceholder")}
               disabled={loading}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              className="absolute inset-y-0 end-0 pe-3 flex items-center"
               disabled={loading}>
               {showPassword ? (
                 <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -119,17 +115,16 @@ export function LoginForm({ onSwitchToRegister, onLoginSuccess }) {
           <button
             type="button"
             onClick={() => setShowForgotPassword(true)}
-            className="text-sm text-primary-600 hover:text-primary-800 font-medium cursor-pointer hover:underline transition-colors duration-200">
-            Forgot password?
+            className="text-sm text-primary-600 hover:text-primary-800 font-medium cursor-pointer hover:underline transition-colors">
+            {t("auth.login.forgotPassword")}
           </button>
         </div>
 
-        {/* Submit Button */}
         <button
           type="submit"
           disabled={loading}
           className="w-full bg-gradient-to-r from-[#54B3A4] to-[#163C60] text-white py-3 rounded-lg font-semibold hover:from-[#48a094] hover:to-[#0f2a45] focus:outline-none focus:ring-2 focus:ring-[#54B3A4] focus:ring-offset-2 transition cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
-          {loading ? "Signing in..." : "Sign In"}
+          {loading ? t("auth.login.signingIn") : t("auth.login.signIn")}
         </button>
       </form>
 
@@ -140,7 +135,7 @@ export function LoginForm({ onSwitchToRegister, onLoginSuccess }) {
         </div>
         <div className="relative flex justify-center text-sm">
           <span className="px-4 bg-white text-gray-500">
-            Don't have an account?
+            {t("auth.login.dontHaveAccount")}
           </span>
         </div>
       </div>
@@ -151,7 +146,7 @@ export function LoginForm({ onSwitchToRegister, onLoginSuccess }) {
           type="button"
           onClick={onSwitchToRegister}
           className="text-primary-600 hover:text-primary-800 font-semibold cursor-pointer hover:underline transition-colors duration-200">
-          Create an account
+          {t("auth.login.createAccount")}
         </button>
       </div>
 

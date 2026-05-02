@@ -1,6 +1,8 @@
 import { AlertCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export function CoursePerformanceCard({ course }) {
+  const { t } = useTranslation();
   const getStatusBadge = (status) => {
     const statusStyles = {
       "On Track": "bg-emerald-100 text-emerald-700",
@@ -41,7 +43,7 @@ export function CoursePerformanceCard({ course }) {
       <div className="grid grid-cols-2 gap-6 mb-4">
         <div>
           <p className="text-xs text-gray-600 font-medium mb-1">
-            Current Grade
+            {t("performance.card.currentGrade")}
           </p>
           <p className="text-2xl font-bold text-gray-900">
             {course.currentGrade}%
@@ -49,7 +51,7 @@ export function CoursePerformanceCard({ course }) {
         </div>
         <div>
           <p className="text-xs text-gray-600 font-medium mb-1">
-            Predicted Range
+            {t("performance.card.predictedRange")}
           </p>
           <p className="text-2xl font-bold text-teal-500">
             {course.predictedRange}%

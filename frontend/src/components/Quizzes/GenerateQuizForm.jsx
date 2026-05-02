@@ -1,5 +1,7 @@
 import { LoaderCircle, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { getLanguagePrefs } from "../../hooks/useLanguage";
 
 const getDefaultFormValues = (courseId) => ({
   courseId: courseId || "",
@@ -16,6 +18,7 @@ export function GenerateQuizForm({
   isGenerating,
   error,
 }) {
+  const { t } = useTranslation();
   const [formValues, setFormValues] = useState(
     getDefaultFormValues(selectedCourseId),
   );
@@ -41,20 +44,21 @@ export function GenerateQuizForm({
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    await onGenerateQuiz(formValues);
+    const language = getLanguagePrefs().language || "en";
+    await onGenerateQuiz({ ...formValues, language });
   };
 
   return (
     <section className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
       <div className="px-6 py-5 border-b border-gray-100">
         <h2 className="text-xl font-bold text-primary-900">
-          Generate Custom Quiz
+          {t("quizzes.generateForm.title")}
         </h2>
       </div>
       <form onSubmit={handleSubmit} className="px-6 py-6 space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Select Course
+            {t("quizzes.generateForm.courseLabel")}
           </label>
           <select
             name="courseId"
@@ -62,7 +66,7 @@ export function GenerateQuizForm({
             onChange={handleChange}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
             disabled={isGenerating}>
-            {courses.length === 0 && <option value="">No courses found</option>}
+            {courses.length === 0 && <option value="">{t("quizzes.generateForm.noCoursesFound")}</option>}
             {courses.map((course) => (
               <option key={course._id} value={course._id}>
                 {course.code} - {course.name}
@@ -73,7 +77,7 @@ export function GenerateQuizForm({
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Question Type
+            {t("quizzes.generateForm.questionTypeLabel")}
           </label>
           <select
             name="questionType"
@@ -81,7 +85,7 @@ export function GenerateQuizForm({
             onChange={handleChange}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
             disabled={isGenerating}>
-            <option value="all">All Types</option>
+              <option value="all">{t("quizzes.generateForm.allTypes")}</option>
             <option value="mcq">MCQ</option>
             <option value="choose">Choose</option>
             <option value="complete">Complete</option>
@@ -92,7 +96,7 @@ export function GenerateQuizForm({
         <div className="grid md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Number of Questions
+              {t("quizzes.generateForm.numberOfQuestionsLabel")}
             </label>
             <input
               name="numberOfQuestions"
@@ -107,7 +111,7 @@ export function GenerateQuizForm({
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Difficulty
+              {t("quizzes.generateForm.difficultyLabel")}
             </label>
             <select
               name="difficulty"
@@ -115,9 +119,9 @@ export function GenerateQuizForm({
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
               disabled={isGenerating}>
-              <option value="easy">Easy</option>
-              <option value="medium">Medium</option>
-              <option value="hard">Hard</option>
+              <option value="easy">{t("quizzes.generateForm.easy")}</option>
+              <option value="medium">{t("quizzes.generateForm.medium")}</option>
+              <option value="hard">{t("quizzes.generateForm.hard")}</option>
             </select>
           </div>
         </div>
@@ -135,12 +139,12 @@ export function GenerateQuizForm({
           {isGenerating ? (
             <>
               <LoaderCircle className="w-5 h-5 animate-spin" />
-              Generating quiz...
+              {t("quizzes.generateForm.generating")}
             </>
           ) : (
             <>
               <Sparkles className="w-5 h-5" />
-              Generate Quiz
+              {t("quizzes.generateForm.generateButton")}
             </>
           )}
         </button>

@@ -1,5 +1,6 @@
 import { LoaderCircle, Send, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const createInitialAnswers = (quiz) => {
   if (!quiz || !Array.isArray(quiz.questions)) {
@@ -27,6 +28,7 @@ export function QuizSessionModal({
   onClose,
   onSubmit,
 }) {
+  const { t } = useTranslation();
   const [answers, setAnswers] = useState(createInitialAnswers(quiz));
 
   useEffect(() => {
@@ -62,9 +64,9 @@ export function QuizSessionModal({
           <div>
             <h2 className="text-xl font-bold text-gray-900">{quiz.title}</h2>
             <p className="text-sm text-gray-600 mt-1">
-              {course ? `${course.code} - ${course.name}` : "Practice quiz"} •{" "}
-              {quiz.totalQuestions} questions • {quiz.estimatedDurationMinutes}{" "}
-              min
+              {course ? `${course.code} - ${course.name}` : t("quizzes.session.practiceQuiz")} •{" "}
+              {quiz.totalQuestions} {t("quizzes.session.questions_other").replace("{{count}} ", "")} • {quiz.estimatedDurationMinutes}{" "}
+              {t("quizzes.available.min")}
             </p>
           </div>
           <button
@@ -100,8 +102,8 @@ export function QuizSessionModal({
                 {(question.type === "mcq" || question.type === "true_false") &&
                   (question.type === "true_false"
                     ? [
-                        { key: true, text: "True" },
-                        { key: false, text: "False" },
+                        { key: true, text: t("quizzes.session.true") },
+                        { key: false, text: t("quizzes.session.false") },
                       ]
                     : question.options
                   ).map((option) => (
@@ -161,7 +163,7 @@ export function QuizSessionModal({
                       )
                     }
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition resize-none bg-white"
-                    placeholder="Write your answer here..."
+                    placeholder={t("quizzes.session.answerPlaceholder")}
                   />
                 )}
               </div>
@@ -190,7 +192,7 @@ export function QuizSessionModal({
 
         <div className="px-6 py-4 border-t border-gray-100 bg-white flex items-center justify-between gap-3">
           <p className="text-sm text-gray-500">
-            Submit to update mastery scores and weak areas.
+            {t("quizzes.session.submitMessage")}
           </p>
           <div className="flex items-center gap-3">
             <button
@@ -198,7 +200,7 @@ export function QuizSessionModal({
               onClick={onClose}
               className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
               disabled={isSubmitting}>
-              Cancel
+              {t("common.close")}
             </button>
             <button
               type="submit"
@@ -208,12 +210,12 @@ export function QuizSessionModal({
               {isSubmitting ? (
                 <>
                   <LoaderCircle className="w-4 h-4 animate-spin" />
-                  Submitting...
+                  {t("quizzes.session.submitting")}
                 </>
               ) : (
                 <>
                   <Send className="w-4 h-4" />
-                  Submit Quiz
+                  {t("quizzes.session.submit")}
                 </>
               )}
             </button>

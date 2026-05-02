@@ -5,28 +5,23 @@ import {
   getPredictedGPA,
   refreshPredictedGPA,
 } from "../../services/courseService";
-
-function getCurrentSemester() {
-  const now = new Date();
-  const month = now.getMonth() + 1; // 1-12
-  const year = now.getFullYear();
-
-  let semester;
-  if (month >= 3 && month <= 5) {
-    semester = "Spring";
-  } else if (month >= 6 && month <= 9) {
-    semester = "Summer";
-  } else if (month >= 10 && month <= 11) {
-    semester = "Autumn";
-  } else {
-    // December, January, February
-    semester = "Winter";
-  }
-
-  return `${semester} ${year} Semester`;
-}
+import { useTranslation } from "react-i18next";
 
 export function PerformanceHeader() {
+  const { t } = useTranslation();
+
+  function getCurrentSemester() {
+    const now = new Date();
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+    let season;
+    if (month >= 3 && month <= 5) season = t("courses.seasons.spring");
+    else if (month >= 6 && month <= 9) season = t("courses.seasons.summer");
+    else if (month >= 10 && month <= 11) season = t("courses.seasons.autumn");
+    else season = t("courses.seasons.winter");
+    return t("courses.seasons.semester", { season, year });
+  }
+
   const currentSemester = getCurrentSemester();
   const [gpaData, setGpaData] = useState({
     gpa: 0,
@@ -120,7 +115,9 @@ export function PerformanceHeader() {
       <div className="bg-white rounded-lg border border-gray-100 p-6 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
           <Award className="w-5 h-5 text-gray-600" />
-          <p className="text-sm font-medium text-gray-600">Current GPA</p>
+          <p className="text-sm font-medium text-gray-600">
+            {t("performance.header.currentGPA")}
+          </p>
         </div>
         {gpaData.isLoading ? (
           <div className="space-y-2">
@@ -134,8 +131,11 @@ export function PerformanceHeader() {
             </h2>
             <p className="text-sm text-gray-600">
               {gpaData.completedCourses > 0
-                ? `${currentSemester} • ${gpaData.completedCourses} completed course${gpaData.completedCourses !== 1 ? "s" : ""}`
-                : "No completed courses yet"}
+                ? t("performance.header.completedCoursesSemester", {
+                    semester: currentSemester,
+                    count: gpaData.completedCourses,
+                  })
+                : t("performance.header.noCompletedCourses")}
             </p>
           </>
         )}
@@ -146,7 +146,9 @@ export function PerformanceHeader() {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-teal-500" />
-            <p className="text-sm font-medium text-gray-600">Predicted GPA</p>
+            <p className="text-sm font-medium text-gray-600">
+              {t("performance.header.predictedGPA")}
+            </p>
           </div>
           <button
             onClick={handleRefresh}
@@ -156,7 +158,9 @@ export function PerformanceHeader() {
             <RefreshCw
               className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`}
             />
-            {isRefreshing ? "Calculating…" : "Refresh"}
+            {isRefreshing
+              ? t("performance.header.calculating")
+              : t("performance.header.refresh")}
           </button>
         </div>
         {predictedData.isLoading ? (
@@ -173,14 +177,18 @@ export function PerformanceHeader() {
             </h2>
             <p className="text-sm text-gray-600">
               {predictedData.activeCourses > 0
-                ? `Based on ${predictedData.activeCourses} active course${predictedData.activeCourses !== 1 ? "s" : ""} and past performance`
+                ? t("performance.header.basedOnCourses", {
+                    count: predictedData.activeCourses,
+                  })
                 : predictedData.cachedAt
-                  ? "No active courses in last calculation"
-                  : "Click Refresh to calculate your predicted GPA"}
+                  ? t("performance.header.noActiveCoursesCached")
+                  : t("performance.header.clickRefresh")}
             </p>
             {predictedData.cachedAt && (
               <p className="text-xs text-gray-400 mt-1">
-                Last updated: {formatCachedAt(predictedData.cachedAt)}
+                {t("performance.header.lastUpdated", {
+                  time: formatCachedAt(predictedData.cachedAt),
+                })}
               </p>
             )}
             {refreshError && (

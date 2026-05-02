@@ -9,8 +9,10 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { getGPATrend } from "../../services/courseService";
+import { useTranslation } from "react-i18next";
 
 export function GPATrendChart() {
+  const { t } = useTranslation();
   const [gpaTrendData, setGpaTrendData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -45,9 +47,11 @@ export function GPATrendChart() {
   if (loading) {
     return (
       <div className="bg-white rounded-lg border border-gray-100 p-6 shadow-sm">
-        <h3 className="text-lg font-bold text-gray-900 mb-6">GPA Trend</h3>
+        <h3 className="text-lg font-bold text-gray-900 mb-6">
+          {t("performance.gpaTrend.title")}
+        </h3>
         <div className="h-[300px] flex items-center justify-center">
-          <p className="text-gray-500">Loading GPA trend data...</p>
+          <p className="text-gray-500">{t("performance.gpaTrend.loading")}</p>
         </div>
       </div>
     );
@@ -56,11 +60,13 @@ export function GPATrendChart() {
   if (error) {
     return (
       <div className="bg-white rounded-lg border border-gray-100 p-6 shadow-sm">
-        <h3 className="text-lg font-bold text-gray-900 mb-6">GPA Trend</h3>
+        <h3 className="text-lg font-bold text-gray-900 mb-6">
+          {t("performance.gpaTrend.title")}
+        </h3>
         <div className="h-[300px] flex items-center justify-center">
           <p className="text-gray-500">
             {error === "No GPA data available"
-              ? "No completed courses yet. Your GPA trend will appear here once you complete courses."
+              ? t("performance.gpaTrend.noData")
               : error}
           </p>
         </div>
@@ -71,11 +77,11 @@ export function GPATrendChart() {
   if (gpaTrendData.length === 0) {
     return (
       <div className="bg-white rounded-lg border border-gray-100 p-6 shadow-sm">
-        <h3 className="text-lg font-bold text-gray-900 mb-6">GPA Trend</h3>
+        <h3 className="text-lg font-bold text-gray-900 mb-6">
+          {t("performance.gpaTrend.title")}
+        </h3>
         <div className="h-[300px] flex items-center justify-center">
-          <p className="text-gray-500">
-            No completed courses yet. Your GPA trend will appear here.
-          </p>
+          <p className="text-gray-500">{t("performance.gpaTrend.empty")}</p>
         </div>
       </div>
     );
@@ -83,7 +89,9 @@ export function GPATrendChart() {
 
   return (
     <div className="bg-white rounded-lg border border-gray-100 p-6 shadow-sm">
-      <h3 className="text-lg font-bold text-gray-900 mb-6">GPA Trend</h3>
+      <h3 className="text-lg font-bold text-gray-900 mb-6">
+        {t("performance.gpaTrend.title")}
+      </h3>
 
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={gpaTrendData}>
@@ -161,15 +169,17 @@ export function GPATrendChart() {
       {gpaTrendData.length > 0 && (
         <div className="mt-4 pt-4 border-t border-gray-100">
           <p className="text-sm text-gray-600">
-            Total Semesters:{" "}
+            {t("performance.gpaTrend.totalSemesters")}:{" "}
             <span className="font-semibold">
               {gpaTrendData.filter((d) => !d.isPredicted).length}
             </span>
           </p>
           {hasPredictedData && (
             <p className="text-sm text-amber-600 mt-2">
-              <span className="font-semibold">Predicted GPA:</span> Based on
-              current semester performance
+              <span className="font-semibold">
+                {t("performance.gpaTrend.predictedLabel")}:
+              </span>{" "}
+              {t("performance.gpaTrend.predictedNote")}
             </p>
           )}
         </div>

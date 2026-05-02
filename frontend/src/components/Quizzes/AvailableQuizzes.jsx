@@ -1,4 +1,5 @@
 import { BookOpen, Clock, LoaderCircle, Play, Sparkles } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const formatCourseLabel = (course) => `${course.code} - ${course.name}`;
 
@@ -12,6 +13,7 @@ export function AvailableQuizzes({
   onSelectCourse,
   onStartQuiz,
 }) {
+  const { t } = useTranslation();
   const selectedCourse = courses.find(
     (course) => course._id === selectedCourseId,
   );
@@ -22,23 +24,24 @@ export function AvailableQuizzes({
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <h2 className="text-xl font-bold text-primary-900">
-              Available Quizzes
+              {t("quizzes.available.title")}
             </h2>
             <p className="text-sm text-gray-600 mt-1">
-              AI-generated from your course notes and ranked by what needs
-              review.
+              {t("quizzes.available.subtitle")}
             </p>
           </div>
           <div className="w-full md:w-80">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Course
+              {t("quizzes.available.courseLabel")}
             </label>
             <select
               value={selectedCourseId}
               onChange={(event) => onSelectCourse(event.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition">
               {courses.length === 0 && (
-                <option value="">No courses found</option>
+                <option value="">
+                  {t("quizzes.available.noCoursesFound")}
+                </option>
               )}
               {courses.map((course) => (
                 <option key={course._id} value={course._id}>
@@ -71,7 +74,7 @@ export function AvailableQuizzes({
       {loading && (
         <div className="px-6 py-10 flex items-center justify-center gap-3 text-gray-500">
           <LoaderCircle className="w-5 h-5 animate-spin" />
-          Loading quizzes...
+          {t("quizzes.available.loading")}
         </div>
       )}
 
@@ -83,8 +86,7 @@ export function AvailableQuizzes({
 
       {!loading && !error && quizzes.length === 0 && (
         <div className="px-6 py-10 text-sm text-gray-500">
-          No quizzes available for this course yet. Generate one below to get
-          started.
+          {t("quizzes.available.empty")}
         </div>
       )}
 
@@ -102,7 +104,7 @@ export function AvailableQuizzes({
                   {quiz.isRecommended && (
                     <span className="inline-flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">
                       <Sparkles className="w-3 h-3" />
-                      Recommended
+                      {t("quizzes.available.recommended")}
                     </span>
                   )}
                 </div>
@@ -119,11 +121,11 @@ export function AvailableQuizzes({
                   </span>
                   <span className="flex items-center gap-1">
                     <BookOpen className="w-4 h-4" />
-                    {quiz.totalQuestions} questions
+                    {quiz.totalQuestions} {t("quizzes.available.questions")}
                   </span>
                   <span className="flex items-center gap-1">
                     <Clock className="w-4 h-4" />
-                    {quiz.estimatedDurationMinutes} min
+                    {quiz.estimatedDurationMinutes} {t("quizzes.available.min")}
                   </span>
                 </div>
               </div>
@@ -131,7 +133,7 @@ export function AvailableQuizzes({
                 onClick={() => onStartQuiz(quiz)}
                 className="flex items-center gap-2 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
                 <Play className="w-4 h-4" />
-                Start
+                {t("quizzes.available.startButton")}
               </button>
             </div>
           ))}

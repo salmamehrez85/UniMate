@@ -1,12 +1,12 @@
 import { ListTodo } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-function getDaysLeftText(daysLeft) {
-  if (daysLeft === 0) return "Due today";
-  if (daysLeft === 1) return "1 day left";
-  return `${daysLeft} days left`;
+function getDaysLeftText(daysLeft, t) {
+  if (daysLeft === 0) return t("dashboard.upcomingTasks.dueToday");
+  return t("dashboard.upcomingTasks.daysLeft", { count: daysLeft });
 }
 
-function TaskItem({ task }) {
+function TaskItem({ task, t }) {
   return (
     <div className="flex items-start gap-3 p-5 rounded-lg hover:bg-primary-50 transition-all border border-gray-100 hover:border-primary-200">
       <div className="flex-1 min-w-0">
@@ -19,11 +19,11 @@ function TaskItem({ task }) {
                 ? "bg-red-100 text-red-700 font-semibold"
                 : "bg-amber-100 text-amber-700"
             }`}>
-            {task.priority === "high" ? "• High " : "Medium"}
+            {task.priority === "high" ? t("dashboard.upcomingTasks.priorityHigh") : t("dashboard.upcomingTasks.priorityMedium")}
           </span>
           <span className="text-xs text-gray-500">•</span>
           <span className="text-xs text-gray-500">
-            {getDaysLeftText(task.daysLeft)}
+            {getDaysLeftText(task.daysLeft, t)}
           </span>
         </div>
       </div>
@@ -32,12 +32,13 @@ function TaskItem({ task }) {
 }
 
 export function UpcomingTasks({ tasks = [], loading = false }) {
+  const { t } = useTranslation();
   return (
     <div className="bg-white rounded-lg p-7 shadow-sm border border-gray-200">
       <div className="flex items-center justify-between mb-7">
         <h3 className="text-lg font-bold text-primary-900 flex items-center gap-2">
           <ListTodo className="w-5 h-5" />
-          Upcoming Tasks
+          {t("dashboard.upcomingTasks.title")}
         </h3>
       </div>
       <div className="space-y-4">
@@ -50,10 +51,10 @@ export function UpcomingTasks({ tasks = [], loading = false }) {
           ))
         ) : tasks.length === 0 ? (
           <p className="text-sm text-gray-400 text-center py-6">
-            No upcoming tasks. You&apos;re all caught up!
+            {t("dashboard.upcomingTasks.empty")}
           </p>
         ) : (
-          tasks.map((task) => <TaskItem key={task.id} task={task} />)
+          tasks.map((task) => <TaskItem key={task.id} task={task} t={t} />)
         )}
       </div>
     </div>

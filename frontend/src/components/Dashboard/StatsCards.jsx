@@ -5,10 +5,30 @@ export function StatsCards({ stats = {}, loading = false }) {
   const { t } = useTranslation();
 
   const STATS_CONFIG = [
-    { key: "activeCourses", label: t("dashboard.stats.activeCourses"), Icon: BookOpen, color: "bg-blue-50 text-primary-600" },
-    { key: "pendingTasks", label: t("dashboard.stats.pendingTasks"), Icon: CheckCircle, color: "bg-emerald-50 text-emerald-700" },
-    { key: "avgPerformance", label: t("dashboard.stats.avgPerformance"), Icon: TrendingUp, color: "bg-purple-50 text-purple-700" },
-    { key: "studyHours", label: t("dashboard.stats.completedTasks"), Icon: Clock, color: "bg-amber-50 text-amber-700" },
+    {
+      key: "activeCourses",
+      label: t("dashboard.stats.activeCourses"),
+      Icon: BookOpen,
+      color: "bg-blue-50 text-primary-600",
+    },
+    {
+      key: "pendingTasks",
+      label: t("dashboard.stats.pendingTasks"),
+      Icon: CheckCircle,
+      color: "bg-emerald-50 text-emerald-700",
+    },
+    {
+      key: "avgPerformance",
+      label: t("dashboard.stats.avgPerformance"),
+      Icon: TrendingUp,
+      color: "bg-purple-50 text-purple-700",
+    },
+    {
+      key: "studyHours",
+      label: t("dashboard.stats.completedTasks"),
+      Icon: Clock,
+      color: "bg-amber-50 text-amber-700",
+    },
   ];
 
   return (

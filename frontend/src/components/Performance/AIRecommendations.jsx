@@ -4,8 +4,11 @@ import {
   getAIRecommendations,
   refreshAIRecommendations,
 } from "../../services/courseService";
+import { useTranslation } from "react-i18next";
+import { getLanguagePrefs } from "../../hooks/useLanguage";
 
 export function AIRecommendations() {
+  const { t } = useTranslation();
   const [recommendations, setRecommendations] = useState([]);
   const [cachedAt, setCachedAt] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,7 +38,8 @@ export function AIRecommendations() {
     setIsRefreshing(true);
     setError(null);
     try {
-      const data = await refreshAIRecommendations();
+      const language = getLanguagePrefs().language || "en";
+      const data = await refreshAIRecommendations(language);
       setRecommendations(data.data || []);
       setCachedAt(data.cachedAt || null);
     } catch (err) {
@@ -75,7 +79,7 @@ export function AIRecommendations() {
         <div className="flex items-center gap-2">
           <Lightbulb className="w-5 h-5 text-blue-600" />
           <h3 className="text-lg font-semibold text-blue-900">
-            AI Recommendations
+            {t("performance.recommendations.title")}
           </h3>
         </div>
         <button
@@ -86,7 +90,7 @@ export function AIRecommendations() {
           <RefreshCw
             className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`}
           />
-          {isRefreshing ? "Calculating…" : "Refresh"}
+          {isRefreshing ? t("performance.recommendations.calculating") : t("performance.recommendations.refresh")}
         </button>
       </div>
 
@@ -100,8 +104,8 @@ export function AIRecommendations() {
         <div className="text-center py-4">
           <p className="text-gray-600">
             {isRefreshing
-              ? "Running AI analysis…"
-              : "Loading recommendations..."}
+              ? t("performance.recommendations.analyzing")
+              : t("performance.recommendations.loading")}
           </p>
         </div>
       )}
@@ -116,8 +120,8 @@ export function AIRecommendations() {
         <div className="text-center py-4">
           <p className="text-gray-600">
             {cachedAt
-              ? "No active courses in last calculation"
-              : "Click Refresh to generate AI recommendations"}
+              ? t("performance.recommendations.noActiveCourses")
+              : t("performance.recommendations.clickRefresh")}
           </p>
         </div>
       )}

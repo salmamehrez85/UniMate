@@ -1,7 +1,10 @@
+import { useTranslation } from "react-i18next";
+
 export function LoginFooter() {
+  const { t } = useTranslation();
   return (
     <p className="text-center text-sm text-gray-600 mt-8">
-      By signing in, you agree to our Terms of Service and Privacy Policy
+      {t("auth.login.footer")}
     </p>
   );
 }

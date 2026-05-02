@@ -114,7 +114,9 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
       <div className="bg-white rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <h2 className="text-xl font-bold text-gray-900">{t("courses.addModal.title")}</h2>
+          <h2 className="text-xl font-bold text-gray-900">
+            {t("courses.addModal.title")}
+          </h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition"
@@ -130,7 +132,10 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
             <label
               htmlFor="code"
               className="block text-sm font-medium text-gray-700 mb-2">
-              {t("courses.addModal.codeLabel")} <span className="text-red-500">{t("courses.addModal.codeRequired")}</span>
+              {t("courses.addModal.codeLabel")}{" "}
+              <span className="text-red-500">
+                {t("courses.addModal.codeRequired")}
+              </span>
             </label>
             <input
               id="code"
@@ -149,7 +154,10 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
             <label
               htmlFor="name"
               className="block text-sm font-medium text-gray-700 mb-2">
-              {t("courses.addModal.nameLabel")} <span className="text-red-500">{t("courses.addModal.codeRequired")}</span>
+              {t("courses.addModal.nameLabel")}{" "}
+              <span className="text-red-500">
+                {t("courses.addModal.codeRequired")}
+              </span>
             </label>
             <input
               id="name"
@@ -244,7 +252,10 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
             <label
               htmlFor="semester"
               className="block text-sm font-medium text-gray-700 mb-2">
-              {t("courses.addModal.semesterLabel")} <span className="text-red-500">{t("courses.addModal.codeRequired")}</span>
+              {t("courses.addModal.semesterLabel")}{" "}
+              <span className="text-red-500">
+                {t("courses.addModal.codeRequired")}
+              </span>
             </label>
             <select
               id="semester"
@@ -263,7 +274,9 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
               ))}
             </select>
             <p className="text-xs text-gray-500 mt-1">
-              {t("courses.addModal.semesterDefault", { semester: currentSemester })}
+              {t("courses.addModal.semesterDefault", {
+                semester: currentSemester,
+              })}
             </p>
           </div>
 
@@ -309,7 +322,9 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
               type="submit"
               className="flex-1 px-4 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={loading}>
-              {loading ? t("courses.addModal.addingButton") : t("courses.addModal.addButton")}
+              {loading
+                ? t("courses.addModal.addingButton")
+                : t("courses.addModal.addButton")}
             </button>
           </div>
         </form>
