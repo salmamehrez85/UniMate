@@ -5,8 +5,10 @@ import { AddCourseModal } from "../components/Courses/AddCourseModal";
 import { GenerateEmailModal } from "../components/Courses/GenerateEmailModal";
 import { getCourses, createCourse } from "../services/courseService";
 import { getUserData } from "../services/authService";
+import { useTranslation } from "react-i18next";
 
 export function Courses({ onSelectCourse }) {
+  const { t } = useTranslation();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -22,7 +24,7 @@ export function Courses({ onSelectCourse }) {
   const displayedCourses =
     viewMode === "completed" ? completedCourses : activeCourses;
   const coursesLabel =
-    viewMode === "completed" ? "completed courses" : "active courses";
+    viewMode === "completed" ? t("courses.header.completedLabel") : t("courses.header.activeLabel");
 
   const getSemesterSortKey = (semester) => {
     if (!semester) return { year: 0, season: 0 };
@@ -103,7 +105,7 @@ export function Courses({ onSelectCourse }) {
     return (
       <div className="space-y-6 mt-20 px-6 pb-24 md:pb-6">
         <div className="flex items-center justify-center py-12">
-          <div className="text-gray-600">Loading courses...</div>
+          <div className="text-gray-600">{t("courses.loading")}</div>
         </div>
       </div>
     );
@@ -135,7 +137,7 @@ export function Courses({ onSelectCourse }) {
               ? "bg-teal-500 text-white"
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}>
-          Active ({activeCourses.length})
+          {t("courses.active", { count: activeCourses.length })}
         </button>
         <button
           onClick={() => setViewMode("completed")}
@@ -144,7 +146,7 @@ export function Courses({ onSelectCourse }) {
               ? "bg-teal-500 text-white"
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}>
-          Completed ({completedCourses.length})
+          {t("courses.completed", { count: completedCourses.length })}
         </button>
       </div>
 
@@ -153,14 +155,14 @@ export function Courses({ onSelectCourse }) {
         <div className="bg-white rounded-xl p-12 text-center border border-gray-100">
           <p className="text-gray-600 mb-4">
             {viewMode === "completed"
-              ? "No completed courses yet"
-              : "No active courses yet"}
+              ? t("courses.noCompleted")
+              : t("courses.noActive")}
           </p>
           {viewMode === "active" && (
             <button
               onClick={() => setIsModalOpen(true)}
               className="px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition font-semibold">
-              Add Your First Course
+              {t("courses.addFirst")}
             </button>
           )}
         </div>

@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { getCourses } from "../services/courseService";
 import { getNotificationPrefs } from "../hooks/useNotificationPrefs";
+import { LanguageSwitcher } from "./LanguageSwitcher";
+import { useTranslation } from "react-i18next";
 
 function buildNotifications(courses, prefs) {
   const items = [];
@@ -82,6 +84,7 @@ function buildNotifications(courses, prefs) {
 }
 
 export function Header({ activeView, onLogout }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [dismissed, setDismissed] = useState(() => {
@@ -144,32 +147,32 @@ export function Header({ activeView, onLogout }) {
   const getTitle = () => {
     switch (activeView) {
       case "dashboard":
-        return "Dashboard";
+        return t("header.dashboard");
       case "courses":
-        return "My Courses";
+        return t("header.myCourses");
       case "tasks":
-        return "Tasks";
+        return t("header.tasks");
       case "summarizer":
-        return "Summarizer";
+        return t("header.summarizer");
       case "quizzes":
-        return "Quizzes";
+        return t("header.quizzes");
       case "performance":
-        return "Performance";
+        return t("header.performance");
       case "chat":
-        return "AI Chat";
+        return t("header.aiChat");
       case "schedule":
-        return "Schedule";
+        return t("header.schedule");
       case "email":
-        return "Email Professor";
+        return t("header.emailProfessor");
       case "settings":
-        return "Settings";
+        return t("header.settings");
       default:
-        return "UniMate";
+        return t("header.unimate");
     }
   };
 
   return (
-    <header className="bg-white border-b border-gray-100 fixed top-0 left-0 right-0 z-10 md:ml-64 shadow-sm">
+    <header className="bg-white border-b border-gray-100 fixed top-0 left-0 right-0 z-10 md:ms-64 shadow-sm">
       <div className="max-w-7xl mx-auto px-6 py-5">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-primary-700 text-left tracking-tight">
@@ -191,7 +194,7 @@ export function Header({ activeView, onLogout }) {
                 <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100 z-50 overflow-hidden">
                   <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
                     <span className="font-semibold text-gray-800 text-sm">
-                      Notifications
+                      {t("header.notifications")}
                     </span>
                     {visible.length > 0 && (
                       <span className="text-xs bg-primary-100 text-primary-700 font-semibold px-2 py-0.5 rounded-full">
@@ -233,6 +236,8 @@ export function Header({ activeView, onLogout }) {
                 </div>
               )}
             </div>
+
+            <LanguageSwitcher />
 
             <button
               onClick={onLogout}

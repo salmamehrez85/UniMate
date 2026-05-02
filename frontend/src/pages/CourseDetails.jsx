@@ -7,6 +7,7 @@ import { ProjectPhasesTab } from "../components/CourseDetails/ProjectPhasesTab";
 import { SettingsTab } from "../components/CourseDetails/SettingsTab";
 import { AIPracticeTab } from "../components/CourseDetails/AIPracticeTab";
 import { updateCourse, deleteCourse } from "../services/courseService";
+import { useTranslation } from "react-i18next";
 
 export function CourseDetails({
   courseId,
@@ -15,16 +16,17 @@ export function CourseDetails({
   onCourseUpdate,
   onCourseDelete,
 }) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("overview");
   const [courseData, setCourseData] = useState(course);
 
   const tabs = [
-    { id: "overview", label: "Overview" },
-    { id: "assessments", label: "Assessments" },
-    { id: "tasks", label: "Tasks" },
-    { id: "phases", label: "Project Phases" },
-    { id: "ai-practice", label: " AI Practice" },
-    { id: "settings", label: "Settings" },
+    { id: "overview", label: t("courseDetails.tabs.overview") },
+    { id: "assessments", label: t("courseDetails.tabs.assessments") },
+    { id: "tasks", label: t("courseDetails.tabs.tasks") },
+    { id: "phases", label: t("courseDetails.tabs.projectPhases") },
+    { id: "ai-practice", label: t("courseDetails.tabs.aiPractice") },
+    { id: "settings", label: t("courseDetails.tabs.settings") },
   ];
 
   // Handler to update both local courseData and parent state + API
@@ -87,7 +89,7 @@ export function CourseDetails({
           onClick={onBack}
           className="flex items-center gap-2 text-primary-600 hover:text-primary-700 transition font-medium">
           <ChevronLeft className="w-5 h-5" />
-          Back to Courses
+          {t("courseDetails.backToCourses")}
         </button>
       </div>
 
@@ -97,7 +99,7 @@ export function CourseDetails({
             <h1 className="text-3xl font-bold text-primary-900 mb-2">
               {courseData.name || courseData.title}
             </h1>
-            <p className="text-gray-600">Course Code: {courseData.code}</p>
+            <p className="text-gray-600">{t("courseDetails.courseCode", { code: courseData.code })}</p>
           </div>
         </div>
 

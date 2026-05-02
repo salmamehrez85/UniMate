@@ -11,32 +11,37 @@ import {
   Mail,
 } from "lucide-react";
 import { Logo } from "./Logo";
+import { useTranslation } from "react-i18next";
 
 export function Navigation({ activeView, setActiveView }) {
+  const { t } = useTranslation();
+
   const navSections = [
     {
       items: [
-        { id: "dashboard", label: "Dashboard", Icon: LayoutGrid },
-        { id: "courses", label: "Courses", Icon: BookOpen },
-        { id: "tasks", label: "Tasks", Icon: CheckCircle },
-        { id: "schedule", label: "Schedule", Icon: Calendar },
+        { id: "dashboard", label: t("nav.dashboard"), Icon: LayoutGrid },
+        { id: "courses", label: t("nav.courses"), Icon: BookOpen },
+        { id: "tasks", label: t("nav.tasks"), Icon: CheckCircle },
+        { id: "schedule", label: t("nav.schedule"), Icon: Calendar },
       ],
     },
     {
-      title: "AI TOOLS",
+      title: t("nav.aiTools"),
       items: [
-        { id: "chat", label: "AI Assistant", Icon: MessageSquare },
-        { id: "summarizer", label: "Summarizer", Icon: FileText },
-        { id: "quizzes", label: "Quiz", Icon: HelpCircle },
-        { id: "email", label: "Email Professor", Icon: Mail },
+        { id: "chat", label: t("nav.aiAssistant"), Icon: MessageSquare },
+        { id: "summarizer", label: t("nav.summarizer"), Icon: FileText },
+        { id: "quizzes", label: t("nav.quiz"), Icon: HelpCircle },
+        { id: "email", label: t("nav.emailProfessor"), Icon: Mail },
       ],
     },
     {
-      title: "INSIGHTS",
-      items: [{ id: "performance", label: "Performance", Icon: TrendingUp }],
+      title: t("nav.insights"),
+      items: [
+        { id: "performance", label: t("nav.performance"), Icon: TrendingUp },
+      ],
     },
     {
-      items: [{ id: "settings", label: "Settings", Icon: Settings }],
+      items: [{ id: "settings", label: t("nav.settings"), Icon: Settings }],
     },
   ];
 
@@ -65,11 +70,11 @@ export function Navigation({ activeView, setActiveView }) {
       </nav>
 
       {/* Desktop Side Navigation */}
-      <aside className="hidden md:block fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-gray-100 z-20 shadow-sm">
+      <aside className="hidden md:block fixed start-0 top-0 bottom-0 w-64 bg-white border-e border-gray-100 z-20 shadow-sm">
         <div className="p-2 border-b border-gray-100 flex flex-col items-center">
           <Logo size="lg" showText={true} />
           <p className="text-[10px] text-gray-500 font-medium tracking-wide text-center">
-            Professional Learning Platform
+            {t("nav.tagline")}
           </p>
         </div>
         <nav className="px-3 py-4 space-y-6">
@@ -105,7 +110,8 @@ export function Navigation({ activeView, setActiveView }) {
         {/* Footer */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100 bg-gradient-to-b from-transparent to-gray-50">
           <p className="text-xs text-gray-500 text-center">
-            <span className="font-semibold">UniMate</span> • Academic AI
+            <span className="font-semibold">UniMate</span> •{" "}
+            {t("nav.footer").split("UniMate • ")[1] || t("nav.footer")}
           </p>
         </div>
       </aside>

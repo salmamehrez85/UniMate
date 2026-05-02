@@ -17,10 +17,12 @@ import { Navigation } from "./components/Navigation";
 import { Header } from "./components/Header";
 import { getAuthToken, logout as logoutService } from "./services/authService";
 import { applyAppearance, getAppearancePrefs } from "./hooks/useAppearance";
+import { applyLanguage, getLanguagePrefs } from "./hooks/useLanguage";
 import "./App.css";
 
-// Apply saved appearance immediately on load
+// Apply saved appearance and language immediately on load
 applyAppearance(getAppearancePrefs());
+applyLanguage(getLanguagePrefs());
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -148,7 +150,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header activeView={activeView} onLogout={handleLogout} />
-      <main className="pb-20 md:pb-6 md:ml-64">
+      <main className="pb-20 md:pb-6 md:ms-64">
         <div className="max-w-7xl mx-auto px-4 py-6">{renderView()}</div>
       </main>
       <Navigation activeView={activeView} setActiveView={setActiveView} />

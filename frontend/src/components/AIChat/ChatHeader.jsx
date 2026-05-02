@@ -1,6 +1,8 @@
-import { Bot, Trash2 } from "lucide-react";
+import { Bot } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-export function ChatHeader({ onClearChat, messageCount, sessionTitle }) {
+export function ChatHeader({ sessionTitle }) {
+  const { t } = useTranslation();
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm flex items-center justify-between">
       <div className="flex items-center gap-4">
@@ -9,10 +11,10 @@ export function ChatHeader({ onClearChat, messageCount, sessionTitle }) {
         </div>
         <div>
           <h2 className="text-xl font-bold text-primary-900 tracking-tight">
-            {sessionTitle || "AI Study Assistant"}
+            {sessionTitle || t("aiChat.header.title")}
           </h2>
           <p className="text-sm text-gray-500 mt-0.5">
-            Powered by Gemini · Ask me anything about your studies
+            {t("aiChat.header.subtitle")}
           </p>
         </div>
       </div>

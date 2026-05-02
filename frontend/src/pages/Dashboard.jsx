@@ -5,8 +5,10 @@ import { CourseProgress } from "../components/Dashboard/CourseProgress";
 import { RecentActivity } from "../components/Dashboard/RecentActivity";
 import { QuickActions } from "../components/Dashboard/QuickActions";
 import { useDashboardData } from "../hooks/useDashboardData";
+import { useTranslation } from "react-i18next";
 
 export function Dashboard({ onNavigate }) {
+  const { t } = useTranslation();
   const {
     userName,
     tasksToday,
@@ -24,7 +26,7 @@ export function Dashboard({ onNavigate }) {
 
         <div>
           <h3 className="text-xl font-bold text-primary-900 mb-6 tracking-tight">
-            Your Statistics
+            {t("dashboard.statistics")}
           </h3>
           <StatsCards stats={stats} loading={loading} />
         </div>
