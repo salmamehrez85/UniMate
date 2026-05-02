@@ -233,7 +233,13 @@ const buildQuizGenerationUserPrompt = ({
   difficulty,
   questionType,
   courseContext,
+  language,
 }) => {
+  const languageInstruction =
+    language === "ar"
+      ? "\n\nIMPORTANT: Generate ALL question prompts, answer options, and explanations in Arabic (العربية). Do NOT use English for any text fields."
+      : "";
+
   return `Generate a new practice quiz for this course.
 
 Course metadata:
@@ -257,7 +263,7 @@ Return JSON with:
 Remember:
 - Every question must include 1 to 3 specific subTopicTags using the exact key subTopicTags.
 - Those tags must be micro-topic labels, not broad domains.
-- Keep the output strictly JSON.`;
+- Keep the output strictly JSON.${languageInstruction}`;
 };
 
 const buildMockQuizPayload = ({
@@ -566,6 +572,7 @@ const generatePracticeQuiz = async ({
   sourceContext,
   useMock,
   timeoutMs,
+  language,
 }) => {
   const normalizedDifficulty = normalizeDifficulty(difficulty);
   const normalizedQuestionType = normalizeQuestionType(questionType);
@@ -585,6 +592,7 @@ const generatePracticeQuiz = async ({
     difficulty: normalizedDifficulty,
     questionType: normalizedQuestionType,
     courseContext,
+    language,
   });
 
   let parsedQuizPayload;

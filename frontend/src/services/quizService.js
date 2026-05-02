@@ -53,6 +53,7 @@ export const generateQuiz = async ({
   questionType,
   sourceContext,
   useMock,
+  language,
 }) => {
   const response = await fetch(`${API_BASE_URL}/quizzes/generate`, {
     method: "POST",
@@ -64,6 +65,7 @@ export const generateQuiz = async ({
       questionType,
       sourceContext,
       useMock,
+      language,
     }),
   });
 

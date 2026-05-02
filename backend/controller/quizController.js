@@ -33,6 +33,7 @@ exports.generateQuiz = async (req, res) => {
       questionType,
       sourceContext,
       useMock,
+      language,
     } = req.body;
 
     if (!userId) {
@@ -57,6 +58,7 @@ exports.generateQuiz = async (req, res) => {
       questionType,
       sourceContext: parseSourceContext(sourceContext),
       useMock,
+      language,
     });
 
     return res.status(201).json({

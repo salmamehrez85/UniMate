@@ -13,11 +13,11 @@ const getAuthHeaders = () => {
   };
 };
 
-export const sendChatMessage = async (messages, sessionId = null) => {
+export const sendChatMessage = async (messages, sessionId = null, language = "en") => {
   const response = await fetch(`${API_BASE_URL}/chat/message`, {
     method: "POST",
     headers: getAuthHeaders(),
-    body: JSON.stringify({ messages, sessionId }),
+    body: JSON.stringify({ messages, sessionId, language }),
   });
 
   const data = await response.json();

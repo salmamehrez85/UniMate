@@ -11,9 +11,15 @@ export const getDaysUntil = (dueDate) => {
   return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 };
 
-export const formatDueLabel = (daysLeft) => {
-  if (daysLeft < 0) return `${Math.abs(daysLeft)} day(s) overdue`;
-  if (daysLeft === 0) return "Due today";
-  if (daysLeft === 1) return "1 day left";
-  return `${daysLeft} days left`;
+export const formatDueLabel = (daysLeft, t) => {
+  if (!t) {
+    if (daysLeft < 0) return `${Math.abs(daysLeft)} day(s) overdue`;
+    if (daysLeft === 0) return "Due today";
+    if (daysLeft === 1) return "1 day left";
+    return `${daysLeft} days left`;
+  }
+  if (daysLeft < 0) return t("tasks.overdue", { count: Math.abs(daysLeft) });
+  if (daysLeft === 0) return t("tasks.dueToday");
+  if (daysLeft === 1) return t("tasks.oneDayLeft");
+  return t("tasks.daysLeft", { count: daysLeft });
 };

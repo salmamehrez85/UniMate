@@ -1048,7 +1048,10 @@ const computeAIRecommendations = async (userId, language = "en") => {
     };
   });
 
-  const aiResult = await generateActionableRecommendations(mappedActiveCourses, language);
+  const aiResult = await generateActionableRecommendations(
+    mappedActiveCourses,
+    language,
+  );
   return aiResult.recommendations || [];
 };
 
@@ -1085,9 +1088,14 @@ exports.getAIRecommendations = async (req, res) => {
 // @access  Private
 exports.refreshAIRecommendations = async (req, res) => {
   try {
-    const language = String(req.body?.language || "en").trim().toLowerCase();
+    const language = String(req.body?.language || "en")
+      .trim()
+      .toLowerCase();
     const safeLanguage = ["en", "ar"].includes(language) ? language : "en";
-    const recommendations = await computeAIRecommendations(req.user._id, safeLanguage);
+    const recommendations = await computeAIRecommendations(
+      req.user._id,
+      safeLanguage,
+    );
     const now = new Date();
     await User.findByIdAndUpdate(req.user._id, {
       "recommendationsCache.data": recommendations,
