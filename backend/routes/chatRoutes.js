@@ -109,7 +109,7 @@ router.patch("/sessions/:id", protect, async (req, res) => {
 
 // POST /api/chat/message — send a message; creates or updates a session
 router.post("/message", protect, async (req, res) => {
-  const { messages, sessionId } = req.body;
+  const { messages, sessionId, language } = req.body;
 
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: "Messages array is required" });
@@ -122,9 +122,15 @@ router.post("/message", protect, async (req, res) => {
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
+
+    const languageInstruction =
+      language === "ar"
+        ? "\n\nIMPORTANT: The user's interface language is Arabic. Respond entirely in Arabic (العربية) unless the user explicitly writes in English or asks you to switch languages."
+        : "";
+
     const model = genAI.getGenerativeModel({
       model: process.env.GEMINI_MODEL || "gemini-2.5-flash",
-      systemInstruction: SYSTEM_PROMPT,
+      systemInstruction: SYSTEM_PROMPT + languageInstruction,
     });
 
     const history = messages.slice(0, -1).map((msg) => ({

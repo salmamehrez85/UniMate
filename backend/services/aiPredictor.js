@@ -637,7 +637,10 @@ const calculateAIPrediction = async (activeCourse, pastCourses) => {
   }
 };
 
-const generateActionableRecommendations = async (activeCourses) => {
+const generateActionableRecommendations = async (
+  activeCourses,
+  language = "en",
+) => {
   try {
     if (!activeCourses || activeCourses.length === 0) {
       return { recommendations: [] };
@@ -749,7 +752,7 @@ Also determine a status:
 - "yellow": Performance 60-75% OR pending tasks piling up
 - "red": Performance below 60% OR critical deadlines
 
-Return JSON with both 'summaryAdvice' and 'detailedAnalysis' for each course.`;
+Return JSON with both 'summaryAdvice' and 'detailedAnalysis' for each course.${language === "ar" ? "\n\nIMPORTANT: Write ALL text fields (summaryAdvice, detailedAnalysis) in Arabic (العربية)." : ""}`;
 
     const result = await callLLMWithRetry(prompt, RecommendationSchema);
 
