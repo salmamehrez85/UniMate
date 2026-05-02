@@ -10,9 +10,21 @@ function AddTaskModal({ isOpen, onClose, onAdd }) {
     { value: "done", label: t("courseDetails.tasks.done") },
   ];
   const TASK_PRIORITY = [
-    { value: "low", label: t("courseDetails.tasks.low"), color: "bg-green-100 text-green-800" },
-    { value: "medium", label: t("courseDetails.tasks.medium"), color: "bg-yellow-100 text-yellow-800" },
-    { value: "high", label: t("courseDetails.tasks.high"), color: "bg-red-100 text-red-800" },
+    {
+      value: "low",
+      label: t("courseDetails.tasks.low"),
+      color: "bg-green-100 text-green-800",
+    },
+    {
+      value: "medium",
+      label: t("courseDetails.tasks.medium"),
+      color: "bg-yellow-100 text-yellow-800",
+    },
+    {
+      value: "high",
+      label: t("courseDetails.tasks.high"),
+      color: "bg-red-100 text-red-800",
+    },
   ];
   const [formData, setFormData] = useState({
     title: "",
@@ -68,7 +80,9 @@ function AddTaskModal({ isOpen, onClose, onAdd }) {
     <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-lg max-w-md w-full">
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <h2 className="text-xl font-bold text-primary-900">{t("courseDetails.tasks.addTitle")}</h2>
+          <h2 className="text-xl font-bold text-primary-900">
+            {t("courseDetails.tasks.addTitle")}
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700">
@@ -201,9 +215,21 @@ export function TasksTab({ course, onCourseUpdate }) {
     { value: "done", label: t("courseDetails.tasks.done") },
   ];
   const TASK_PRIORITY = [
-    { value: "low", label: t("courseDetails.tasks.low"), color: "bg-green-100 text-green-800" },
-    { value: "medium", label: t("courseDetails.tasks.medium"), color: "bg-yellow-100 text-yellow-800" },
-    { value: "high", label: t("courseDetails.tasks.high"), color: "bg-red-100 text-red-800" },
+    {
+      value: "low",
+      label: t("courseDetails.tasks.low"),
+      color: "bg-green-100 text-green-800",
+    },
+    {
+      value: "medium",
+      label: t("courseDetails.tasks.medium"),
+      color: "bg-yellow-100 text-yellow-800",
+    },
+    {
+      value: "high",
+      label: t("courseDetails.tasks.high"),
+      color: "bg-red-100 text-red-800",
+    },
   ];
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState("all");
@@ -297,7 +323,9 @@ export function TasksTab({ course, onCourseUpdate }) {
           <p className="text-gray-600 mb-4">
             {filterStatus === "all"
               ? t("courseDetails.tasks.noTasksYet")
-              : t("courseDetails.tasks.noStatusTasks", { status: getStatusLabel(filterStatus).toLowerCase() })}
+              : t("courseDetails.tasks.noStatusTasks", {
+                  status: getStatusLabel(filterStatus).toLowerCase(),
+                })}
           </p>
           <button
             onClick={() => setIsModalOpen(true)}

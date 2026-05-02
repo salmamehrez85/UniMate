@@ -108,7 +108,9 @@ export function ForgotPasswordModal({ onClose }) {
                 type="submit"
                 disabled={loading}
                 className="w-full bg-gradient-to-r from-[#54B3A4] to-[#163C60] text-white py-3 rounded-lg font-semibold hover:from-[#48a094] hover:to-[#0f2a45] focus:outline-none focus:ring-2 focus:ring-[#54B3A4] focus:ring-offset-2 transition cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
-                {loading ? t("auth.forgotPassword.sending") : t("auth.forgotPassword.sendReset")}
+                {loading
+                  ? t("auth.forgotPassword.sending")
+                  : t("auth.forgotPassword.sendReset")}
               </button>
 
               <button

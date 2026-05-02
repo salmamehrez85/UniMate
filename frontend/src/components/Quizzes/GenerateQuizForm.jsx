@@ -66,7 +66,11 @@ export function GenerateQuizForm({
             onChange={handleChange}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
             disabled={isGenerating}>
-            {courses.length === 0 && <option value="">{t("quizzes.generateForm.noCoursesFound")}</option>}
+            {courses.length === 0 && (
+              <option value="">
+                {t("quizzes.generateForm.noCoursesFound")}
+              </option>
+            )}
             {courses.map((course) => (
               <option key={course._id} value={course._id}>
                 {course.code} - {course.name}
@@ -85,7 +89,7 @@ export function GenerateQuizForm({
             onChange={handleChange}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
             disabled={isGenerating}>
-              <option value="all">{t("quizzes.generateForm.allTypes")}</option>
+            <option value="all">{t("quizzes.generateForm.allTypes")}</option>
             <option value="mcq">MCQ</option>
             <option value="choose">Choose</option>
             <option value="complete">Complete</option>

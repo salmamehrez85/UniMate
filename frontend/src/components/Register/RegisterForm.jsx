@@ -5,8 +5,10 @@ import {
   setAuthToken,
   setUserData,
 } from "../../services/authService";
+import { useTranslation } from "react-i18next";
 
 export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -39,19 +41,19 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
       !formData.confirmPassword ||
       !formData.university
     ) {
-      setError("Please fill in all fields");
+      setError(t("auth.register.fillAllFields"));
       setLoading(false);
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
+      setError(t("auth.register.passwordsNoMatch"));
       setLoading(false);
       return;
     }
 
     if (formData.password.length < 8) {
-      setError("Password must be at least 8 characters long");
+      setError(t("auth.register.passwordTooShort"));
       setLoading(false);
       return;
     }
@@ -75,7 +77,7 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
       }
     } catch (err) {
       console.error("Registration error:", err);
-      setError(err.message || "Failed to create account. Please try again.");
+      setError(err.message || t("auth.register.registrationFailed"));
     } finally {
       setLoading(false);
     }
@@ -89,10 +91,10 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
           <label
             htmlFor="fullName"
             className="block text-sm font-medium text-gray-700 mb-2">
-            Full Name
+            {t("auth.register.fullNameLabel")}
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
               <User className="h-5 w-5 text-gray-400" />
             </div>
             <input
@@ -101,8 +103,8 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
               type="text"
               value={formData.fullName}
               onChange={handleChange}
-              className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
-              placeholder="John Doe"
+              className="block w-full ps-10 pe-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+              placeholder={t("auth.register.fullNamePlaceholder")}
               disabled={loading}
             />
           </div>
@@ -113,10 +115,10 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
           <label
             htmlFor="email"
             className="block text-sm font-medium text-gray-700 mb-2">
-            Email Address
+            {t("auth.register.emailLabel")}
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
               <Mail className="h-5 w-5 text-gray-400" />
             </div>
             <input
@@ -125,8 +127,8 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
               type="email"
               value={formData.email}
               onChange={handleChange}
-              className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
-              placeholder="you@university.edu"
+              className="block w-full ps-10 pe-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+              placeholder={t("auth.register.emailPlaceholder")}
               disabled={loading}
             />
           </div>
@@ -137,10 +139,10 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
           <label
             htmlFor="university"
             className="block text-sm font-medium text-gray-700 mb-2">
-            University
+            {t("auth.register.universityLabel")}
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
               <GraduationCap className="h-5 w-5 text-gray-400" />
             </div>
             <input
@@ -149,8 +151,8 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
               type="text"
               value={formData.university}
               onChange={handleChange}
-              className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
-              placeholder="Your University"
+              className="block w-full ps-10 pe-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+              placeholder={t("auth.register.universityPlaceholder")}
               disabled={loading}
             />
           </div>
@@ -161,10 +163,10 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
           <label
             htmlFor="password"
             className="block text-sm font-medium text-gray-700 mb-2">
-            Password
+            {t("auth.register.passwordLabel")}
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
               <Lock className="h-5 w-5 text-gray-400" />
             </div>
             <input
@@ -173,19 +175,19 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
               type={showPassword ? "text" : "password"}
               value={formData.password}
               onChange={handleChange}
-              className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
-              placeholder="At least 8 characters"
+              className="block w-full ps-10 pe-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+              placeholder={t("auth.register.passwordPlaceholder")}
               disabled={loading}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              className="absolute inset-y-0 end-0 pe-3 flex items-center"
               disabled={loading}>
               {showPassword ? (
-                <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                <EyeOff className="h-5 w-5 text-gray-400" />
               ) : (
-                <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                <Eye className="h-5 w-5 text-gray-400" />
               )}
             </button>
           </div>
@@ -196,10 +198,10 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
           <label
             htmlFor="confirmPassword"
             className="block text-sm font-medium text-gray-700 mb-2">
-            Confirm Password
+            {t("auth.register.confirmPasswordLabel")}
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
               <Lock className="h-5 w-5 text-gray-400" />
             </div>
             <input
@@ -208,25 +210,23 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
               type={showConfirmPassword ? "text" : "password"}
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
-              placeholder="Re-enter your password"
+              className="block w-full ps-10 pe-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+              placeholder={t("auth.register.confirmPasswordPlaceholder")}
               disabled={loading}
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              className="absolute inset-y-0 end-0 pe-3 flex items-center"
               disabled={loading}>
               {showConfirmPassword ? (
-                <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                <EyeOff className="h-5 w-5 text-gray-400" />
               ) : (
-                <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                <Eye className="h-5 w-5 text-gray-400" />
               )}
             </button>
           </div>
         </div>
-
-        {/* Error Message */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
             {error}
@@ -238,7 +238,7 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
           type="submit"
           disabled={loading}
           className="w-full bg-gradient-to-r from-[#54B3A4] to-[#163C60] text-white py-3 rounded-lg font-semibold hover:from-[#48a094] hover:to-[#0f2a45] focus:outline-none focus:ring-2 focus:ring-[#54B3A4] focus:ring-offset-2 transition cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
-          {loading ? "Creating account..." : "Create Account"}
+          {loading ? t("auth.register.creatingAccount") : t("auth.register.signUp")}
         </button>
       </form>
 
@@ -249,7 +249,7 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
         </div>
         <div className="relative flex justify-center text-sm">
           <span className="px-4 bg-white text-gray-500">
-            Already have an account?
+            {t("auth.register.alreadyHaveAccount")}
           </span>
         </div>
       </div>
@@ -260,7 +260,7 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
           type="button"
           onClick={onSwitchToLogin}
           className="text-primary-600 hover:text-primary-800 font-semibold cursor-pointer hover:underline transition-colors duration-200">
-          Sign in instead
+          {t("auth.register.signIn")}
         </button>
       </div>
     </div>

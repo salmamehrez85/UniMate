@@ -1,4 +1,5 @@
 import { MapPin, ExternalLink } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const BADGE_COLORS = [
   "bg-sky-100 text-sky-700",
@@ -55,6 +56,7 @@ function isUrl(str) {
 }
 
 function ClassRow({ entry }) {
+  const { t } = useTranslation();
   const badge = badgeColorFor(entry.code);
   const hasLocation = Boolean(entry.location);
   const locationIsUrl = hasLocation && isUrl(entry.location);
@@ -87,7 +89,7 @@ function ClassRow({ entry }) {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-xs font-medium text-teal-600 hover:text-teal-700 mt-0.5">
               <ExternalLink className="w-3 h-3" />
-              Join online
+              {t("schedule.joinOnline")}
             </a>
           ) : (
             <span className="inline-flex items-center gap-1 text-xs text-gray-500 mt-0.5">
@@ -101,6 +103,7 @@ function ClassRow({ entry }) {
 }
 
 export function WeekGrid({ schedule }) {
+  const { t } = useTranslation();
   const DAYS = [
     "Sunday",
     "Monday",
@@ -137,11 +140,11 @@ export function WeekGrid({ schedule }) {
               className={`px-5 py-3 flex items-center gap-3 ${isToday ? "bg-teal-50/60" : ""}`}>
               <h2
                 className={`text-base font-bold ${isToday ? "text-teal-600" : "text-gray-800"}`}>
-                {day}
+                {t(`schedule.days.${day.toLowerCase()}`)}
               </h2>
               {isToday && (
                 <span className="text-xs font-semibold bg-teal-500 text-white px-2 py-0.5 rounded-full">
-                  Today
+                  {t("schedule.today")}
                 </span>
               )}
             </div>
@@ -149,7 +152,7 @@ export function WeekGrid({ schedule }) {
             {/* Class rows */}
             {entries.length === 0 ? (
               <p className="px-5 py-4 text-sm text-gray-300">
-                No classes today
+                {t("schedule.noClassesToday")}
               </p>
             ) : (
               entries.map((entry, i) => <ClassRow key={i} entry={entry} />)

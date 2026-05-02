@@ -64,9 +64,12 @@ export function QuizSessionModal({
           <div>
             <h2 className="text-xl font-bold text-gray-900">{quiz.title}</h2>
             <p className="text-sm text-gray-600 mt-1">
-              {course ? `${course.code} - ${course.name}` : t("quizzes.session.practiceQuiz")} •{" "}
-              {quiz.totalQuestions} {t("quizzes.session.questions_other").replace("{{count}} ", "")} • {quiz.estimatedDurationMinutes}{" "}
-              {t("quizzes.available.min")}
+              {course
+                ? `${course.code} - ${course.name}`
+                : t("quizzes.session.practiceQuiz")}{" "}
+              • {quiz.totalQuestions}{" "}
+              {t("quizzes.session.questions_other").replace("{{count}} ", "")} •{" "}
+              {quiz.estimatedDurationMinutes} {t("quizzes.available.min")}
             </p>
           </div>
           <button

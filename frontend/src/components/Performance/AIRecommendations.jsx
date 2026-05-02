@@ -90,7 +90,9 @@ export function AIRecommendations() {
           <RefreshCw
             className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`}
           />
-          {isRefreshing ? t("performance.recommendations.calculating") : t("performance.recommendations.refresh")}
+          {isRefreshing
+            ? t("performance.recommendations.calculating")
+            : t("performance.recommendations.refresh")}
         </button>
       </div>
 

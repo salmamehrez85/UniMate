@@ -1,13 +1,15 @@
 import { BookOpen } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export function CourseList({ courses }) {
+  const { t } = useTranslation();
   if (courses.length === 0) return null;
 
   return (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
       <div className="flex items-center gap-2 mb-4">
         <BookOpen className="w-5 h-5 text-teal-500" />
-        <h2 className="text-base font-bold text-primary-900">Active Courses</h2>
+        <h2 className="text-base font-bold text-primary-900">{t("schedule.courseList.title")}</h2>
       </div>
       <div className="divide-y divide-gray-50">
         {courses.map((course) => (
@@ -24,7 +26,7 @@ export function CourseList({ courses }) {
               {course.schedule ? (
                 <p className="text-xs text-gray-500">{course.schedule}</p>
               ) : (
-                <p className="text-xs text-gray-300 italic">No schedule set</p>
+                <p className="text-xs text-gray-300 italic">{t("schedule.courseList.noSchedule")}</p>
               )}
               {course.instructor && (
                 <p className="text-xs text-gray-400 mt-0.5">

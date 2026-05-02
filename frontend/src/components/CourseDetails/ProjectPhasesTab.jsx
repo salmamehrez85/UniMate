@@ -116,7 +116,9 @@ function AddPhaseModal({ isOpen, onClose, onAdd }) {
               name="title"
               value={formData.title}
               onChange={handleChange}
-              placeholder={t("courseDetails.projectPhases.phaseTitlePlaceholder")}
+              placeholder={t(
+                "courseDetails.projectPhases.phaseTitlePlaceholder",
+              )}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
@@ -156,7 +158,9 @@ function AddPhaseModal({ isOpen, onClose, onAdd }) {
                     onChange={(e) =>
                       handleRequirementChange(index, e.target.value)
                     }
-                    placeholder={t("courseDetails.projectPhases.requirementPlaceholder")}
+                    placeholder={t(
+                      "courseDetails.projectPhases.requirementPlaceholder",
+                    )}
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                   />
                   <button
@@ -247,7 +251,9 @@ export function ProjectPhasesTab({ course, onCourseUpdate }) {
 
       {phases.length === 0 ? (
         <div className="bg-white rounded-xl p-12 text-center border border-gray-100">
-          <p className="text-gray-600 mb-4">{t("courseDetails.projectPhases.noPhases")}</p>
+          <p className="text-gray-600 mb-4">
+            {t("courseDetails.projectPhases.noPhases")}
+          </p>
           <button
             onClick={() => setIsModalOpen(true)}
             className="px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">

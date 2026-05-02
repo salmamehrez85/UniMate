@@ -1,4 +1,5 @@
 import { MapPin, ExternalLink } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const HOUR_HEIGHT = 80; // px per hour
 
@@ -61,6 +62,7 @@ function hourLabel(h) {
 }
 
 export function CalendarGrid({ schedule }) {
+  const { t } = useTranslation();
   const DAYS = [
     "Sunday",
     "Monday",
@@ -112,11 +114,11 @@ export function CalendarGrid({ schedule }) {
               className={`text-sm font-bold ${
                 day === todayLabel ? "text-teal-600" : "text-gray-700"
               }`}>
-              {day}
+              {t(`schedule.days.${day.toLowerCase()}`)}
             </span>
             {day === todayLabel && (
               <span className="ml-2 text-xs bg-teal-500 text-white px-1.5 py-0.5 rounded-full">
-                Today
+                {t("schedule.today")}
               </span>
             )}
           </div>

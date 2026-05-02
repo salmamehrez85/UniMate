@@ -1,8 +1,10 @@
+import { useTranslation } from "react-i18next";
+
 export function RegisterFooter() {
+  const { t } = useTranslation();
   return (
     <p className="text-center text-sm text-gray-600 mt-8">
-      By creating an account, you agree to our Terms of Service and Privacy
-      Policy
+      {t("auth.register.footer")}
     </p>
   );
 }

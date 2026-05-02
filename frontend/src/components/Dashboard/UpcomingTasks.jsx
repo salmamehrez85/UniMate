@@ -19,7 +19,9 @@ function TaskItem({ task, t }) {
                 ? "bg-red-100 text-red-700 font-semibold"
                 : "bg-amber-100 text-amber-700"
             }`}>
-            {task.priority === "high" ? t("dashboard.upcomingTasks.priorityHigh") : t("dashboard.upcomingTasks.priorityMedium")}
+            {task.priority === "high"
+              ? t("dashboard.upcomingTasks.priorityHigh")
+              : t("dashboard.upcomingTasks.priorityMedium")}
           </span>
           <span className="text-xs text-gray-500">•</span>
           <span className="text-xs text-gray-500">
