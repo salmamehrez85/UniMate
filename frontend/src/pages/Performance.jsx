@@ -16,6 +16,7 @@ import {
   getPredictedGPA,
   predictCourse,
 } from "../services/courseService";
+import { useTranslation } from "react-i18next";
 
 function PredictionSkeleton() {
   return (
@@ -35,6 +36,7 @@ function ActiveCourseCard({
 }) {
   const prediction = predictions[course.id];
   const isLoading = course.isLoading;
+  const { t } = useTranslation();
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -93,14 +95,16 @@ function ActiveCourseCard({
         <div>
           <h3 className="text-lg font-bold text-gray-900">{course.name}</h3>
           <p className="text-sm text-gray-500 mt-1">
-            Course Code: {course.code}
+            {t("performance.courseCode")}: {course.code}
           </p>
         </div>
       </div>
 
       {/* Current Grade */}
       <div className="mb-4">
-        <p className="text-xs text-gray-600 font-medium mb-1">Current Grade</p>
+        <p className="text-xs text-gray-600 font-medium mb-1">
+          {t("performance.currentGrade")}
+        </p>
         <p className="text-3xl font-bold text-gray-900">
           {course.currentGrade.toFixed(1)}%
         </p>
@@ -143,7 +147,7 @@ function ActiveCourseCard({
                 {prediction.status}
               </span>
               <span className="text-xs text-gray-600 ml-auto">
-                Confidence: {prediction.confidence}
+                {t("performance.confidence")}: {prediction.confidence}
               </span>
             </div>
           </div>
@@ -168,7 +172,7 @@ function ActiveCourseCard({
             onClick={() => onViewInsights(course.id, prediction)}
             className="w-full mt-3 px-4 py-2 bg-teal-50 hover:bg-teal-100 text-teal-700 rounded-lg font-medium transition text-sm flex items-center justify-center gap-2">
             <Zap className="w-4 h-4" />
-            View AI Insights
+            {t("performance.viewInsights")}
           </button>
         </div>
       )}
@@ -179,7 +183,7 @@ function ActiveCourseCard({
           onClick={() => onPredictClick(course.id)}
           className="w-full px-4 py-3 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white rounded-lg font-semibold transition flex items-center justify-center gap-2">
           <Sparkles className="w-5 h-5" />
-          Predict Final Grade
+          {t("performance.predictFinalGrade")}
         </button>
       )}
     </div>
@@ -193,6 +197,7 @@ function AIInsightsModal({
   courseName,
   prediction,
 }) {
+  const { t } = useTranslation();
   if (!isOpen) return null;
 
   return (
@@ -202,7 +207,7 @@ function AIInsightsModal({
         <div className="flex items-center justify-between p-6 border-b border-gray-100 sticky top-0 bg-white">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">
-              AI Prediction Insights
+              {t("performance.aiInsights.title")}
             </h2>
             <p className="text-sm text-gray-600 mt-1">{courseName}</p>
           </div>
@@ -218,7 +223,9 @@ function AIInsightsModal({
           <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
             <div className="flex items-center gap-2 mb-2">
               <TrendingUp className="w-5 h-5 text-blue-600" />
-              <h3 className="font-semibold text-blue-900">Confidence Level</h3>
+              <h3 className="font-semibold text-blue-900">
+                {t("performance.aiInsights.confidenceTitle")}
+              </h3>
             </div>
             <p className="text-blue-800">
               This prediction is based on{" "}
@@ -234,13 +241,17 @@ function AIInsightsModal({
           <div className="bg-white rounded-lg p-4 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-gray-500">Current Performance</p>
+                <p className="text-xs text-gray-500">
+                  {t("performance.aiInsights.currentPerf")}
+                </p>
                 <p className="text-xl font-semibold text-gray-900">
                   {prediction.currentPerformance}%
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-xs text-gray-500">Predicted Range</p>
+                <p className="text-xs text-gray-500">
+                  {t("performance.aiInsights.predictedRange")}
+                </p>
                 <p className="text-xl font-semibold text-teal-700">
                   {prediction.predictedRange.min}% -{" "}
                   {prediction.predictedRange.max}%
@@ -258,13 +269,12 @@ function AIInsightsModal({
           <div>
             <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-teal-600" />
-              Top Similar Past Courses
+              {t("performance.aiInsights.similarCourses")}
             </h3>
             {prediction.similarCoursesUsed.length === 0 ? (
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                 <p className="text-sm text-gray-600">
-                  No similar completed courses found yet. Add more completed
-                  courses to improve AI matching.
+                  {t("performance.aiInsights.noSimilarCourses")}
                 </p>
               </div>
             ) : (
@@ -316,6 +326,7 @@ function AIInsightsModal({
 }
 
 export function Performance() {
+  const { t } = useTranslation();
   const [courses, setCourses] = useState([]);
   const [predictions, setPredictions] = useState({});
   const [selectedInsight, setSelectedInsight] = useState(null);
@@ -477,11 +488,9 @@ export function Performance() {
       {/* Page Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Academic Performance
+          {t("performance.pageTitle")}
         </h1>
-        <p className="text-gray-600">
-          Track your progress and get AI-powered predictions for your courses
-        </p>
+        <p className="text-gray-600">{t("performance.pageSubtitle")}</p>
       </div>
 
       {/* GPA Overview */}
@@ -493,9 +502,11 @@ export function Performance() {
       {/* Active Courses Section */}
       <div>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Current Courses</h2>
+          <h2 className="text-2xl font-bold text-gray-900">
+            {t("performance.currentCourses")}
+          </h2>
           <span className="text-sm text-gray-600">
-            Click "Predict Final Grade" to get AI insights
+            {t("performance.predictHint")}
           </span>
         </div>
 
@@ -503,21 +514,23 @@ export function Performance() {
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600 mb-4"></div>
-              <p className="text-gray-600">Loading courses...</p>
+              <p className="text-gray-600">{t("performance.loadingCourses")}</p>
             </div>
           </div>
         ) : error ? (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-red-700 font-semibold">Error loading courses</p>
+            <p className="text-red-700 font-semibold">
+              {t("performance.errorLoadingCourses")}
+            </p>
             <p className="text-red-600 text-sm">{error}</p>
           </div>
         ) : courses.length === 0 ? (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
             <p className="text-blue-700 font-semibold">
-              No active courses found
+              {t("performance.noActiveCourses")}
             </p>
             <p className="text-blue-600 text-sm">
-              Add courses to see predictions and recommendations
+              {t("performance.addCoursesHint")}
             </p>
           </div>
         ) : (

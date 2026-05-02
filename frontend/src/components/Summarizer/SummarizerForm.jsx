@@ -49,15 +49,21 @@ export function SummarizerForm({
       className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-5">
       <div className="grid md:grid-cols-2 gap-4">
         <label className="flex flex-col gap-2">
-          <span className="text-sm font-medium text-gray-700">{t("summarizer.form.sourceLabel")}</span>
+          <span className="text-sm font-medium text-gray-700">
+            {t("summarizer.form.sourceLabel")}
+          </span>
           <select
             value={form.sourceType}
             onChange={(event) => onChange("sourceType", event.target.value)}
             className="px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400">
             <option value="text">{t("summarizer.form.pasteText")}</option>
-            <option value="courseOutline">{t("summarizer.form.courseOutline")}</option>
+            <option value="courseOutline">
+              {t("summarizer.form.courseOutline")}
+            </option>
             <option value="file">{t("summarizer.form.uploadFile")}</option>
-            <option value="handwritten">{t("summarizer.form.handwritten")}</option>
+            <option value="handwritten">
+              {t("summarizer.form.handwritten")}
+            </option>
           </select>
         </label>
 
@@ -86,13 +92,17 @@ export function SummarizerForm({
           type="button"
           onClick={onToggleAdvanced}
           className="text-xs font-medium text-teal-700 hover:text-teal-800 underline underline-offset-2">
-          {isAdvancedOpen ? t("summarizer.form.hideAdvanced") : t("summarizer.form.showAdvanced")}
+          {isAdvancedOpen
+            ? t("summarizer.form.hideAdvanced")
+            : t("summarizer.form.showAdvanced")}
         </button>
       </div>
 
       <div className="grid md:grid-cols-3 gap-4">
         <label className="flex flex-col gap-2">
-          <span className="text-sm font-medium text-gray-700">{t("summarizer.form.languageLabel")}</span>
+          <span className="text-sm font-medium text-gray-700">
+            {t("summarizer.form.languageLabel")}
+          </span>
           <select
             value={form.language}
             onChange={(event) => onChange("language", event.target.value)}
@@ -110,7 +120,9 @@ export function SummarizerForm({
         className={`overflow-hidden transition-all duration-300 ease-in-out ${isAdvancedOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}>
         <div className="grid md:grid-cols-2 gap-4 pt-1">
           <label className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-gray-700">{t("summarizer.form.lengthLabel")}</span>
+            <span className="text-sm font-medium text-gray-700">
+              {t("summarizer.form.lengthLabel")}
+            </span>
             <select
               value={form.length}
               onChange={(event) => onChange("length", event.target.value)}
@@ -124,7 +136,9 @@ export function SummarizerForm({
           </label>
 
           <label className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-gray-700">{t("summarizer.form.focusLabel")}</span>
+            <span className="text-sm font-medium text-gray-700">
+              {t("summarizer.form.focusLabel")}
+            </span>
             <select
               value={form.focus}
               onChange={(event) => onChange("focus", event.target.value)}
@@ -166,7 +180,9 @@ export function SummarizerForm({
         </label>
       ) : form.sourceType === "file" ? (
         <label className="flex flex-col gap-2">
-          <span className="text-sm font-medium text-gray-700">{t("summarizer.form.uploadFileLabel")}</span>
+          <span className="text-sm font-medium text-gray-700">
+            {t("summarizer.form.uploadFileLabel")}
+          </span>
           <input
             type="file"
             accept=".pdf,.txt,.md,.csv,.json,.rtf,.log,application/pdf,text/plain,text/markdown,text/csv,application/json"
@@ -230,9 +246,10 @@ export function SummarizerForm({
                   </span>
                 </div>
               ))}
-                <span className="self-center text-xs text-primary-700 font-medium">
-                  {form.handwrittenImages.length} {t("summarizer.form.imagesSelected")}
-                </span>
+              <span className="self-center text-xs text-primary-700 font-medium">
+                {form.handwrittenImages.length}{" "}
+                {t("summarizer.form.imagesSelected")}
+              </span>
             </div>
           )}
         </div>

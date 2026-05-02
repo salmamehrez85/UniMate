@@ -24,7 +24,9 @@ export function Courses({ onSelectCourse }) {
   const displayedCourses =
     viewMode === "completed" ? completedCourses : activeCourses;
   const coursesLabel =
-    viewMode === "completed" ? t("courses.header.completedLabel") : t("courses.header.activeLabel");
+    viewMode === "completed"
+      ? t("courses.header.completedLabel")
+      : t("courses.header.activeLabel");
 
   const getSemesterSortKey = (semester) => {
     if (!semester) return { year: 0, season: 0 };

@@ -99,7 +99,9 @@ export function CourseDetails({
             <h1 className="text-3xl font-bold text-primary-900 mb-2">
               {courseData.name || courseData.title}
             </h1>
-            <p className="text-gray-600">{t("courseDetails.courseCode", { code: courseData.code })}</p>
+            <p className="text-gray-600">
+              {t("courseDetails.courseCode", { code: courseData.code })}
+            </p>
           </div>
         </div>
 

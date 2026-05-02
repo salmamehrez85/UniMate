@@ -7,8 +7,18 @@ export function AppearanceSection() {
   const { prefs, setTheme, setFontSize } = useAppearance();
 
   const THEMES = [
-    { id: "light", label: t("settings.appearance.light"), bg: "bg-white", border: "border-gray-200" },
-    { id: "dark", label: t("settings.appearance.dark"), bg: "bg-gray-900", border: "border-gray-700" },
+    {
+      id: "light",
+      label: t("settings.appearance.light"),
+      bg: "bg-white",
+      border: "border-gray-200",
+    },
+    {
+      id: "dark",
+      label: t("settings.appearance.dark"),
+      bg: "bg-gray-900",
+      border: "border-gray-700",
+    },
   ];
 
   const FONT_SIZES = [
@@ -21,12 +31,16 @@ export function AppearanceSection() {
     <div className="p-6">
       <div className="flex items-center gap-3 mb-4">
         <Palette className="w-5 h-5 text-primary-600" />
-        <h3 className="text-lg font-semibold text-gray-900">{t("settings.appearance.title")}</h3>
+        <h3 className="text-lg font-semibold text-gray-900">
+          {t("settings.appearance.title")}
+        </h3>
       </div>
 
       {/* Theme */}
       <div className="mb-5">
-        <p className="text-sm font-medium text-gray-700 mb-3">{t("settings.appearance.theme")}</p>
+        <p className="text-sm font-medium text-gray-700 mb-3">
+          {t("settings.appearance.theme")}
+        </p>
         <div className="flex gap-3">
           {THEMES.map((theme) => (
             <button
@@ -42,7 +56,9 @@ export function AppearanceSection() {
               />
               <span
                 className={`text-xs font-medium ${
-                  prefs.theme === theme.id ? "text-primary-600" : "text-gray-500"
+                  prefs.theme === theme.id
+                    ? "text-primary-600"
+                    : "text-gray-500"
                 }`}>
                 {theme.label}
               </span>
@@ -53,7 +69,9 @@ export function AppearanceSection() {
 
       {/* Font size */}
       <div>
-        <p className="text-sm font-medium text-gray-700 mb-3">{t("settings.appearance.fontSize")}</p>
+        <p className="text-sm font-medium text-gray-700 mb-3">
+          {t("settings.appearance.fontSize")}
+        </p>
         <div className="flex gap-2">
           {FONT_SIZES.map((size) => (
             <button

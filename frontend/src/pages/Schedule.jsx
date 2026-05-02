@@ -5,6 +5,7 @@ import { CalendarGrid } from "../components/Schedule/CalendarGrid";
 import { EmptySchedule } from "../components/Schedule/EmptySchedule";
 import { getCourses } from "../services/courseService";
 import { List, LayoutGrid } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 // Maps abbreviated day tokens to full day names
 const DAY_MAP = {
@@ -99,6 +100,7 @@ function buildScheduleMap(courses) {
 }
 
 export function Schedule() {
+  const { t } = useTranslation();
   const [activeCourses, setActiveCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState("grid");
@@ -149,7 +151,7 @@ export function Schedule() {
                   : "text-gray-500 hover:text-gray-700"
               }`}>
               <List className="w-4 h-4" />
-              List
+              {t("schedule.view.list")}
             </button>
             <button
               onClick={() => setView("grid")}
@@ -159,7 +161,7 @@ export function Schedule() {
                   : "text-gray-500 hover:text-gray-700"
               }`}>
               <LayoutGrid className="w-4 h-4" />
-              Grid
+              {t("schedule.view.grid")}
             </button>
           </div>
         )}

@@ -14,6 +14,7 @@ import {
   renameChatSession,
 } from "../services/chatService";
 import { getCourses } from "../services/courseService";
+import { getLanguagePrefs } from "../hooks/useLanguage";
 
 export function AIChat() {
   const [messages, setMessages] = useState([]);
@@ -143,9 +144,11 @@ export function AIChat() {
     setError(null);
 
     try {
+      const language = getLanguagePrefs().language || "en";
       const { reply, sessionId, title } = await sendChatMessage(
         updatedMessages,
         activeSessionId,
+        language,
       );
 
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);

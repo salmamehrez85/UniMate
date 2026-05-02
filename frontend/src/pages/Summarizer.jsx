@@ -9,13 +9,15 @@ import {
   summarizeContent,
   summarizeUploadedContent,
 } from "../services/courseService";
+import { useTranslation } from "react-i18next";
+import { getLanguagePrefs } from "../hooks/useLanguage";
 
 GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
 
 const INITIAL_FORM = {
   sourceType: "text",
   mode: "quick",
-  language: "en",
+  language: getLanguagePrefs().language || "en",
   length: "medium",
   focus: "general",
   courseId: "",
@@ -107,6 +109,7 @@ const renderPdfPagesAsBase64Images = async (file, maxPages = OCR_MAX_PAGES) => {
 };
 
 export function Summarizer({ onNavigate }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState(INITIAL_FORM);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const [courses, setCourses] = useState([]);
@@ -526,10 +529,10 @@ export function Summarizer({ onNavigate }) {
           disabled={isSubmitting || isPreparingOCR}
           className="w-full inline-flex items-center justify-center px-5 py-3 rounded-lg bg-teal-500 hover:bg-teal-600 text-white font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed">
           {isPreparingOCR
-            ? "OCR in progress..."
+            ? t("summarizer.ocrInProgress")
             : isSubmitting
-              ? "Generating Summary..."
-              : "Generate Summary"}
+              ? t("summarizer.generating")
+              : t("summarizer.generateButton")}
         </button>
       </div>
 

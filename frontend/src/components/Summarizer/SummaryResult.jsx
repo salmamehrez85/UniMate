@@ -136,11 +136,25 @@ export function SummaryResult({ summaryData, courses = [] }) {
       dividerClass: "border-violet-100",
       type: "prose",
       sections: [
-        { key: "learningOutcomes", title: t("summarizer.result.learningOutcomes") },
-        { key: "conceptConnections", title: t("summarizer.result.conceptConnections") },
+        {
+          key: "learningOutcomes",
+          title: t("summarizer.result.learningOutcomes"),
+        },
+        {
+          key: "conceptConnections",
+          title: t("summarizer.result.conceptConnections"),
+        },
         { key: "importantTerms", title: t("summarizer.result.keyTerms") },
-        { key: "studyPlan", title: t("summarizer.result.studyPlan"), numbered: true },
-        { key: "possibleQuestions", title: t("summarizer.result.possibleQuestions"), numbered: true },
+        {
+          key: "studyPlan",
+          title: t("summarizer.result.studyPlan"),
+          numbered: true,
+        },
+        {
+          key: "possibleQuestions",
+          title: t("summarizer.result.possibleQuestions"),
+          numbered: true,
+        },
       ],
     },
     exam: {
@@ -152,8 +166,16 @@ export function SummaryResult({ summaryData, courses = [] }) {
       sections: [
         { key: "examFocus", title: t("summarizer.result.examTopics") },
         { key: "importantTerms", title: t("summarizer.result.mustKnowTerms") },
-        { key: "possibleQuestions", title: t("summarizer.result.examQuestions"), numbered: true },
-        { key: "studyPlan", title: t("summarizer.result.revisionPlan"), numbered: true },
+        {
+          key: "possibleQuestions",
+          title: t("summarizer.result.examQuestions"),
+          numbered: true,
+        },
+        {
+          key: "studyPlan",
+          title: t("summarizer.result.revisionPlan"),
+          numbered: true,
+        },
       ],
     },
     custom: {
@@ -163,12 +185,26 @@ export function SummaryResult({ summaryData, courses = [] }) {
       dividerClass: "border-teal-100",
       type: "prose",
       sections: [
-        { key: "learningOutcomes", title: t("summarizer.result.learningOutcomes") },
-        { key: "conceptConnections", title: t("summarizer.result.conceptConnections") },
+        {
+          key: "learningOutcomes",
+          title: t("summarizer.result.learningOutcomes"),
+        },
+        {
+          key: "conceptConnections",
+          title: t("summarizer.result.conceptConnections"),
+        },
         { key: "examFocus", title: t("summarizer.result.examFocus") },
         { key: "importantTerms", title: t("summarizer.result.keyTermsShort") },
-        { key: "studyPlan", title: t("summarizer.result.studyPlan"), numbered: true },
-        { key: "possibleQuestions", title: t("summarizer.result.possibleQuestions"), numbered: true },
+        {
+          key: "studyPlan",
+          title: t("summarizer.result.studyPlan"),
+          numbered: true,
+        },
+        {
+          key: "possibleQuestions",
+          title: t("summarizer.result.possibleQuestions"),
+          numbered: true,
+        },
         { key: "actionItems", title: t("summarizer.result.actionItems") },
       ],
     },
@@ -296,7 +332,9 @@ export function SummaryResult({ summaryData, courses = [] }) {
       className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-gray-900">{t("summarizer.result.title")}</h3>
+        <h3 className="text-lg font-bold text-gray-900">
+          {t("summarizer.result.title")}
+        </h3>
         <span
           className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${config.badgeClass}`}>
           {config.label}
@@ -408,7 +446,9 @@ export function SummaryResult({ summaryData, courses = [] }) {
             }
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
             <BookMarked className="w-3.5 h-3.5" />
-            {saveStatus === "saving" ? t("summarizer.result.saving") : t("summarizer.result.saveToCourse")}
+            {saveStatus === "saving"
+              ? t("summarizer.result.saving")
+              : t("summarizer.result.saveToCourse")}
             <ChevronDown className="w-3 h-3 ml-0.5" />
           </button>
 

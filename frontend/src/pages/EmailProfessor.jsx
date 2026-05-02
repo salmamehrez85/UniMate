@@ -19,6 +19,7 @@ import {
   EMAIL_PURPOSES,
   buildEmailDraft,
 } from "../components/Courses/GenerateEmailModal";
+import { useTranslation } from "react-i18next";
 
 const HISTORY_KEY = "emailProfessorHistory";
 
@@ -62,6 +63,7 @@ function Composer({
   onMarkOpened,
   onCancel,
 }) {
+  const { t } = useTranslation();
   const availableCourses = useMemo(
     () => courses.filter((c) => !c.isOldCourse),
     [courses],
@@ -115,25 +117,26 @@ function Composer({
         onClick={onCancel}
         className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition">
         <ArrowLeft className="w-4 h-4" />
-        Back to Dashboard
+        <ArrowLeft className="w-4 h-4" />
+        {t("emailProfessor.backToDashboard")}
       </button>
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-5 max-w-2xl">
         <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-teal-600" />
-          Compose New Email
+          {t("emailProfessor.composeNew")}
         </h2>
 
         {draft ? (
           <>
             <div className="rounded-xl border border-blue-200 bg-blue-50 text-blue-700 px-4 py-3 text-sm flex items-center gap-2">
               <Sparkles className="w-4 h-4 shrink-0" />
-              AI-generated draft. Review and edit before sending.
+              {t("emailProfessor.aiGeneratedDraft")}
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-gray-800 mb-2">
-                Email Draft
+                {t("emailProfessor.emailDraft")}
               </label>
               <textarea
                 value={draft}
@@ -147,14 +150,16 @@ function Composer({
                 type="button"
                 onClick={() => setDraft("")}
                 className="px-4 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold transition">
-                Regenerate
+                {t("emailProfessor.regenerate")}
               </button>
               <button
                 type="button"
                 onClick={handleCopy}
                 className="px-4 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold transition inline-flex items-center justify-center gap-2">
                 <Copy className="w-4 h-4" />
-                {copied ? "Copied!" : "Copy Email"}
+                {copied
+                  ? t("emailProfessor.copied")
+                  : t("emailProfessor.copyEmail")}
               </button>
             </div>
 
@@ -163,20 +168,20 @@ function Composer({
               onClick={handleOpenEmailApp}
               className="w-full px-4 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold transition inline-flex items-center justify-center gap-2">
               <Send className="w-4 h-4" />
-              Open in Email App
+              {t("emailProfessor.openInEmailApp")}
             </button>
           </>
         ) : (
           <>
             <div>
               <label className="block text-sm font-semibold text-gray-800 mb-2">
-                Select Course & Professor
+                {t("emailProfessor.selectCourse")}
               </label>
               {loadingCourses ? (
                 <div className="h-12 bg-gray-100 rounded-xl animate-pulse" />
               ) : availableCourses.length === 0 ? (
                 <p className="text-sm text-gray-500">
-                  No active courses found.
+                  {t("emailProfessor.noActiveCourses")}
                 </p>
               ) : (
                 <select
@@ -186,7 +191,9 @@ function Composer({
                   {availableCourses.map((course) => (
                     <option key={course._id} value={course._id}>
                       {course.code} – {course.name || course.title} (
-                      {course.instructor || "Professor"})
+                      {course.instructor ||
+                        t("emailProfessor.professorFallback")}
+                      )
                     </option>
                   ))}
                 </select>
@@ -195,7 +202,7 @@ function Composer({
 
             <div>
               <p className="block text-sm font-semibold text-gray-800 mb-2">
-                Email Purpose
+                {t("emailProfessor.emailPurpose")}
               </p>
               <div className="space-y-2">
                 {EMAIL_PURPOSES.map((item) => {
@@ -219,12 +226,12 @@ function Composer({
 
             <div>
               <label className="block text-sm font-semibold text-gray-800 mb-2">
-                Additional Context (Optional)
+                {t("emailProfessor.additionalContext")}
               </label>
               <textarea
                 value={additionalContext}
                 onChange={(e) => setAdditionalContext(e.target.value)}
-                placeholder="Add any specific details you want included in the email..."
+                placeholder={t("emailProfessor.additionalContextPlaceholder")}
                 rows={4}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
               />
@@ -236,13 +243,13 @@ function Composer({
               disabled={!selectedCourse}
               className="w-full px-4 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold transition inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
               <Sparkles className="w-4 h-4" />
-              Generate Email
+              {t("emailProfessor.generateEmail")}
             </button>
           </>
         )}
 
         <p className="text-xs text-gray-400">
-          Always review AI-generated content for accuracy and appropriate tone.
+          {t("emailProfessor.disclaimer")}
         </p>
       </div>
     </div>
@@ -251,6 +258,7 @@ function Composer({
 
 // ─── Detail sub-component ─────────────────────────────────────────────────────
 function EmailDetail({ entry, onBack, onStatusChange, onDelete }) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const cfg = STATUS_CONFIG[entry.status] || STATUS_CONFIG.pending;
 
@@ -275,7 +283,7 @@ function EmailDetail({ entry, onBack, onStatusChange, onDelete }) {
         onClick={onBack}
         className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition">
         <ArrowLeft className="w-4 h-4" />
-        Back to Dashboard
+        {t("emailProfessor.backToDashboard")}
       </button>
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-5 max-w-2xl">
@@ -301,7 +309,7 @@ function EmailDetail({ entry, onBack, onStatusChange, onDelete }) {
             <span
               className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full ${cfg.color}`}>
               <cfg.Icon className="w-3.5 h-3.5" />
-              {cfg.label}
+              {t(`emailProfessor.status.${entry.status}`)}
             </span>
           </div>
         </div>
@@ -309,7 +317,7 @@ function EmailDetail({ entry, onBack, onStatusChange, onDelete }) {
         {/* Draft */}
         <div>
           <label className="block text-sm font-semibold text-gray-800 mb-2">
-            Email Content
+            {t("emailProfessor.emailContent")}
           </label>
           <pre className="text-sm text-gray-700 whitespace-pre-wrap font-sans leading-relaxed bg-gray-50 rounded-xl p-4 border border-gray-100">
             {entry.draft}
@@ -323,7 +331,9 @@ function EmailDetail({ entry, onBack, onStatusChange, onDelete }) {
             onClick={handleCopy}
             className="px-4 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold transition inline-flex items-center justify-center gap-2">
             <Copy className="w-4 h-4" />
-            {copied ? "Copied!" : "Copy Email"}
+            {copied
+              ? t("emailProfessor.copied")
+              : t("emailProfessor.copyEmail")}
           </button>
           {entry.status === "pending" && (
             <button
@@ -331,7 +341,7 @@ function EmailDetail({ entry, onBack, onStatusChange, onDelete }) {
               onClick={handleOpenEmailApp}
               className="px-4 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold transition inline-flex items-center justify-center gap-2">
               <Send className="w-4 h-4" />
-              Open in Email App
+              {t("emailProfessor.openInEmailApp")}
             </button>
           )}
           {entry.status === "awaiting_reply" && (
@@ -340,7 +350,7 @@ function EmailDetail({ entry, onBack, onStatusChange, onDelete }) {
               onClick={() => onStatusChange(entry.id, "replied")}
               className="px-4 py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold transition inline-flex items-center justify-center gap-2">
               <CheckCircle2 className="w-4 h-4" />
-              Mark as Replied
+              {t("emailProfessor.markReplied")}
             </button>
           )}
           {entry.status === "replied" && (
@@ -349,7 +359,7 @@ function EmailDetail({ entry, onBack, onStatusChange, onDelete }) {
               onClick={() => onStatusChange(entry.id, "awaiting_reply")}
               className="px-4 py-3 rounded-xl border border-gray-300 text-gray-600 hover:bg-gray-50 font-semibold transition inline-flex items-center justify-center gap-2">
               <Hourglass className="w-4 h-4" />
-              Re-open
+              {t("emailProfessor.reOpen")}
             </button>
           )}
         </div>
@@ -359,7 +369,7 @@ function EmailDetail({ entry, onBack, onStatusChange, onDelete }) {
           onClick={() => onDelete(entry.id)}
           className="text-xs text-red-400 hover:text-red-600 transition inline-flex items-center gap-1">
           <Trash2 className="w-3.5 h-3.5" />
-          Delete this record
+          {t("emailProfessor.deleteRecord")}
         </button>
       </div>
     </div>
@@ -368,6 +378,7 @@ function EmailDetail({ entry, onBack, onStatusChange, onDelete }) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export function EmailProfessor() {
+  const { t } = useTranslation();
   // "dashboard" | "compose" | "detail"
   const [view, setView] = useState("dashboard");
   const [detailEntry, setDetailEntry] = useState(null);
@@ -484,14 +495,14 @@ export function EmailProfessor() {
       {/* Action bar */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-500">
-          Track and manage your emails to professors
+          {t("emailProfessor.trackManage")}
         </p>
         <button
           type="button"
           onClick={() => setView("compose")}
           className="inline-flex items-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-semibold transition text-sm">
           <Plus className="w-4 h-4" />
-          Compose New
+          {t("emailProfessor.composeNew")}
         </button>
       </div>
 
@@ -503,7 +514,9 @@ export function EmailProfessor() {
           </div>
           <div>
             <p className="text-2xl font-bold text-gray-800">{totalDrafts}</p>
-            <p className="text-xs text-gray-500">Generated Drafts</p>
+            <p className="text-xs text-gray-500">
+              {t("emailProfessor.generatedDrafts")}
+            </p>
           </div>
         </div>
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3">
@@ -512,7 +525,9 @@ export function EmailProfessor() {
           </div>
           <div>
             <p className="text-2xl font-bold text-gray-800">{totalPending}</p>
-            <p className="text-xs text-gray-500">Pending Action</p>
+            <p className="text-xs text-gray-500">
+              {t("emailProfessor.pendingAction")}
+            </p>
           </div>
         </div>
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3">
@@ -521,7 +536,7 @@ export function EmailProfessor() {
           </div>
           <div>
             <p className="text-2xl font-bold text-gray-800">{totalOpened}</p>
-            <p className="text-xs text-gray-500">Sent</p>
+            <p className="text-xs text-gray-500">{t("emailProfessor.sent")}</p>
           </div>
         </div>
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3">
@@ -530,7 +545,9 @@ export function EmailProfessor() {
           </div>
           <div>
             <p className="text-2xl font-bold text-gray-800">{totalAwaiting}</p>
-            <p className="text-xs text-gray-500">Awaiting Reply</p>
+            <p className="text-xs text-gray-500">
+              {t("emailProfessor.awaitingReply")}
+            </p>
           </div>
         </div>
       </div>
@@ -540,7 +557,7 @@ export function EmailProfessor() {
         <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
             <Clock className="w-4 h-4 text-gray-400" />
-            Recent Emails
+            {t("emailProfessor.recentEmails")}
           </h2>
           {history.length > 0 && (
             <span className="text-xs text-gray-400">
@@ -552,10 +569,10 @@ export function EmailProfessor() {
         {history.length === 0 ? (
           <div className="py-16 text-center text-gray-400">
             <Mail className="w-10 h-10 mx-auto mb-3 opacity-25" />
-            <p className="text-sm font-medium">No emails yet</p>
-            <p className="text-xs mt-1">
-              Click &quot;Compose New&quot; to generate your first email.
+            <p className="text-sm font-medium">
+              {t("emailProfessor.noEmailsYet")}
             </p>
+            <p className="text-xs mt-1">{t("emailProfessor.noEmailsHint")}</p>
           </div>
         ) : (
           <ul className="divide-y divide-gray-50">
@@ -598,7 +615,7 @@ export function EmailProfessor() {
                     <span
                       className={`shrink-0 inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${cfg.color}`}>
                       <cfg.Icon className="w-3 h-3" />
-                      {cfg.label}
+                      {t(`emailProfessor.status.${entry.status}`)}
                     </span>
 
                     <ChevronRight className="w-4 h-4 text-gray-300 shrink-0" />

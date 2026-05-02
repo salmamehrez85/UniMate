@@ -2,8 +2,11 @@ import { useState } from "react";
 import { Lock, Eye, EyeOff, CheckCircle } from "lucide-react";
 import { resetPassword } from "../services/authService";
 import { LoginHeader } from "../components/Login/LoginHeader";
+import { LanguageSwitcher } from "../components/LanguageSwitcher";
+import { useTranslation } from "react-i18next";
 
 export function ResetPassword({ resetToken, onBackToLogin }) {
+  const { t } = useTranslation();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -17,15 +20,15 @@ export function ResetPassword({ resetToken, onBackToLogin }) {
     setError("");
 
     if (!password || !confirmPassword) {
-      setError("Please fill in all fields");
+      setError(t("auth.resetPassword.fillAllFields"));
       return;
     }
     if (password.length < 8) {
-      setError("Password must be at least 8 characters");
+      setError(t("auth.resetPassword.passwordTooShort"));
       return;
     }
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(t("auth.resetPassword.passwordsNoMatch"));
       return;
     }
 
@@ -36,9 +39,7 @@ export function ResetPassword({ resetToken, onBackToLogin }) {
       // Clear token from URL without reloading
       window.history.replaceState({}, document.title, window.location.pathname);
     } catch (err) {
-      setError(
-        err.message || "Failed to reset password. The link may have expired.",
-      );
+      setError(err.message || t("auth.resetPassword.resetFailed"));
     } finally {
       setLoading(false);
     }
@@ -47,6 +48,9 @@ export function ResetPassword({ resetToken, onBackToLogin }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-teal-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+        <div className="flex justify-end mb-4">
+          <LanguageSwitcher />
+        </div>
         <LoginHeader />
 
         <div className="bg-white rounded-2xl shadow-lg p-8">
@@ -56,25 +60,24 @@ export function ResetPassword({ resetToken, onBackToLogin }) {
                 <CheckCircle className="h-14 w-14 text-teal-500" />
               </div>
               <h2 className="text-xl font-bold text-gray-800 mb-2">
-                Password updated!
+                {t("auth.resetPassword.successTitle")}
               </h2>
               <p className="text-gray-500 text-sm mb-6">
-                Your password has been reset successfully. You can now sign in
-                with your new password.
+                {t("auth.resetPassword.successMessage")}
               </p>
               <button
                 onClick={onBackToLogin}
                 className="w-full bg-gradient-to-r from-[#54B3A4] to-[#163C60] text-white py-3 rounded-lg font-semibold hover:from-[#48a094] hover:to-[#0f2a45] transition cursor-pointer hover:scale-[1.02] active:scale-[0.98]">
-                Sign In
+                {t("auth.resetPassword.backToSignIn")}
               </button>
             </div>
           ) : (
             <>
               <h2 className="text-xl font-bold text-gray-800 mb-1">
-                Set a new password
+                {t("auth.resetPassword.pageTitle")}
               </h2>
               <p className="text-gray-500 text-sm mb-6">
-                Your new password must be at least 8 characters.
+                {t("auth.resetPassword.description")}
               </p>
 
               <form onSubmit={handleSubmit} className="space-y-5">
@@ -83,10 +86,10 @@ export function ResetPassword({ resetToken, onBackToLogin }) {
                   <label
                     htmlFor="new-password"
                     className="block text-sm font-medium text-gray-700 mb-2">
-                    New Password
+                    {t("auth.resetPassword.newPasswordLabel")}
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
                       <Lock className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
@@ -94,15 +97,17 @@ export function ResetPassword({ resetToken, onBackToLogin }) {
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
-                      placeholder="At least 8 characters"
+                      className="block w-full ps-10 pe-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+                      placeholder={t(
+                        "auth.resetPassword.newPasswordPlaceholder",
+                      )}
                       disabled={loading}
                       autoFocus
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
+                      className="absolute inset-y-0 end-0 pe-3 flex items-center cursor-pointer"
                       disabled={loading}>
                       {showPassword ? (
                         <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -118,10 +123,10 @@ export function ResetPassword({ resetToken, onBackToLogin }) {
                   <label
                     htmlFor="confirm-new-password"
                     className="block text-sm font-medium text-gray-700 mb-2">
-                    Confirm New Password
+                    {t("auth.resetPassword.confirmPasswordLabel")}
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
                       <Lock className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
@@ -129,8 +134,10 @@ export function ResetPassword({ resetToken, onBackToLogin }) {
                       type={showConfirmPassword ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
-                      placeholder="Re-enter your new password"
+                      className="block w-full ps-10 pe-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+                      placeholder={t(
+                        "auth.resetPassword.confirmPasswordPlaceholder",
+                      )}
                       disabled={loading}
                     />
                     <button
@@ -138,7 +145,7 @@ export function ResetPassword({ resetToken, onBackToLogin }) {
                       onClick={() =>
                         setShowConfirmPassword(!showConfirmPassword)
                       }
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
+                      className="absolute inset-y-0 end-0 pe-3 flex items-center cursor-pointer"
                       disabled={loading}>
                       {showConfirmPassword ? (
                         <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -159,14 +166,16 @@ export function ResetPassword({ resetToken, onBackToLogin }) {
                   type="submit"
                   disabled={loading}
                   className="w-full bg-gradient-to-r from-[#54B3A4] to-[#163C60] text-white py-3 rounded-lg font-semibold hover:from-[#48a094] hover:to-[#0f2a45] focus:outline-none focus:ring-2 focus:ring-[#54B3A4] focus:ring-offset-2 transition cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
-                  {loading ? "Resetting..." : "Reset Password"}
+                  {loading
+                    ? t("auth.resetPassword.resetting")
+                    : t("auth.resetPassword.resetButton")}
                 </button>
 
                 <button
                   type="button"
                   onClick={onBackToLogin}
                   className="w-full text-sm text-gray-500 hover:text-gray-700 font-medium cursor-pointer hover:underline transition-colors duration-200 py-1">
-                  Back to Sign In
+                  {t("auth.resetPassword.backToSignIn")}
                 </button>
               </form>
             </>

@@ -6,21 +6,23 @@ import { TasksList } from "../components/Tasks/TasksList";
 import { AddTaskModal } from "../components/Tasks/AddTaskModal";
 import { getCourses, updateCourse } from "../services/courseService";
 import { getDaysUntil } from "../components/Tasks/taskUtils";
-
-const STATUS_OPTIONS = [
-  { value: "all", label: "All" },
-  { value: "todo", label: "To Do" },
-  { value: "done", label: "Done" },
-];
-
-const PRIORITY_OPTIONS = [
-  { value: "all", label: "All Priorities" },
-  { value: "high", label: "High" },
-  { value: "medium", label: "Medium" },
-  { value: "low", label: "Low" },
-];
+import { useTranslation } from "react-i18next";
 
 export function Tasks() {
+  const { t } = useTranslation();
+
+  const STATUS_OPTIONS = [
+    { value: "all", label: t("tasks.status.all") },
+    { value: "todo", label: t("tasks.status.todo") },
+    { value: "done", label: t("tasks.status.done") },
+  ];
+
+  const PRIORITY_OPTIONS = [
+    { value: "all", label: t("tasks.priority.all") },
+    { value: "high", label: t("tasks.priority.high") },
+    { value: "medium", label: t("tasks.priority.medium") },
+    { value: "low", label: t("tasks.priority.low") },
+  ];
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

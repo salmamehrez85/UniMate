@@ -1,5 +1,6 @@
 import { CheckCircle, Circle } from "lucide-react";
 import { formatDueLabel, getDaysUntil } from "./taskUtils";
+import { useTranslation } from "react-i18next";
 
 const priorityStyles = {
   high: "bg-red-100 text-red-700",
@@ -14,15 +15,14 @@ const statusStyles = {
 };
 
 export function TasksList({ tasks, onToggleStatus, updatingTaskId }) {
+  const { t } = useTranslation();
   if (tasks.length === 0) {
     return (
       <div className="bg-gray-50 border border-gray-100 rounded-xl p-10 text-center">
         <h3 className="text-lg font-semibold text-gray-800">
-          No tasks match this view
+          {t("tasks.list.noMatch")}
         </h3>
-        <p className="text-gray-500 mt-2">
-          Try another filter or add tasks inside a course.
-        </p>
+        <p className="text-gray-500 mt-2">{t("tasks.list.noMatchHint")}</p>
       </div>
     );
   }
@@ -89,11 +89,13 @@ export function TasksList({ tasks, onToggleStatus, updatingTaskId }) {
               <div className="flex flex-wrap items-center gap-2 sm:flex-col sm:items-end">
                 <span
                   className={`text-xs font-semibold px-3 py-1 rounded-full ${priorityClass}`}>
-                  {task.priority || "medium"}
+                  {task.priority
+                    ? t(`tasks.priority.${task.priority}`)
+                    : t("tasks.priority.medium")}
                 </span>
                 <span
                   className={`text-xs font-semibold px-3 py-1 rounded-full ${statusClass}`}>
-                  {task.status}
+                  {t(`tasks.status.${task.status}`)}
                 </span>
                 {daysLeft !== null && task.status !== "done" && (
                   <span
@@ -102,7 +104,7 @@ export function TasksList({ tasks, onToggleStatus, updatingTaskId }) {
                         ? "bg-red-100 text-red-700"
                         : "bg-gray-100 text-gray-600"
                     }`}>
-                    {formatDueLabel(daysLeft)}
+                    {formatDueLabel(daysLeft, t)}
                   </span>
                 )}
               </div>
