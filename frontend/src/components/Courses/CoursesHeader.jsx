@@ -1,28 +1,23 @@
 import { Calendar, Plus } from "lucide-react";
-
-function getCurrentSemester() {
-  const now = new Date();
-  const month = now.getMonth() + 1; // 1-12
-  const year = now.getFullYear();
-
-  let semester;
-  if (month >= 3 && month <= 5) {
-    semester = "Spring";
-  } else if (month >= 6 && month <= 9) {
-    semester = "Summer";
-  } else if (month >= 10 && month <= 11) {
-    semester = "Autumn";
-  } else {
-    // December, January, February
-    semester = "Winter";
-  }
-
-  return `${semester} ${year} Semester`;
-}
+import { useTranslation } from "react-i18next";
 
 export function CoursesHeader({ totalCourses, coursesLabel, onAddCourse }) {
+  const { t } = useTranslation();
+
+  function getCurrentSemester() {
+    const now = new Date();
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+    let season;
+    if (month >= 3 && month <= 5) season = t("courses.seasons.spring");
+    else if (month >= 6 && month <= 9) season = t("courses.seasons.summer");
+    else if (month >= 10 && month <= 11) season = t("courses.seasons.autumn");
+    else season = t("courses.seasons.winter");
+    return t("courses.seasons.semester", { season, year });
+  }
+
   const currentSemester = getCurrentSemester();
-  const labelText = coursesLabel || "active courses";
+  const labelText = coursesLabel || t("courses.header.activeLabel");
 
   return (
     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
@@ -38,7 +33,7 @@ export function CoursesHeader({ totalCourses, coursesLabel, onAddCourse }) {
           onClick={onAddCourse}
           className="flex items-center gap-2 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-all font-semibold">
           <Plus className="w-5 h-5" />
-          Add Course
+          {t("courses.header.addCourse")}
         </button>
       </div>
     </div>

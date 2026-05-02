@@ -1,4 +1,5 @@
 import { BookOpen } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 function CourseItem({ course }) {
   return (
@@ -22,12 +23,13 @@ function CourseItem({ course }) {
 }
 
 export function CourseProgress({ courses = [], loading = false }) {
+  const { t } = useTranslation();
   return (
     <div className="bg-white rounded-lg p-7 shadow-sm border border-gray-200">
       <div className="flex items-center justify-between mb-7">
         <h3 className="text-lg font-bold text-primary-900 flex items-center gap-2">
           <BookOpen className="w-5 h-5" />
-          Course Progress
+          {t("dashboard.courseProgress.title")}
         </h3>
       </div>
       <div className="space-y-6">
@@ -40,7 +42,7 @@ export function CourseProgress({ courses = [], loading = false }) {
           ))
         ) : courses.length === 0 ? (
           <p className="text-sm text-gray-400 text-center py-6">
-            No active courses found.
+            {t("dashboard.courseProgress.empty")}
           </p>
         ) : (
           courses.map((course) => (

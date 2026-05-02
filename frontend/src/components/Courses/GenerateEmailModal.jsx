@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { X, Mail, Sparkles, Copy, Send } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export const EMAIL_PURPOSES = [
   "Request Deadline Extension",
@@ -122,6 +123,7 @@ export function GenerateEmailModal({
   selectedCourse = null,
   studentName = "",
 }) {
+  const { t } = useTranslation();
   const availableCourses = useMemo(
     () => (courses || []).filter((course) => !course.isOldCourse),
     [courses],
@@ -198,7 +200,7 @@ export function GenerateEmailModal({
           <div className="flex items-center gap-2">
             <Mail className="w-5 h-5 text-teal-600" />
             <h2 className="text-xl font-bold text-gray-900">
-              Generate Email to Professor
+              {t("courses.emailModal.title")}
             </h2>
           </div>
           <button
@@ -214,12 +216,12 @@ export function GenerateEmailModal({
             <>
               <div className="rounded-xl border border-blue-200 bg-blue-50 text-blue-700 px-4 py-3 text-sm flex items-center gap-2">
                 <Sparkles className="w-4 h-4" />
-                AI-generated draft. Review and edit before sending.
+                {t("courses.emailModal.aiDraftNote")}
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-800 mb-2">
-                  Email Draft
+                  {t("courses.emailModal.draftLabel")}
                 </label>
                 <textarea
                   value={draft}
@@ -233,14 +235,16 @@ export function GenerateEmailModal({
                   type="button"
                   onClick={() => setDraft("")}
                   className="px-4 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold transition">
-                  Back
+                  {t("courses.emailModal.backButton")}
                 </button>
                 <button
                   type="button"
                   onClick={handleCopy}
                   className="px-4 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold transition inline-flex items-center justify-center gap-2">
                   <Copy className="w-4 h-4" />
-                  {copied ? "Copied!" : "Copy Email"}
+                  {copied
+                    ? t("courses.emailModal.copied")
+                    : t("courses.emailModal.copyButton")}
                 </button>
               </div>
 
@@ -249,14 +253,14 @@ export function GenerateEmailModal({
                 onClick={handleOpenEmailApp}
                 className="w-full px-4 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold transition inline-flex items-center justify-center gap-2">
                 <Send className="w-4 h-4" />
-                Open in Email App
+                {t("courses.emailModal.openEmailApp")}
               </button>
             </>
           ) : (
             <>
               <div>
                 <label className="block text-sm font-semibold text-gray-800 mb-2">
-                  Select Course & Professor
+                  {t("courses.emailModal.courseLabel")}
                 </label>
                 <select
                   value={courseId}
@@ -272,7 +276,7 @@ export function GenerateEmailModal({
 
               <div>
                 <p className="block text-sm font-semibold text-gray-800 mb-2">
-                  Email Purpose
+                  {t("courses.emailModal.purposeLabel")}
                 </p>
                 <div className="space-y-2">
                   {EMAIL_PURPOSES.map((item) => {
@@ -296,12 +300,12 @@ export function GenerateEmailModal({
 
               <div>
                 <label className="block text-sm font-semibold text-gray-800 mb-2">
-                  Additional Context (Optional)
+                  {t("courses.emailModal.contextLabel")}
                 </label>
                 <textarea
                   value={additionalContext}
                   onChange={(event) => setAdditionalContext(event.target.value)}
-                  placeholder="Add any specific details you want included in the email..."
+                  placeholder={t("courses.emailModal.contextPlaceholder")}
                   rows={5}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
                 />
@@ -313,13 +317,13 @@ export function GenerateEmailModal({
                 disabled={!selected}
                 className="w-full px-4 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold transition inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                 <Sparkles className="w-4 h-4" />
-                Generate Email
+                {t("courses.emailModal.generateButton")}
               </button>
             </>
           )}
 
           <p className="text-sm text-gray-500">
-            Always review AI-generated content for accuracy and appropriate tone
+            {t("courses.emailModal.disclaimer")}
           </p>
         </div>
       </div>

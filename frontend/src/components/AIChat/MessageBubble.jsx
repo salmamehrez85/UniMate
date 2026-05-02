@@ -46,8 +46,12 @@ export function MessageBubble({ message, onSpeak }) {
             {/* Copy */}
             <button
               onClick={handleCopy}
-              title={copied ? t("aiChat.message.copied") : t("aiChat.message.copy")}
-              aria-label={copied ? t("aiChat.message.copied") : t("aiChat.message.copy")}
+              title={
+                copied ? t("aiChat.message.copied") : t("aiChat.message.copy")
+              }
+              aria-label={
+                copied ? t("aiChat.message.copied") : t("aiChat.message.copy")
+              }
               className={`flex items-center gap-1 px-2 py-0.5 bg-white border rounded-full shadow-sm text-xs transition-all cursor-pointer active:scale-95 ${
                 copied
                   ? "border-green-300 text-green-600"

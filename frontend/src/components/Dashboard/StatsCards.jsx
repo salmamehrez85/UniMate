@@ -1,33 +1,16 @@
 import { BookOpen, CheckCircle, TrendingUp, Clock } from "lucide-react";
-
-const STATS_CONFIG = [
-  {
-    key: "activeCourses",
-    label: "Active Courses",
-    Icon: BookOpen,
-    color: "bg-blue-50 text-primary-600",
-  },
-  {
-    key: "pendingTasks",
-    label: "Pending Tasks",
-    Icon: CheckCircle,
-    color: "bg-emerald-50 text-emerald-700",
-  },
-  {
-    key: "avgPerformance",
-    label: "Avg Performance",
-    Icon: TrendingUp,
-    color: "bg-purple-50 text-purple-700",
-  },
-  {
-    key: "studyHours",
-    label: "Completed Tasks",
-    Icon: Clock,
-    color: "bg-amber-50 text-amber-700",
-  },
-];
+import { useTranslation } from "react-i18next";
 
 export function StatsCards({ stats = {}, loading = false }) {
+  const { t } = useTranslation();
+
+  const STATS_CONFIG = [
+    { key: "activeCourses", label: t("dashboard.stats.activeCourses"), Icon: BookOpen, color: "bg-blue-50 text-primary-600" },
+    { key: "pendingTasks", label: t("dashboard.stats.pendingTasks"), Icon: CheckCircle, color: "bg-emerald-50 text-emerald-700" },
+    { key: "avgPerformance", label: t("dashboard.stats.avgPerformance"), Icon: TrendingUp, color: "bg-purple-50 text-purple-700" },
+    { key: "studyHours", label: t("dashboard.stats.completedTasks"), Icon: Clock, color: "bg-amber-50 text-amber-700" },
+  ];
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
       {STATS_CONFIG.map((s) => (

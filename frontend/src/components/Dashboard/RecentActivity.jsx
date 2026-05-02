@@ -1,4 +1,5 @@
 import { Activity } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 function ActivityItem({ activity }) {
   const IconComponent = activity.Icon || Activity;
@@ -26,11 +27,12 @@ function ActivityItem({ activity }) {
 }
 
 export function RecentActivity({ activities = [], loading = false }) {
+  const { t } = useTranslation();
   return (
     <div className="bg-white rounded-lg p-7 shadow-sm border border-gray-200">
       <h3 className="text-lg font-bold text-primary-900 mb-7 flex items-center gap-2">
         <Activity className="w-5 h-5" />
-        Recent Activity
+        {t("dashboard.recentActivity.title")}
       </h3>
       <div className="space-y-5">
         {loading ? (
@@ -42,7 +44,7 @@ export function RecentActivity({ activities = [], loading = false }) {
           ))
         ) : activities.length === 0 ? (
           <p className="text-sm text-gray-400 text-center py-6">
-            No recent activity yet. Start studying!
+            {t("dashboard.recentActivity.empty")}
           </p>
         ) : (
           activities.map((activity) => (

@@ -66,7 +66,9 @@ export function SettingsTab({
       {/* Edit Course Section */}
       <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-primary-900">{t("courseDetails.settingsTab.editCourse")}</h2>
+          <h2 className="text-2xl font-bold text-primary-900">
+            {t("courseDetails.settingsTab.editCourse")}
+          </h2>
           {!isEditing && (
             <button
               onClick={() => setIsEditing(true)}
@@ -255,7 +257,8 @@ export function SettingsTab({
                   {t("courseDetails.settingsTab.instructorLabel")}
                 </p>
                 <p className="text-lg font-semibold text-primary-900">
-                  {course.instructor || t("courseDetails.settingsTab.notSpecified")}
+                  {course.instructor ||
+                    t("courseDetails.settingsTab.notSpecified")}
                 </p>
               </div>
               <div>
@@ -263,7 +266,8 @@ export function SettingsTab({
                   {t("courseDetails.settingsTab.scheduleLabel")}
                 </p>
                 <p className="text-lg font-semibold text-primary-900">
-                  {course.schedule || t("courseDetails.settingsTab.notSpecified")}
+                  {course.schedule ||
+                    t("courseDetails.settingsTab.notSpecified")}
                 </p>
               </div>
               <div>
@@ -271,7 +275,8 @@ export function SettingsTab({
                   {t("courseDetails.settingsTab.locationLabel")}
                 </p>
                 <p className="text-lg font-semibold text-primary-900">
-                  {course.location || t("courseDetails.settingsTab.notSpecified")}
+                  {course.location ||
+                    t("courseDetails.settingsTab.notSpecified")}
                 </p>
               </div>
               <div>
@@ -287,7 +292,8 @@ export function SettingsTab({
                   {t("courseDetails.settingsTab.semesterLabel")}
                 </p>
                 <p className="text-lg font-semibold text-primary-900">
-                  {course.semester || t("courseDetails.settingsTab.notSpecified")}
+                  {course.semester ||
+                    t("courseDetails.settingsTab.notSpecified")}
                 </p>
               </div>
             </div>
@@ -304,7 +310,9 @@ export function SettingsTab({
                   </p>
                 </div>
               ) : (
-                <p className="text-gray-500 italic">{t("courseDetails.settingsTab.noOutline")}</p>
+                <p className="text-gray-500 italic">
+                  {t("courseDetails.settingsTab.noOutline")}
+                </p>
               )}
             </div>
           </div>
@@ -313,7 +321,9 @@ export function SettingsTab({
 
       {/* Delete Course Section - Danger Zone */}
       <div className="bg-red-50 rounded-xl p-8 border border-red-200">
-        <h2 className="text-2xl font-bold text-red-900 mb-2">{t("courseDetails.settingsTab.dangerZone")}</h2>
+        <h2 className="text-2xl font-bold text-red-900 mb-2">
+          {t("courseDetails.settingsTab.dangerZone")}
+        </h2>
         <p className="text-red-700 mb-6">
           {t("courseDetails.settingsTab.dangerWarning")}
         </p>

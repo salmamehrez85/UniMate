@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 // Helper function to get current semester based on date
 const getCurrentSemester = () => {
@@ -48,6 +49,7 @@ const generateSemesterOptions = () => {
 };
 
 export function AddCourseModal({ isOpen, onClose, onAdd }) {
+  const { t } = useTranslation();
   const semesterOptions = generateSemesterOptions();
   const currentSemester = getCurrentSemester();
 
@@ -78,7 +80,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
 
     // Validation
     if (!formData.code || !formData.name) {
-      setError("Course code and name are required");
+      setError(t("courses.addModal.codeNameRequired"));
       return;
     }
 
@@ -99,7 +101,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
       });
       onClose();
     } catch (err) {
-      setError(err.message || "Failed to add course");
+      setError(err.message || t("courses.addModal.failedToAdd"));
     } finally {
       setLoading(false);
     }
@@ -112,7 +114,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
       <div className="bg-white rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <h2 className="text-xl font-bold text-gray-900">Add New Course</h2>
+          <h2 className="text-xl font-bold text-gray-900">{t("courses.addModal.title")}</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition"
@@ -128,7 +130,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
             <label
               htmlFor="code"
               className="block text-sm font-medium text-gray-700 mb-2">
-              Course Code <span className="text-red-500">*</span>
+              {t("courses.addModal.codeLabel")} <span className="text-red-500">{t("courses.addModal.codeRequired")}</span>
             </label>
             <input
               id="code"
@@ -137,7 +139,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
               value={formData.code}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-              placeholder="e.g., CS 301"
+              placeholder={t("courses.addModal.codePlaceholder")}
               disabled={loading}
             />
           </div>
@@ -147,7 +149,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
             <label
               htmlFor="name"
               className="block text-sm font-medium text-gray-700 mb-2">
-              Course Name <span className="text-red-500">*</span>
+              {t("courses.addModal.nameLabel")} <span className="text-red-500">{t("courses.addModal.codeRequired")}</span>
             </label>
             <input
               id="name"
@@ -156,7 +158,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
               value={formData.name}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-              placeholder="e.g., Data Structures"
+              placeholder={t("courses.addModal.namePlaceholder")}
               disabled={loading}
             />
           </div>
@@ -166,7 +168,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
             <label
               htmlFor="instructor"
               className="block text-sm font-medium text-gray-700 mb-2">
-              Instructor
+              {t("courses.addModal.instructorLabel")}
             </label>
             <input
               id="instructor"
@@ -175,7 +177,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
               value={formData.instructor}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-              placeholder="e.g., John Doe"
+              placeholder={t("courses.addModal.instructorPlaceholder")}
               disabled={loading}
             />
           </div>
@@ -185,7 +187,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
             <label
               htmlFor="schedule"
               className="block text-sm font-medium text-gray-700 mb-2">
-              Schedule
+              {t("courses.addModal.scheduleLabel")}
             </label>
             <input
               id="schedule"
@@ -194,7 +196,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
               value={formData.schedule}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-              placeholder="e.g., Mon & Wed 10:00 AM - 11:30 AM"
+              placeholder={t("courses.addModal.schedulePlaceholder")}
               disabled={loading}
             />
           </div>
@@ -204,7 +206,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
             <label
               htmlFor="location"
               className="block text-sm font-medium text-gray-700 mb-2">
-              Location
+              {t("courses.addModal.locationLabel")}
             </label>
             <input
               id="location"
@@ -223,7 +225,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
             <label
               htmlFor="credits"
               className="block text-sm font-medium text-gray-700 mb-2">
-              Credits
+              {t("courses.addModal.creditsLabel")}
             </label>
             <input
               id="credits"
@@ -242,7 +244,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
             <label
               htmlFor="semester"
               className="block text-sm font-medium text-gray-700 mb-2">
-              Semester <span className="text-red-500">*</span>
+              {t("courses.addModal.semesterLabel")} <span className="text-red-500">{t("courses.addModal.codeRequired")}</span>
             </label>
             <select
               id="semester"
@@ -252,7 +254,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
               disabled={loading}>
               <option value="" disabled>
-                Select a semester...
+                {t("courses.addModal.semesterPlaceholder")}
               </option>
               {semesterOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -261,7 +263,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
               ))}
             </select>
             <p className="text-xs text-gray-500 mt-1">
-              Default: {currentSemester}
+              {t("courses.addModal.semesterDefault", { semester: currentSemester })}
             </p>
           </div>
 
@@ -270,7 +272,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
             <label
               htmlFor="outlineText"
               className="block text-sm font-medium text-gray-700 mb-2">
-              Course Outline / Syllabus
+              {t("courses.addModal.outlineLabel")}
             </label>
             <textarea
               id="outlineText"
@@ -278,13 +280,12 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
               value={formData.outlineText}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition resize-none"
-              placeholder="Paste the course syllabus or outline here... (helps AI make better predictions)"
+              placeholder={t("courses.addModal.outlinePlaceholder")}
               rows="4"
               disabled={loading}
             />
             <p className="text-xs text-gray-500 mt-1">
-              This helps the AI predictor understand course content for better
-              grade forecasts
+              {t("courses.addModal.outlineHint")}
             </p>
           </div>
 
@@ -302,13 +303,13 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
               onClick={onClose}
               className="flex-1 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium text-gray-700"
               disabled={loading}>
-              Cancel
+              {t("courses.addModal.cancelButton")}
             </button>
             <button
               type="submit"
               className="flex-1 px-4 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={loading}>
-              {loading ? "Adding..." : "Add Course"}
+              {loading ? t("courses.addModal.addingButton") : t("courses.addModal.addButton")}
             </button>
           </div>
         </form>

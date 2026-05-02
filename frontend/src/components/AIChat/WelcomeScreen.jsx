@@ -21,28 +21,65 @@ export function WelcomeScreen({ onSelectPrompt, courses = [] }) {
   const { t } = useTranslation();
 
   const STATIC_PROMPTS = [
-    { Icon: BookOpen, label: t("aiChat.welcome.explainConcept"), prompt: "Can you explain the concept of recursion in programming with a simple example?" },
-    { Icon: Calculator, label: t("aiChat.welcome.solveProblem"), prompt: "Help me solve this step by step: Find the derivative of f(x) = 3x² + 5x − 7" },
-    { Icon: Lightbulb, label: t("aiChat.welcome.studyTips"), prompt: "What are the most effective study techniques for retaining information long-term?" },
-    { Icon: FlaskConical, label: t("aiChat.welcome.examPrep"), prompt: "I have an exam on thermodynamics tomorrow. Can you give me a quick overview of the key concepts?" },
+    {
+      Icon: BookOpen,
+      label: t("aiChat.welcome.explainConcept"),
+      prompt:
+        "Can you explain the concept of recursion in programming with a simple example?",
+    },
+    {
+      Icon: Calculator,
+      label: t("aiChat.welcome.solveProblem"),
+      prompt:
+        "Help me solve this step by step: Find the derivative of f(x) = 3x² + 5x − 7",
+    },
+    {
+      Icon: Lightbulb,
+      label: t("aiChat.welcome.studyTips"),
+      prompt:
+        "What are the most effective study techniques for retaining information long-term?",
+    },
+    {
+      Icon: FlaskConical,
+      label: t("aiChat.welcome.examPrep"),
+      prompt:
+        "I have an exam on thermodynamics tomorrow. Can you give me a quick overview of the key concepts?",
+    },
   ];
 
   const PROMPT_TEMPLATES = [
-    (name) => ({ label: t("aiChat.welcome.explainCourse", { name }), prompt: `I'm studying ${name}. Can you explain one of the core concepts in this course in a clear and simple way?` }),
-    (name) => ({ label: t("aiChat.welcome.examPrepCourse", { name }), prompt: `I have an upcoming exam in ${name}. What are the most important topics I should focus on?` }),
-    (name) => ({ label: t("aiChat.welcome.problemHelp", { name }), prompt: `I'm stuck on a problem in ${name}. Can you walk me through how to approach it step by step?` }),
-    (name) => ({ label: t("aiChat.welcome.summarizeCourse", { name }), prompt: `Can you give me a concise summary of the key topics covered in ${name}?` }),
+    (name) => ({
+      label: t("aiChat.welcome.explainCourse", { name }),
+      prompt: `I'm studying ${name}. Can you explain one of the core concepts in this course in a clear and simple way?`,
+    }),
+    (name) => ({
+      label: t("aiChat.welcome.examPrepCourse", { name }),
+      prompt: `I have an upcoming exam in ${name}. What are the most important topics I should focus on?`,
+    }),
+    (name) => ({
+      label: t("aiChat.welcome.problemHelp", { name }),
+      prompt: `I'm stuck on a problem in ${name}. Can you walk me through how to approach it step by step?`,
+    }),
+    (name) => ({
+      label: t("aiChat.welcome.summarizeCourse", { name }),
+      prompt: `Can you give me a concise summary of the key topics covered in ${name}?`,
+    }),
   ];
 
   function buildCoursePrompts(courseList) {
     return courseList.slice(0, 4).map((course, i) => {
       const name = course.name || course.code || "this course";
       const template = PROMPT_TEMPLATES[i % PROMPT_TEMPLATES.length](name);
-      return { Icon: COURSE_ICONS[i % COURSE_ICONS.length], label: template.label, prompt: template.prompt };
+      return {
+        Icon: COURSE_ICONS[i % COURSE_ICONS.length],
+        label: template.label,
+        prompt: template.prompt,
+      };
     });
   }
 
-  const prompts = courses.length > 0 ? buildCoursePrompts(courses) : STATIC_PROMPTS;
+  const prompts =
+    courses.length > 0 ? buildCoursePrompts(courses) : STATIC_PROMPTS;
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-6 py-10 text-center">

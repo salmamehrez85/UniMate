@@ -185,9 +185,7 @@ export function ChatSidebar({
         ) : sessions.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
             <MessageSquare className="w-8 h-8 text-gray-300 mb-2" />
-            <p className="text-xs text-gray-400">
-              {t("aiChat.sidebar.empty")}
-            </p>
+            <p className="text-xs text-gray-400">{t("aiChat.sidebar.empty")}</p>
           </div>
         ) : (
           sessions.map((session) => (
