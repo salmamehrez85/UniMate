@@ -1,4 +1,5 @@
 import { Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export function TasksFilters({
   statusOptions,
@@ -10,6 +11,7 @@ export function TasksFilters({
   query,
   onQueryChange,
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
       <div className="flex flex-wrap gap-2">
@@ -29,13 +31,13 @@ export function TasksFilters({
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative">
-          <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-gray-400 absolute start-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
-            placeholder="Search tasks or courses"
-            className="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            placeholder={t("tasks.filters.searchPlaceholder")}
+            className="w-full sm:w-64 ps-10 pe-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
         </div>
         <select

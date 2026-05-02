@@ -1,32 +1,30 @@
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
-
-const STATUS_OPTIONS = [
-  { value: "todo", label: "To Do" },
-  { value: "doing", label: "Doing" },
-  { value: "done", label: "Done" },
-];
-
-const PRIORITY_OPTIONS = [
-  { value: "high", label: "High" },
-  { value: "medium", label: "Medium" },
-  { value: "low", label: "Low" },
-];
-
-const defaultForm = {
-  title: "",
-  description: "",
-  courseId: "",
-  dueDate: "",
-  dueTime: "",
-  status: "todo",
-  priority: "medium",
-};
+import { useTranslation } from "react-i18next";
 
 export function AddTaskModal({ courses, onClose, onAdd }) {
+  const { t } = useTranslation();
+
+  const STATUS_OPTIONS = [
+    { value: "todo", label: t("tasks.status.todo") },
+    { value: "doing", label: t("tasks.status.doing") },
+    { value: "done", label: t("tasks.status.done") },
+  ];
+
+  const PRIORITY_OPTIONS = [
+    { value: "high", label: t("tasks.priority.high") },
+    { value: "medium", label: t("tasks.priority.medium") },
+    { value: "low", label: t("tasks.priority.low") },
+  ];
+
   const [form, setForm] = useState({
-    ...defaultForm,
+    title: "",
+    description: "",
     courseId: courses[0]?._id || "",
+    dueDate: "",
+    dueTime: "",
+    status: "todo",
+    priority: "medium",
   });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -54,15 +52,15 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.title.trim()) {
-      setError("Title is required");
+      setError(t("tasks.addModal.titleRequired"));
       return;
     }
     if (!form.courseId) {
-      setError("Please select a course");
+      setError(t("tasks.addModal.courseRequired"));
       return;
     }
     if (!form.dueDate) {
-      setError("Due date is required");
+      setError(t("tasks.addModal.dueDateRequired"));
       return;
     }
 
@@ -84,7 +82,7 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
       });
       onClose();
     } catch (err) {
-      setError(err.message || "Failed to add task.");
+      setError(err.message || t("tasks.addModal.failedToAdd"));
     } finally {
       setSubmitting(false);
     }
@@ -99,7 +97,9 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
       <div className="bg-white rounded-xl shadow-lg max-w-md w-full">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <h2 className="text-xl font-bold text-primary-900">Add Task</h2>
+          <h2 className="text-xl font-bold text-primary-900">
+            {t("tasks.addModal.title")}
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 cursor-pointer transition">
@@ -118,7 +118,7 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
           {/* Title */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Title *
+              {t("tasks.addModal.titleLabel")} *
             </label>
             <input
               ref={titleRef}
@@ -126,7 +126,7 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
               name="title"
               value={form.title}
               onChange={handleChange}
-              placeholder="e.g., Complete assignment"
+              placeholder={t("tasks.addModal.titlePlaceholder")}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
@@ -134,13 +134,13 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
           {/* Description */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description (Optional)
+              {t("tasks.addModal.descriptionLabel")}
             </label>
             <textarea
               name="description"
               value={form.description}
               onChange={handleChange}
-              placeholder="Add task details..."
+              placeholder={t("tasks.addModal.descriptionPlaceholder")}
               rows={3}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
             />
@@ -149,7 +149,7 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
           {/* Course */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Course *
+              {t("tasks.addModal.courseLabel")} *
             </label>
             <select
               name="courseId"
@@ -168,7 +168,7 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Due Date *
+                {t("tasks.addModal.dueDateLabel")} *
               </label>
               <input
                 type="date"
@@ -180,7 +180,7 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Due Time
+                {t("tasks.addModal.dueTimeLabel")}
               </label>
               <input
                 type="time"
@@ -196,7 +196,7 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Status *
+                {t("tasks.addModal.statusLabel")} *
               </label>
               <select
                 name="status"
@@ -212,7 +212,7 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Priority *
+                {t("tasks.addModal.priorityLabel")} *
               </label>
               <select
                 name="priority"
@@ -234,13 +234,15 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
               type="submit"
               disabled={submitting}
               className="flex-1 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
-              {submitting ? "Adding…" : "Add Task"}
+              {submitting
+                ? t("tasks.addModal.adding")
+                : t("tasks.addModal.addButton")}
             </button>
             <button
               type="button"
               onClick={onClose}
               className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition cursor-pointer">
-              Cancel
+              {t("tasks.addModal.cancelButton")}
             </button>
           </div>
         </form>

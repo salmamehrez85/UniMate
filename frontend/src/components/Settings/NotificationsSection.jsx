@@ -1,25 +1,8 @@
 import { Bell } from "lucide-react";
 import { useNotificationPrefs } from "../../hooks/useNotificationPrefs";
+import { useTranslation } from "react-i18next";
 
-const NOTIFICATION_ITEMS = [
-  {
-    id: "assignments",
-    label: "Assignment reminders",
-    description: "Get reminded before deadlines",
-  },
-  {
-    id: "quizzes",
-    label: "Quiz availability",
-    description: "Notified when new quizzes are ready",
-  },
-  {
-    id: "performance",
-    label: "Performance updates",
-    description: "Weekly summary of your progress",
-  },
-];
-
-function Toggle({ enabled, onChange }) {
+function Toggle({ enabled, onChange, onLabel, offLabel }) {
   return (
     <button
       onClick={() => onChange(!enabled)}
@@ -35,20 +18,41 @@ function Toggle({ enabled, onChange }) {
         className={`absolute text-[10px] font-bold tracking-wide transition-all ${
           enabled ? "left-2 text-white" : "right-2 text-gray-400"
         }`}>
-        {enabled ? "ON" : "OFF"}
+        {enabled ? onLabel : offLabel}
       </span>
     </button>
   );
 }
 
 export function NotificationsSection() {
+  const { t } = useTranslation();
   const { prefs, toggle } = useNotificationPrefs();
+
+  const NOTIFICATION_ITEMS = [
+    {
+      id: "assignments",
+      label: t("settings.notifications.assignments"),
+      description: t("settings.notifications.assignmentsDesc"),
+    },
+    {
+      id: "quizzes",
+      label: t("settings.notifications.quizzes"),
+      description: t("settings.notifications.quizzesDesc"),
+    },
+    {
+      id: "performance",
+      label: t("settings.notifications.performance"),
+      description: t("settings.notifications.performanceDesc"),
+    },
+  ];
 
   return (
     <div className="p-6">
       <div className="flex items-center gap-3 mb-4">
         <Bell className="w-5 h-5 text-primary-600" />
-        <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+        <h3 className="text-lg font-semibold text-gray-900">
+          {t("settings.notifications.title")}
+        </h3>
       </div>
       <div className="space-y-4">
         {NOTIFICATION_ITEMS.map((item) => (
@@ -57,7 +61,12 @@ export function NotificationsSection() {
               <p className="text-sm font-medium text-gray-800">{item.label}</p>
               <p className="text-xs text-gray-500">{item.description}</p>
             </div>
-            <Toggle enabled={prefs[item.id]} onChange={() => toggle(item.id)} />
+            <Toggle
+              enabled={prefs[item.id]}
+              onChange={() => toggle(item.id)}
+              onLabel={t("settings.notifications.on")}
+              offLabel={t("settings.notifications.off")}
+            />
           </div>
         ))}
       </div>

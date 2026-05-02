@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { User, Pencil, Check, X } from "lucide-react";
 import { getUserData } from "../../services/authService";
+import { useTranslation } from "react-i18next";
 
 export function ProfileSection() {
+  const { t } = useTranslation();
   const user = getUserData();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(user?.fullName || "");
@@ -26,14 +28,14 @@ export function ProfileSection() {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <User className="w-5 h-5 text-primary-600" />
-          <h3 className="text-lg font-semibold text-gray-900">Profile</h3>
+          <h3 className="text-lg font-semibold text-gray-900">{t("settings.profile.title")}</h3>
         </div>
         {!editing && (
           <button
             onClick={() => setEditing(true)}
             className="flex items-center gap-1 text-sm text-primary-600 hover:text-primary-800 font-medium cursor-pointer transition-colors">
             <Pencil className="w-4 h-4" />
-            Edit
+            {t("settings.profile.edit")}
           </button>
         )}
       </div>
@@ -42,7 +44,7 @@ export function ProfileSection() {
         <div className="space-y-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Full Name
+              {t("settings.profile.fullName")}
             </label>
             <input
               type="text"
@@ -53,7 +55,7 @@ export function ProfileSection() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              University
+              {t("settings.profile.university")}
             </label>
             <input
               type="text"
@@ -64,7 +66,7 @@ export function ProfileSection() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address
+              {t("settings.profile.email")}
             </label>
             <input
               type="email"
@@ -73,7 +75,7 @@ export function ProfileSection() {
               className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-400 cursor-not-allowed"
             />
             <p className="text-xs text-gray-400 mt-1">
-              Email cannot be changed
+              {t("settings.profile.emailCannotChange")}
             </p>
           </div>
           <div className="flex flex-col gap-2 pt-2">
@@ -81,13 +83,13 @@ export function ProfileSection() {
               onClick={handleSave}
               className="w-full flex items-center justify-center gap-2 py-2.5 bg-gray-100 hover:bg-gray-200 text-black text-sm font-semibold rounded-lg transition cursor-pointer">
               <Check className="w-4 h-4" />
-              Save Changes
+              {t("settings.profile.save")}
             </button>
             <button
               onClick={handleCancel}
               className="w-full flex items-center justify-center gap-2 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-lg transition cursor-pointer">
               <X className="w-4 h-4" />
-              Cancel
+              {t("settings.profile.cancel")}
             </button>
           </div>
         </div>

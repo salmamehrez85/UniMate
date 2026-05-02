@@ -6,7 +6,9 @@ export function RecentResults({ results }) {
   return (
     <section className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
       <div className="px-6 py-5 border-b border-gray-100">
-        <h2 className="text-xl font-bold text-primary-900">{t("quizzes.results.title")}</h2>
+        <h2 className="text-xl font-bold text-primary-900">
+          {t("quizzes.results.title")}
+        </h2>
       </div>
 
       {results.length === 0 && (
@@ -21,11 +23,16 @@ export function RecentResults({ results }) {
             <div key={result.id} className="px-6 py-5">
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="text-base font-semibold text-gray-900">{result.title}</h3>
-                  <p className="text-sm text-gray-600 mt-1">{result.course} • {result.date}</p>
+                  <h3 className="text-base font-semibold text-gray-900">
+                    {result.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {result.course} • {result.date}
+                  </p>
                 </div>
                 <div className="text-right">
-                  <p className={`text-lg font-bold ${result.score >= 85 ? "text-emerald-600" : result.score >= 70 ? "text-yellow-600" : "text-orange-600"}`}>
+                  <p
+                    className={`text-lg font-bold ${result.score >= 85 ? "text-emerald-600" : result.score >= 70 ? "text-yellow-600" : "text-orange-600"}`}>
                     {result.score}/100
                   </p>
                   <p className="text-sm text-gray-500">{result.score}%</p>
@@ -40,7 +47,9 @@ export function RecentResults({ results }) {
                   </div>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {result.weakAreas.map((area) => (
-                      <span key={area} className="text-xs text-red-700 bg-white border border-red-200 px-2 py-1 rounded-md">
+                      <span
+                        key={area}
+                        className="text-xs text-red-700 bg-white border border-red-200 px-2 py-1 rounded-md">
                         {area}
                       </span>
                     ))}

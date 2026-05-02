@@ -1,9 +1,4 @@
-const SUMMARY_MODES = [
-  { value: "quick", label: "Quick" },
-  { value: "detailed", label: "Detailed" },
-  { value: "exam", label: "Exam Focus" },
-  { value: "custom", label: "Custom" },
-];
+import { useTranslation } from "react-i18next";
 
 const LANGUAGE_OPTIONS = [
   { value: "en", label: "English" },
@@ -37,7 +32,15 @@ export function SummarizerForm({
   onSubmit,
   formId = "summarizer-form",
 }) {
+  const { t } = useTranslation();
   const activeCourses = (courses || []).filter((course) => !course.isOldCourse);
+
+  const SUMMARY_MODES = [
+    { value: "quick", label: t("summarizer.modes.quick") },
+    { value: "detailed", label: t("summarizer.modes.detailed") },
+    { value: "exam", label: t("summarizer.modes.exam") },
+    { value: "custom", label: t("summarizer.modes.custom") },
+  ];
 
   return (
     <form
@@ -46,21 +49,21 @@ export function SummarizerForm({
       className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-5">
       <div className="grid md:grid-cols-2 gap-4">
         <label className="flex flex-col gap-2">
-          <span className="text-sm font-medium text-gray-700">Source</span>
+          <span className="text-sm font-medium text-gray-700">{t("summarizer.form.sourceLabel")}</span>
           <select
             value={form.sourceType}
             onChange={(event) => onChange("sourceType", event.target.value)}
             className="px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400">
-            <option value="text">Paste Text</option>
-            <option value="courseOutline">Course Outline</option>
-            <option value="file">Upload File</option>
-            <option value="handwritten">Handwritten Notes</option>
+            <option value="text">{t("summarizer.form.pasteText")}</option>
+            <option value="courseOutline">{t("summarizer.form.courseOutline")}</option>
+            <option value="file">{t("summarizer.form.uploadFile")}</option>
+            <option value="handwritten">{t("summarizer.form.handwritten")}</option>
           </select>
         </label>
 
         <label className="flex flex-col gap-2">
           <span className="text-sm font-medium text-gray-700">
-            Summary Mode
+            {t("summarizer.form.modeLabel")}
           </span>
           <select
             value={form.mode}
@@ -77,20 +80,19 @@ export function SummarizerForm({
 
       <div className="space-y-2">
         <span className="text-xs text-gray-500">
-          Choose source and mode, then generate. Use advanced options only when
-          you need custom tuning.
+          {t("summarizer.form.advancedHint")}
         </span>
         <button
           type="button"
           onClick={onToggleAdvanced}
           className="text-xs font-medium text-teal-700 hover:text-teal-800 underline underline-offset-2">
-          {isAdvancedOpen ? "Hide Advanced Options" : "Show Advanced Options"}
+          {isAdvancedOpen ? t("summarizer.form.hideAdvanced") : t("summarizer.form.showAdvanced")}
         </button>
       </div>
 
       <div className="grid md:grid-cols-3 gap-4">
         <label className="flex flex-col gap-2">
-          <span className="text-sm font-medium text-gray-700">Language</span>
+          <span className="text-sm font-medium text-gray-700">{t("summarizer.form.languageLabel")}</span>
           <select
             value={form.language}
             onChange={(event) => onChange("language", event.target.value)}
@@ -108,7 +110,7 @@ export function SummarizerForm({
         className={`overflow-hidden transition-all duration-300 ease-in-out ${isAdvancedOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}>
         <div className="grid md:grid-cols-2 gap-4 pt-1">
           <label className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-gray-700">Length</span>
+            <span className="text-sm font-medium text-gray-700">{t("summarizer.form.lengthLabel")}</span>
             <select
               value={form.length}
               onChange={(event) => onChange("length", event.target.value)}
@@ -122,7 +124,7 @@ export function SummarizerForm({
           </label>
 
           <label className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-gray-700">Focus</span>
+            <span className="text-sm font-medium text-gray-700">{t("summarizer.form.focusLabel")}</span>
             <select
               value={form.focus}
               onChange={(event) => onChange("focus", event.target.value)}
@@ -140,14 +142,14 @@ export function SummarizerForm({
       {form.sourceType === "courseOutline" ? (
         <label className="flex flex-col gap-2">
           <span className="text-sm font-medium text-gray-700">
-            Select Course
+            {t("summarizer.form.selectCourseLabel")}
           </span>
           <select
             value={form.courseId}
             onChange={(event) => onChange("courseId", event.target.value)}
             disabled={loadingCourses}
             className="px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400 disabled:opacity-60">
-            <option value="">Choose a course</option>
+            <option value="">{t("summarizer.form.chooseCourse")}</option>
             {activeCourses.map((course) => (
               <option key={course._id} value={course._id}>
                 {course.code} - {course.name}
@@ -156,15 +158,15 @@ export function SummarizerForm({
           </select>
           <span className="text-xs text-gray-500">
             {loadingCourses
-              ? "Loading courses..."
+              ? t("summarizer.form.loadingCourses")
               : activeCourses.length > 0
-                ? "Only active courses are shown. If a course has no outline text, you will be asked to add one."
-                : "No active courses found yet. Add an active course first, then try Course Outline."}
+                ? t("summarizer.form.outlineHint")
+                : t("summarizer.form.noCoursesHint")}
           </span>
         </label>
       ) : form.sourceType === "file" ? (
         <label className="flex flex-col gap-2">
-          <span className="text-sm font-medium text-gray-700">Upload File</span>
+          <span className="text-sm font-medium text-gray-700">{t("summarizer.form.uploadFileLabel")}</span>
           <input
             type="file"
             accept=".pdf,.txt,.md,.csv,.json,.rtf,.log,application/pdf,text/plain,text/markdown,text/csv,application/json"
@@ -172,16 +174,16 @@ export function SummarizerForm({
             className="px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 file:mr-3 file:px-3 file:py-1.5 file:rounded-md file:border-0 file:bg-primary-100 file:text-primary-800 file:font-medium hover:file:bg-primary-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
           />
           <span className="text-xs text-gray-500">
-            Supported: .pdf, .txt, .md, .csv, .json, .rtf, .log (max 10 MB)
+            {t("summarizer.form.uploadFileHint")}
           </span>
           {isPreparingOCR && (
             <span className="text-xs text-amber-700">
-              OCR in progress... preparing page images from scanned PDF.
+              {t("summarizer.form.ocrInProgress")}
             </span>
           )}
           {form.isScannedPdf && !isPreparingOCR && (
             <span className="text-xs text-amber-700">
-              Scanned PDF detected. OCR images are ready.
+              {t("summarizer.form.ocrReady")}
             </span>
           )}
           {form.fileName &&
@@ -228,27 +230,26 @@ export function SummarizerForm({
                   </span>
                 </div>
               ))}
-              <span className="self-center text-xs text-primary-700 font-medium">
-                {form.handwrittenImages.length} image
-                {form.handwrittenImages.length > 1 ? "s" : ""} selected
-              </span>
+                <span className="self-center text-xs text-primary-700 font-medium">
+                  {form.handwrittenImages.length} {t("summarizer.form.imagesSelected")}
+                </span>
             </div>
           )}
         </div>
       ) : (
         <label className="flex flex-col gap-2">
           <span className="text-sm font-medium text-gray-700">
-            Text to Summarize
+            {t("summarizer.form.textLabel")}
           </span>
           <textarea
             value={form.text}
             onChange={(event) => onChange("text", event.target.value)}
-            placeholder="Paste your lecture notes, assignment details, or any study content..."
+            placeholder={t("summarizer.form.textPlaceholder")}
             rows={9}
             className="px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400 resize-y"
           />
           <span className="text-xs text-gray-500">
-            Minimum recommended length: 20 characters.
+            {t("summarizer.form.textHint")}
           </span>
         </label>
       )}

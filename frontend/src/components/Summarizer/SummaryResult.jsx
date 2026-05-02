@@ -13,68 +13,7 @@ import {
   saveSummaryToCourse,
   updateCourse,
 } from "../../services/courseService";
-
-const MODE_CONFIG = {
-  quick: {
-    label: "Quick",
-    badgeClass: "bg-sky-500 text-white",
-    accentClass: "text-sky-700",
-    dividerClass: "border-sky-100",
-    type: "prose",
-    // overview shown as prose above, then these sections below
-    sections: [
-      { key: "learningOutcomes", title: "Key Takeaways" },
-      { key: "actionItems", title: "What To Do Next" },
-    ],
-  },
-  detailed: {
-    label: "Detailed",
-    badgeClass: "bg-violet-600 text-white",
-    accentClass: "text-violet-700",
-    dividerClass: "border-violet-100",
-    type: "prose",
-    sections: [
-      { key: "learningOutcomes", title: "Learning Outcomes" },
-      { key: "conceptConnections", title: "Concept Connections" },
-      { key: "importantTerms", title: "Key Terms & Definitions" },
-      { key: "studyPlan", title: "Study Plan", numbered: true },
-      { key: "possibleQuestions", title: "Possible Questions", numbered: true },
-    ],
-  },
-  exam: {
-    label: "Exam Focus",
-    badgeClass: "bg-amber-500 text-white",
-    accentClass: "text-amber-600",
-    dividerClass: "border-amber-100",
-    type: "prose",
-    sections: [
-      { key: "examFocus", title: "Most Likely Exam Topics" },
-      { key: "importantTerms", title: "Must-Know Terms" },
-      {
-        key: "possibleQuestions",
-        title: "Exam Questions",
-        numbered: true,
-      },
-      { key: "studyPlan", title: "Revision Plan", numbered: true },
-    ],
-  },
-  custom: {
-    label: "Custom",
-    badgeClass: "bg-teal-600 text-white",
-    accentClass: "text-teal-700",
-    dividerClass: "border-teal-100",
-    type: "prose",
-    sections: [
-      { key: "learningOutcomes", title: "Learning Outcomes" },
-      { key: "conceptConnections", title: "Concept Connections" },
-      { key: "examFocus", title: "Exam Focus" },
-      { key: "importantTerms", title: "Key Terms" },
-      { key: "studyPlan", title: "Study Plan", numbered: true },
-      { key: "possibleQuestions", title: "Possible Questions", numbered: true },
-      { key: "actionItems", title: "Action Items" },
-    ],
-  },
-};
+import { useTranslation } from "react-i18next";
 
 // Highlight capitalized phrases and abbreviations within a single line
 function BoldedText({ text }) {
@@ -176,6 +115,65 @@ function FormattedSummary({ text, paragraphClass, textStyle, isArabic }) {
 }
 
 export function SummaryResult({ summaryData, courses = [] }) {
+  const { t } = useTranslation();
+
+  const MODE_CONFIG = {
+    quick: {
+      label: t("summarizer.modes.quick"),
+      badgeClass: "bg-sky-500 text-white",
+      accentClass: "text-sky-700",
+      dividerClass: "border-sky-100",
+      type: "prose",
+      sections: [
+        { key: "learningOutcomes", title: t("summarizer.result.keyTakeaways") },
+        { key: "actionItems", title: t("summarizer.result.whatToDoNext") },
+      ],
+    },
+    detailed: {
+      label: t("summarizer.modes.detailed"),
+      badgeClass: "bg-violet-600 text-white",
+      accentClass: "text-violet-700",
+      dividerClass: "border-violet-100",
+      type: "prose",
+      sections: [
+        { key: "learningOutcomes", title: t("summarizer.result.learningOutcomes") },
+        { key: "conceptConnections", title: t("summarizer.result.conceptConnections") },
+        { key: "importantTerms", title: t("summarizer.result.keyTerms") },
+        { key: "studyPlan", title: t("summarizer.result.studyPlan"), numbered: true },
+        { key: "possibleQuestions", title: t("summarizer.result.possibleQuestions"), numbered: true },
+      ],
+    },
+    exam: {
+      label: t("summarizer.modes.exam"),
+      badgeClass: "bg-amber-500 text-white",
+      accentClass: "text-amber-600",
+      dividerClass: "border-amber-100",
+      type: "prose",
+      sections: [
+        { key: "examFocus", title: t("summarizer.result.examTopics") },
+        { key: "importantTerms", title: t("summarizer.result.mustKnowTerms") },
+        { key: "possibleQuestions", title: t("summarizer.result.examQuestions"), numbered: true },
+        { key: "studyPlan", title: t("summarizer.result.revisionPlan"), numbered: true },
+      ],
+    },
+    custom: {
+      label: t("summarizer.modes.custom"),
+      badgeClass: "bg-teal-600 text-white",
+      accentClass: "text-teal-700",
+      dividerClass: "border-teal-100",
+      type: "prose",
+      sections: [
+        { key: "learningOutcomes", title: t("summarizer.result.learningOutcomes") },
+        { key: "conceptConnections", title: t("summarizer.result.conceptConnections") },
+        { key: "examFocus", title: t("summarizer.result.examFocus") },
+        { key: "importantTerms", title: t("summarizer.result.keyTermsShort") },
+        { key: "studyPlan", title: t("summarizer.result.studyPlan"), numbered: true },
+        { key: "possibleQuestions", title: t("summarizer.result.possibleQuestions"), numbered: true },
+        { key: "actionItems", title: t("summarizer.result.actionItems") },
+      ],
+    },
+  };
+
   const [copied, setCopied] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
   const [saveStatus, setSaveStatus] = useState(null); // null | 'saving' | 'saved' | 'error'
@@ -298,7 +296,7 @@ export function SummaryResult({ summaryData, courses = [] }) {
       className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-gray-900">Summary</h3>
+        <h3 className="text-lg font-bold text-gray-900">{t("summarizer.result.title")}</h3>
         <span
           className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${config.badgeClass}`}>
           {config.label}
@@ -386,7 +384,7 @@ export function SummaryResult({ summaryData, courses = [] }) {
           ) : (
             <Copy className="w-3.5 h-3.5" />
           )}
-          {copied ? "Copied!" : "Copy"}
+          {copied ? t("summarizer.result.copied") : t("summarizer.result.copy")}
         </button>
 
         <button
@@ -394,7 +392,7 @@ export function SummaryResult({ summaryData, courses = [] }) {
           onClick={handleDownload}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 transition-colors">
           <Download className="w-3.5 h-3.5" />
-          Download
+          {t("summarizer.result.download")}
         </button>
 
         {/* Save to Course – inline course picker */}
@@ -405,19 +403,19 @@ export function SummaryResult({ summaryData, courses = [] }) {
             disabled={saveStatus === "saving" || activeCourses.length === 0}
             title={
               activeCourses.length === 0
-                ? "No active courses available"
-                : "Save summary to a course"
+                ? t("summarizer.result.noCoursesTitle")
+                : t("summarizer.result.saveToCourseTitle")
             }
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
             <BookMarked className="w-3.5 h-3.5" />
-            {saveStatus === "saving" ? "Saving…" : "Save to Course"}
+            {saveStatus === "saving" ? t("summarizer.result.saving") : t("summarizer.result.saveToCourse")}
             <ChevronDown className="w-3 h-3 ml-0.5" />
           </button>
 
           {saveOpen && activeCourses.length > 0 && (
             <div className="absolute left-0 mt-1 z-20 bg-white border border-gray-200 rounded-xl shadow-lg min-w-50 py-1 overflow-hidden">
               <p className="px-3 py-1.5 text-xs text-gray-400 font-medium uppercase tracking-wide border-b border-gray-100">
-                Choose a course
+                {t("summarizer.result.chooseCourse")}
               </p>
               {activeCourses.map((c) => (
                 <button
