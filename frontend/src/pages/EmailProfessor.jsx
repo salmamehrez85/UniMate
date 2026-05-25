@@ -260,6 +260,7 @@ function Composer({
 function EmailDetail({ entry, onBack, onStatusChange, onDelete }) {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
   const cfg = STATUS_CONFIG[entry.status] || STATUS_CONFIG.pending;
 
   const handleCopy = async () => {
@@ -366,12 +367,41 @@ function EmailDetail({ entry, onBack, onStatusChange, onDelete }) {
 
         <button
           type="button"
-          onClick={() => onDelete(entry.id)}
+          onClick={() => setDeleteConfirm(true)}
           className="text-xs text-red-400 hover:text-red-600 transition inline-flex items-center gap-1">
           <Trash2 className="w-3.5 h-3.5" />
           {t("emailProfessor.deleteRecord")}
         </button>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6">
+            <h3 className="text-lg font-bold text-primary-900 mb-2">
+              {t("emailProfessor.deleteTitle")}
+            </h3>
+            <p className="text-gray-600 mb-4">
+              {t("emailProfessor.deleteConfirm")}
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  onDelete(entry.id);
+                  setDeleteConfirm(false);
+                }}
+                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition">
+                {t("emailProfessor.deleteButton")}
+              </button>
+              <button
+                onClick={() => setDeleteConfirm(false)}
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
+                {t("emailProfessor.cancel")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

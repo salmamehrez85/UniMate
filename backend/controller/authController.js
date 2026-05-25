@@ -202,7 +202,7 @@ exports.forgotPassword = async (req, res) => {
 
     // In development, log the Ethereal preview URL to the console
     if (!process.env.EMAIL_USER) {
-      console.log("\n📧 Password reset email preview (development only):");
+      console.log("\n Password reset email preview (development only):");
       console.log("   URL:", nodemailer.getTestMessageUrl(info));
       console.log("   Reset link:", resetUrl, "\n");
     }
@@ -225,12 +225,10 @@ exports.forgotPassword = async (req, res) => {
       }
     } catch (_) {}
 
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to send reset email. Please try again.",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to send reset email. Please try again.",
+    });
   }
 };
 
@@ -243,12 +241,10 @@ exports.resetPassword = async (req, res) => {
     const { password } = req.body;
 
     if (!password || password.length < 8) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Password must be at least 8 characters",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters",
+      });
     }
 
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
@@ -269,12 +265,10 @@ exports.resetPassword = async (req, res) => {
     user.resetPasswordExpire = undefined;
     await user.save();
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Password reset successfully. You can now sign in.",
-      });
+    res.status(200).json({
+      success: true,
+      message: "Password reset successfully. You can now sign in.",
+    });
   } catch (error) {
     console.error("Reset password error:", error);
     res

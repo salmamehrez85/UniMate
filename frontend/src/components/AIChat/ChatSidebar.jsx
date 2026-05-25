@@ -25,7 +25,9 @@ function timeAgo(dateStr) {
 function SessionItem({ session, isActive, onSelect, onDelete, onRename }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(session.title);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
   const inputRef = useRef(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (editing) {
@@ -133,12 +135,45 @@ function SessionItem({ session, isActive, onSelect, onDelete, onRename }) {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onDelete(session._id);
+              setDeleteConfirm(true);
             }}
             className="p-1 rounded-md hover:bg-red-50 hover:text-red-500 text-gray-400 transition-all cursor-pointer"
             title="Delete chat">
             <Trash2 className="w-3.5 h-3.5" />
           </button>
+        </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6">
+            <h3 className="text-lg font-bold text-primary-900 mb-2">
+              {t("aiChat.sidebar.deleteSessionTitle")}
+            </h3>
+            <p className="text-gray-600 mb-4">
+              {t("aiChat.sidebar.deleteSessionConfirm")}
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(session._id);
+                  setDeleteConfirm(false);
+                }}
+                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition">
+                {t("aiChat.sidebar.deleteButton")}
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDeleteConfirm(false);
+                }}
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
+                {t("aiChat.sidebar.cancel")}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

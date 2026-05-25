@@ -1076,7 +1076,7 @@ exports.getAIRecommendations = async (req, res) => {
       fromCache: false,
     });
   } catch (error) {
-    console.error("❌ AI recommendations error:", error);
+    console.error("AI recommendations error:", error);
     res
       .status(500)
       .json({ success: false, message: "Error fetching recommendations" });
@@ -1108,7 +1108,7 @@ exports.refreshAIRecommendations = async (req, res) => {
       fromCache: false,
     });
   } catch (error) {
-    console.error("❌ Refresh AI recommendations error:", error);
+    console.error(" Refresh AI recommendations error:", error);
     res
       .status(500)
       .json({ success: false, message: "Error refreshing recommendations" });

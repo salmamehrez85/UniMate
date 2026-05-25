@@ -280,7 +280,10 @@
       "titleRequired": "العنوان مطلوب",
       "dueDateRequired": "تاريخ الاستحقاق مطلوب",
       "addButton": "إضافة مهمة",
-      "cancel": "إلغاء"
+      "cancel": "إلغاء",
+      "deleteTitle": "حذف المهمة؟",
+      "deleteConfirm": "هل أنت متأكد من حذف هذه المهمة؟ لا يمكن التراجع عن هذا الإجراء.",
+      "deleteButton": "حذف"
     },
     "assessments": {
       "titleHeader": "العنوان",
@@ -307,7 +310,10 @@
       "dateRequired": "التاريخ مطلوب",
       "cancel": "إلغاء",
       "save": "حفظ",
-      "add": "إضافة"
+      "add": "إضافة",
+      "deleteTitle": "حذف التقييم؟",
+      "deleteConfirm": "هل أنت متأكد من حذف هذا التقييم؟ لا يمكن التراجع عن هذا الإجراء.",
+      "deleteButton": "حذف"
     },
     "projectPhases": {
       "noPhases": "لا توجد مراحل مشروع حتى الآن.",
@@ -322,7 +328,10 @@
       "titleRequired": "عنوان المرحلة مطلوب",
       "dueDateRequired": "تاريخ الاستحقاق مطلوب",
       "addButton": "إضافة المرحلة",
-      "cancel": "إلغاء"
+      "cancel": "إلغاء",
+      "deleteTitle": "حذف المرحلة؟",
+      "deleteConfirm": "هل أنت متأكد من حذف هذه المرحلة؟ لا يمكن التراجع عن هذا الإجراء.",
+      "deleteButton": "حذف"
     },
     "aiPractice": {
       "title": "التدريب الذكي",
@@ -332,7 +341,15 @@
       "scoreTrend": "منحنى الدرجات (آخر {{count}} محاولات)",
       "noWeakAreas": "لم يتم رصد نقاط ضعف!",
       "keepTakingQuizzes": "واصل الاختبارات لتتبّع إتقانك للمواضيع.",
-      "missed": "{{count}}× مفقودة"
+      "missed": "{{count}}× مفقودة",
+      "totalAttempts": "إجمالي المحاولات",
+      "avgScore": "متوسط الدرجة",
+      "bestScore": "أفضل درجة",
+      "latestScore": "آخر درجة",
+      "needsPractice": "يحتاج تدريباً",
+      "quizHistory": "سجل الاختبارات",
+      "weakAreasInAttempt": "نقاط الضعف في هذه المحاولة:",
+      "noWeakAreasInAttempt": "لا توجد نقاط ضعف في هذه المحاولة."
     },
     "settingsTab": {
       "dangerZone": "منطقة الخطر",
@@ -353,7 +370,10 @@
       "save": "حفظ التغييرات",
       "markOld": "تحديد كمقرر قديم",
       "markActive": "تحديد كمقرر نشط",
-      "deleteCourse": "حذف المقرر"
+      "deleteCourse": "حذف المقرر",
+      "deleteConfirmTitle": "حذف المقرر؟",
+      "deleteConfirmMessage": "سيؤدي هذا إلى حذف هذا المقرر نهائيًا مع جميع مهامه وتقييماته ومراحل مشروعه. لا يمكن التراجع عن هذا الإجراء.",
+      "confirmDelete": "نعم، احذف المقرر"
     }
   },
   "tasks": {
@@ -693,7 +713,10 @@
       "noSavedChats": "لا توجد محادثات محفوظة. ابدأ محادثة!",
       "empty": "لا توجد محادثات محفوظة. ابدأ محادثة!",
       "confirmRename": "تأكيد إعادة التسمية",
-      "cancel": "إلغاء"
+      "cancel": "إلغاء",
+      "deleteSessionTitle": "حذف المحادثة؟",
+      "deleteSessionConfirm": "سيؤدي هذا إلى حذف جلسة المحادثة وجميع رسائلها بشكل نهائي.",
+      "deleteButton": "حذف"
     },
     "bubble": {
       "copyMessage": "نسخ الرسالة",
@@ -783,6 +806,10 @@
     "markReplied": "تحديد كمجاب عليه",
     "reOpen": "إعادة فتح",
     "deleteRecord": "حذف هذا السجل",
+    "deleteTitle": "حذف السجل؟",
+    "deleteConfirm": "سيؤدي هذا إلى حذف هذا السجل نهائيًا. لا يمكن التراجع عن هذا الإجراء.",
+    "deleteButton": "حذف",
+    "cancel": "إلغاء",
     "additionalContext": "سياق إضافي (اختياري)",
     "additionalContextPlaceholder": "أضف أي تفاصيل محددة تريد تضمينها في البريد...",
     "generateEmail": "توليد البريد",

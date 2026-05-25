@@ -406,21 +406,21 @@ export function TasksTab({ course, onCourseUpdate }) {
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6">
-            <h3 className="text-lg font-bold text-primary-900 mb-4">
+            <h3 className="text-lg font-bold text-primary-900 mb-2">
               {t("courseDetails.tasks.deleteTitle")}
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 mb-4">
               {t("courseDetails.tasks.deleteConfirm")}
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => handleDeleteTask(deleteConfirm)}
-                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition">
-                Delete
+                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition">
+                {t("courseDetails.tasks.deleteButton")}
               </button>
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
                 {t("courseDetails.tasks.cancel")}
               </button>
             </div>
