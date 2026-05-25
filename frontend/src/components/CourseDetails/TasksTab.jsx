@@ -99,7 +99,7 @@ function AddTaskModal({ isOpen, onClose, onAdd }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("courseDetails.tasks.titleLabel")} *
+              {t("courseDetails.tasks.titleLabel")}
             </label>
             <input
               type="text"
@@ -128,7 +128,7 @@ function AddTaskModal({ isOpen, onClose, onAdd }) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("courseDetails.tasks.dueDateLabel")} *
+                {t("courseDetails.tasks.dueDateLabel")}
               </label>
               <input
                 type="date"
@@ -155,7 +155,7 @@ function AddTaskModal({ isOpen, onClose, onAdd }) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("courseDetails.tasks.statusLabel")} *
+                {t("courseDetails.tasks.statusLabel")}
               </label>
               <select
                 name="status"
@@ -172,7 +172,7 @@ function AddTaskModal({ isOpen, onClose, onAdd }) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("courseDetails.tasks.priorityLabel")} *
+                {t("courseDetails.tasks.priorityLabel")}
               </label>
               <select
                 name="priority"

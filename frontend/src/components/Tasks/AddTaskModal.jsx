@@ -118,7 +118,7 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
           {/* Title */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("tasks.addModal.titleLabel")} *
+              {t("tasks.addModal.titleLabel")}
             </label>
             <input
               ref={titleRef}
@@ -149,7 +149,7 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
           {/* Course */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("tasks.addModal.courseLabel")} *
+              {t("tasks.addModal.courseLabel")}
             </label>
             <select
               name="courseId"
@@ -168,7 +168,7 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("tasks.addModal.dueDateLabel")} *
+                {t("tasks.addModal.dueDateLabel")}
               </label>
               <input
                 type="date"
@@ -196,7 +196,7 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("tasks.addModal.statusLabel")} *
+                {t("tasks.addModal.statusLabel")}
               </label>
               <select
                 name="status"
@@ -212,7 +212,7 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("tasks.addModal.priorityLabel")} *
+                {t("tasks.addModal.priorityLabel")}
               </label>
               <select
                 name="priority"

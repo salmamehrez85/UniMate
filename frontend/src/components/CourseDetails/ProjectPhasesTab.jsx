@@ -109,7 +109,7 @@ function AddPhaseModal({ isOpen, onClose, onAdd }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("courseDetails.projectPhases.phaseTitleLabel")} *
+              {t("courseDetails.projectPhases.phaseTitleLabel")}
             </label>
             <input
               type="text"
@@ -125,7 +125,7 @@ function AddPhaseModal({ isOpen, onClose, onAdd }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("courseDetails.projectPhases.dueDateLabel")} *
+              {t("courseDetails.projectPhases.dueDateLabel")}
             </label>
             <input
               type="date"

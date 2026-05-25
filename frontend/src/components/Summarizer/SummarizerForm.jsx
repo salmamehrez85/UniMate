@@ -218,7 +218,7 @@ export function SummarizerForm({
         <div className="flex flex-col gap-3">
           <label className="flex flex-col gap-2">
             <span className="text-sm font-medium text-gray-700">
-              Upload Handwritten Notes
+              {t("summarizer.form.uploadHandwrittenLabel")}
             </span>
             <input
               type="file"
@@ -228,8 +228,7 @@ export function SummarizerForm({
               className="px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 file:mr-3 file:px-3 file:py-1.5 file:rounded-md file:border-0 file:bg-primary-100 file:text-primary-800 file:font-medium hover:file:bg-primary-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
             />
             <span className="text-xs text-gray-500">
-              Supported: .jpg, .jpeg, .png, .webp — up to 10 images, max 10 MB
-              each.
+              {t("summarizer.form.uploadHandwrittenHint")}
             </span>
           </label>
           {form.handwrittenImages && form.handwrittenImages.length > 0 && (

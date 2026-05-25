@@ -29,7 +29,11 @@
     "unimate": "يونيميت",
     "notifications": "الإشعارات",
     "taskDueToday": "موعد التسليم اليوم",
+    "taskDaysLeft_zero": "لا أيام متبقّية",
     "taskDaysLeft_one": "يوم واحد متبقّي",
+    "taskDaysLeft_two": "يومان متبقّيان",
+    "taskDaysLeft_few": "{{count}} أيام متبقّية",
+    "taskDaysLeft_many": "{{count}} يوماً متبقّياً",
     "taskDaysLeft_other": "{{count}} أيام متبقّية",
     "quizAvailable": "اختبار متاح: {{title}}",
     "weeklyPerformance": "الأداء الأسبوعي: {{avg}}% معدل",
@@ -132,9 +136,14 @@
       "title": "المهام القادمة",
       "empty": "لا توجد مهام قادمة. أنت في الموعد!",
       "dueToday": "موعد التسليم اليوم",
+      "daysLeft_zero": "لا أيام متبقّية",
       "daysLeft_one": "يوم واحد متبقّي",
+      "daysLeft_two": "يومان متبقّيان",
+      "daysLeft_few": "{{count}} أيام متبقّية",
+      "daysLeft_many": "{{count}} يوماً متبقّياً",
       "daysLeft_other": "{{count}} أيام متبقّية",
-      "priorityHigh": "• عالية"
+      "priorityHigh": "• عالية",
+      "priorityMedium": "• متوسطة"
     },
     "courseProgress": {
       "title": "تقدّم المقررات",
@@ -150,6 +159,12 @@
       "semester": "{{season}} {{year}}"
     },
     "loading": "جارٍ تحميل المقررات...",
+    "groupCount_zero": "لا مقررات",
+    "groupCount_one": "مقرر واحد",
+    "groupCount_two": "مقرران",
+    "groupCount_few": "{{count}} مقررات",
+    "groupCount_many": "{{count}} مقرراً",
+    "groupCount_other": "{{count}} مقررات",
     "active": "نشط ({{count}})",
     "completed": "مكتمل ({{count}})",
     "noCompleted": "لا توجد مقررات مكتملة بعد",
@@ -157,11 +172,16 @@
     "addFirst": "أضف مقررك الأول",
     "header": {
       "activeLabel": "مقررات نشطة",
+      "completedLabel": "مقررات مكتملة",
       "addCourse": "إضافة مقرر"
     },
     "card": {
       "oldCourse": "مقرر قديم",
+      "tasks_zero": "لا مهام",
       "tasks_one": "مهمة واحدة",
+      "tasks_two": "مهمتان",
+      "tasks_few": "{{count}} مهام",
+      "tasks_many": "{{count}} مهمة",
       "tasks_other": "{{count}} مهام",
       "notSpecified": "غير محدد",
       "manage": "إدارة المقرر",
@@ -186,9 +206,18 @@
       "semesterLabel": "الفصل الدراسي",
       "semesterPlaceholder": "مثال: ربيع 2024",
       "codeAndNameRequired": "رمز المقرر واسمه مطلوبان",
+      "codeNameRequired": "رمز المقرر واسمه مطلوبان",
+      "semesterDefault": "افتراضياً الفصل الحالي: {{semester}}",
+      "outlineLabel": "مخطط المقرر / الخطة الدراسية",
+      "outlinePlaceholder": "الصق مخطط المقرر أو الخطة الدراسية هنا...",
+      "outlineHint": "الصق مخطط المقرر لتفعيل ميزات الذكاء الاصطناعي",
       "cancel": "إلغاء",
+      "cancelButton": "إلغاء",
       "add": "إضافة مقرر",
-      "adding": "جارٍ الإضافة..."
+      "addButton": "إضافة مقرر",
+      "adding": "جارِ الإضافة...",
+      "addingButton": "جارِ الإضافة...",
+      "failedToAdd": "فشل إضافة المقرر. يرجى المحاولة مجدداً."
     },
     "emailPurposes": {
       "deadlineExtension": "طلب تمديد الموعد النهائي",
@@ -232,6 +261,7 @@
       "clickToRead": "انقر لقراءة الملخص كاملاً"
     },
     "tasks": {
+      "all": "الكل",
       "todo": "للإنجاز",
       "inProgress": "قيد التنفيذ",
       "done": "مكتمل",
@@ -253,6 +283,12 @@
       "cancel": "إلغاء"
     },
     "assessments": {
+      "titleHeader": "العنوان",
+      "typeHeader": "النوع",
+      "scoreHeader": "الدرجة",
+      "dateHeader": "التاريخ",
+      "weightHeader": "الوزن",
+      "actionsHeader": "الإجراءات",
       "quiz": "اختبار قصير",
       "midterm": "منتصف الفصل",
       "final": "نهائي",
@@ -274,6 +310,8 @@
       "add": "إضافة"
     },
     "projectPhases": {
+      "noPhases": "لا توجد مراحل مشروع حتى الآن.",
+      "addFirst": "أضف مرحلتك الأولى",
       "addTitle": "إضافة مرحلة مشروع",
       "phaseTitleLabel": "عنوان المرحلة *",
       "phaseTitlePlaceholder": "مثال: المرحلة 1: المتطلبات",
@@ -287,12 +325,18 @@
       "cancel": "إلغاء"
     },
     "aiPractice": {
+      "title": "التدريب الذكي",
+      "subtitle": "تدريب مدعوم بالذكاء الاصطناعي ل",
+      "noQuizzesYet": "لا توجد اختبارات بعد",
+      "emptyMessage": "أجرِ اختبارات من صفحة الاختبارات لعرض تحليلات أدائك هنا.",
       "scoreTrend": "منحنى الدرجات (آخر {{count}} محاولات)",
       "noWeakAreas": "لم يتم رصد نقاط ضعف!",
       "keepTakingQuizzes": "واصل الاختبارات لتتبّع إتقانك للمواضيع.",
       "missed": "{{count}}× مفقودة"
     },
     "settingsTab": {
+      "dangerZone": "منطقة الخطر",
+      "dangerWarning": "حذف هذا المقرر سيؤدي إلى حذف جميع مهامه وتقييماته ومراحل مشروعه بشكل نهائي. لا يمكن التراجع عن هذا الإجراء.",
       "editCourse": "تعديل المقرر",
       "editButton": "تعديل المقرر",
       "codeLabel": "رمز المقرر *",
@@ -372,8 +416,13 @@
       "titleRequired": "العنوان مطلوب",
       "courseRequired": "يرجى اختيار مقرر",
       "dueDateRequired": "تاريخ الاستحقاق مطلوب",
+      "descriptionLabel": "الوصف (اختياري)",
+      "descriptionPlaceholder": "أضف تفاصيل المهمة...",
       "addButton": "إضافة مهمة",
-      "cancel": "إلغاء"
+      "adding": "جارِ الإضافة...",
+      "cancel": "إلغاء",
+      "cancelButton": "إلغاء",
+      "failedToAdd": "فشل إضافة المهمة. يرجى المحاولة مجدداً."
     }
   },
   "performance": {
@@ -398,7 +447,12 @@
       "predictedRange": "النطاق المتوقع",
       "similarCourses": "أكثر المقررات السابقة تشابهاً",
       "noSimilarCourses": "لم يتم العثور على مقررات مكتملة مماثلة بعد. أضف المزيد من المقررات المكتملة لتحسين مطابقة الذكاء الاصطناعي.",
-      "recommendation": "توصية مخصصة"
+      "recommendation": "توصية مخصصة",
+      "confidenceDescription": "يستند هذا التنبؤ إلى تحليل بدقة <bold>{{confidence}}</bold> لأنماط أدائك التاريخية.",
+      "sourceAI": "المصدر: نموذج ذكاء اصطناعي",
+      "sourceFallback": "المصدر: تحليل قائم على القواعد",
+      "similar": "{{pct}}% تشابه",
+      "close": "إغلاق"
     },
     "viewAIInsights": "عرض تحليلات الذكاء الاصطناعي",
     "aiInsightsTitle": "تحليلات الذكاء الاصطناعي",
@@ -428,7 +482,7 @@
       "noCompletedCourses": "لا توجد مقررات مكتملة بعد. سيظهر منحنى المعدل هنا بعد إكمال المقررات.",
       "predictedGPA": "المعدل المتوقع",
       "basedOnCurrentSemester": "بناءً على أداء الفصل الحالي",
-      "totalSemesters": "إجمالي الفصول: {{count}}",
+      "totalSemesters": "إجمالي الفصول",
       "predictedLabel": "متوقع",
       "predictedNote": "تقدير بناءً على أداء المقررات النشطة الحالية"
     },
@@ -572,6 +626,8 @@
       "ocrReady": "تم اكتشاف PDF ممسوح ضوئياً. صور OCR جاهزة.",
       "selectedFile": "محدد: {{fileName}} ({{chars}} حرف · ~{{minutes}} دقيقة قراءة)",
       "imagesSelected": "صور محددة",
+      "uploadHandwrittenLabel": "تحميل ملاحظات مكتوبة بخط اليد",
+      "uploadHandwrittenHint": "الصيغ المدعومة: .jpg‏، .jpeg‏، .png‏، .webp — حتى 10 صور، بحد أقصى 10 ميغابايت لكل صورة.",
       "generate": "توليد الملخص",
       "generating": "جارٍ التوليد...",
       "pasteTextPlaceholder": "الصق ملاحظاتك أو نصك هنا...",

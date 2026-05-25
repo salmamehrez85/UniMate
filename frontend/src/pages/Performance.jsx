@@ -123,7 +123,7 @@ function ActiveCourseCard({
           {/* Predicted Range */}
           <div>
             <p className="text-xs text-gray-600 font-medium mb-1">
-              Predicted Final Grade
+              {t("performance.predictedFinalGrade")}
             </p>
             <p className="text-2xl font-bold text-teal-600">
               {prediction.predictedRange.min}% - {prediction.predictedRange.max}
@@ -228,12 +228,24 @@ function AIInsightsModal({
               </h3>
             </div>
             <p className="text-blue-800">
-              This prediction is based on{" "}
-              <span className="font-bold text-lg">{prediction.confidence}</span>{" "}
-              confidence analysis of your historical performance patterns.
+              {t("performance.aiInsights.confidenceDescription", {
+                confidence: prediction.confidence,
+              })
+                .split(/<bold>|<\/bold>/)
+                .map((part, i) =>
+                  i === 1 ? (
+                    <span key={i} className="font-bold text-lg">
+                      {part}
+                    </span>
+                  ) : (
+                    part
+                  ),
+                )}
             </p>
             <p className="text-xs text-blue-700 mt-2">
-              Source: {prediction.usedAI ? "AI model" : "Rule-based fallback"}
+              {prediction.usedAI
+                ? t("performance.aiInsights.sourceAI")
+                : t("performance.aiInsights.sourceFallback")}
             </p>
           </div>
 
@@ -288,7 +300,9 @@ function AIInsightsModal({
                         {idx + 1}. {course.name}
                       </h4>
                       <span className="bg-teal-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                        {course.similarity}% Similar
+                        {t("performance.aiInsights.similar", {
+                          pct: course.similarity,
+                        })}
                       </span>
                     </div>
                     <p className="text-sm text-gray-700">{course.reason}</p>
@@ -304,7 +318,7 @@ function AIInsightsModal({
               <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
               <div>
                 <h3 className="font-semibold text-amber-900 mb-1">
-                  Personalized Recommendation
+                  {t("performance.aiInsights.recommendation")}
                 </h3>
                 <p className="text-sm text-amber-800 whitespace-pre-line">
                   {prediction.recommendation}
@@ -317,7 +331,7 @@ function AIInsightsModal({
           <button
             onClick={onClose}
             className="w-full px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg font-semibold transition">
-            Close
+            {t("performance.aiInsights.close")}
           </button>
         </div>
       </div>

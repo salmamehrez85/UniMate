@@ -89,7 +89,7 @@ export function SettingsTab({
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t("courseDetails.settingsTab.codeLabel")} *
+                  {t("courseDetails.settingsTab.codeLabel")}
                 </label>
                 <input
                   type="text"
@@ -103,7 +103,7 @@ export function SettingsTab({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t("courseDetails.settingsTab.nameLabel")} *
+                  {t("courseDetails.settingsTab.nameLabel")}
                 </label>
                 <input
                   type="text"

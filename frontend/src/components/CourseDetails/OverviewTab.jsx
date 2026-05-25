@@ -219,8 +219,8 @@ export function OverviewTab({ course }) {
                     </p>
                     <p className="mt-2 text-xs text-teal-700 font-medium">
                       {isExpanded
-                        ? "Click to collapse"
-                        : "Click to read full summary"}
+                        ? t("courseDetails.overview.clickToCollapse")
+                        : t("courseDetails.overview.clickToRead")}
                     </p>
                   </div>
                 );

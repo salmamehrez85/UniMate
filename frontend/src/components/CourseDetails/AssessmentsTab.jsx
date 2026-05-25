@@ -125,7 +125,7 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("courseDetails.assessments.titleLabel")} *
+              {t("courseDetails.assessments.titleLabel")}
             </label>
             <input
               type="text"
@@ -139,7 +139,7 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("courseDetails.assessments.typeLabel")} *
+              {t("courseDetails.assessments.typeLabel")}
             </label>
             <select
               name="type"
@@ -157,7 +157,7 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("courseDetails.assessments.scoreLabel")} *
+                {t("courseDetails.assessments.scoreLabel")}
               </label>
               <input
                 type="number"
@@ -171,7 +171,7 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("courseDetails.assessments.maxScoreLabel")} *
+                {t("courseDetails.assessments.maxScoreLabel")}
               </label>
               <input
                 type="number"
@@ -187,7 +187,7 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("courseDetails.assessments.dateLabel")} *
+              {t("courseDetails.assessments.dateLabel")}
             </label>
             <input
               type="date"

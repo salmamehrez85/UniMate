@@ -170,29 +170,48 @@ export function Courses({ onSelectCourse }) {
         </div>
       ) : (
         <div className="space-y-8">
-          {semesterGroups.map(([semester, semesterCourses]) => (
-            <section key={semester} className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-800">
-                  {semester}
-                </h2>
-                <span className="text-sm text-gray-500">
-                  {semesterCourses.length} course
-                  {semesterCourses.length === 1 ? "" : "s"}
-                </span>
-              </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {semesterCourses.map((course) => (
-                  <CourseCard
-                    key={course._id}
-                    course={course}
-                    onManage={() => onSelectCourse(course)}
-                    onEmail={handleOpenEmailModal}
-                  />
-                ))}
-              </div>
-            </section>
-          ))}
+          {semesterGroups.map(([semester, semesterCourses]) => {
+            const semesterMatch = String(semester).match(
+              /(Winter|Spring|Summer|Fall)\s+(\d{4})/i,
+            );
+            const seasonKeyMap = {
+              winter: "courses.seasons.winter",
+              spring: "courses.seasons.spring",
+              summer: "courses.seasons.summer",
+              fall: "courses.seasons.autumn",
+            };
+            const translatedSemester = semesterMatch
+              ? t("courses.seasons.semester", {
+                  season: t(
+                    seasonKeyMap[semesterMatch[1].toLowerCase()] ||
+                      semesterMatch[1],
+                  ),
+                  year: semesterMatch[2],
+                })
+              : semester;
+            return (
+              <section key={semester} className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-gray-800">
+                    {translatedSemester}
+                  </h2>
+                  <span className="text-sm text-gray-500">
+                    {t("courses.groupCount", { count: semesterCourses.length })}
+                  </span>
+                </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {semesterCourses.map((course) => (
+                    <CourseCard
+                      key={course._id}
+                      course={course}
+                      onManage={() => onSelectCourse(course)}
+                      onEmail={handleOpenEmailModal}
+                    />
+                  ))}
+                </div>
+              </section>
+            );
+          })}
         </div>
       )}
 

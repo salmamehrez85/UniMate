@@ -17,6 +17,7 @@ import { getCourses } from "../services/courseService";
 import { getUserData } from "../services/authService";
 import {
   EMAIL_PURPOSES,
+  EMAIL_PURPOSE_KEYS,
   buildEmailDraft,
 } from "../components/Courses/GenerateEmailModal";
 import { useTranslation } from "react-i18next";
@@ -110,13 +111,12 @@ function Composer({
   };
 
   return (
-    <div className="mt-20 space-y-6">
+    <div className="mt-20 max-w-2xl mx-auto space-y-6">
       {/* Back button */}
       <button
         type="button"
         onClick={onCancel}
         className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition">
-        <ArrowLeft className="w-4 h-4" />
         <ArrowLeft className="w-4 h-4" />
         {t("emailProfessor.backToDashboard")}
       </button>
@@ -217,7 +217,7 @@ function Composer({
                           ? "border-teal-500 bg-teal-50 text-teal-700"
                           : "border-gray-200 bg-white text-gray-800 hover:bg-gray-50"
                       }`}>
-                      {item}
+                      {t(EMAIL_PURPOSE_KEYS[item])}
                     </button>
                   );
                 })}
@@ -277,7 +277,7 @@ function EmailDetail({ entry, onBack, onStatusChange, onDelete }) {
   };
 
   return (
-    <div className="mt-20 space-y-6">
+    <div className="mt-20 max-w-2xl mx-auto space-y-6">
       <button
         type="button"
         onClick={onBack}
@@ -491,7 +491,7 @@ export function EmailProfessor() {
 
   // ── Dashboard ──────────────────────────────────────────────────────────────
   return (
-    <div className="mt-20 space-y-6">
+    <div className="mt-20 max-w-2xl mx-auto space-y-6">
       {/* Action bar */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-500">

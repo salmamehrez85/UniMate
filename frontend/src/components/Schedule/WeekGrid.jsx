@@ -143,7 +143,7 @@ export function WeekGrid({ schedule }) {
                 {t(`schedule.days.${day.toLowerCase()}`)}
               </h2>
               {isToday && (
-                <span className="text-xs font-semibold bg-teal-500 text-white px-2 py-0.5 rounded-full">
+                <span className="text-xs font-semibold bg-teal-500 text-white px-2 py-0.5 rounded-full ms-2">
                   {t("schedule.today")}
                 </span>
               )}

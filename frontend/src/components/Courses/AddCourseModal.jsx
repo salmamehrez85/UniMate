@@ -50,6 +50,27 @@ const generateSemesterOptions = () => {
 
 export function AddCourseModal({ isOpen, onClose, onAdd }) {
   const { t } = useTranslation();
+
+  const seasonKeyMap = {
+    Winter: "courses.seasons.winter",
+    Spring: "courses.seasons.spring",
+    Summer: "courses.seasons.summer",
+    Fall: "courses.seasons.autumn",
+  };
+
+  const translateSemester = (semesterStr) => {
+    const match = String(semesterStr).match(
+      /(Winter|Spring|Summer|Fall)\s+(\d{4})/i,
+    );
+    if (!match) return semesterStr;
+    const season = match[1];
+    const year = match[2];
+    return t("courses.seasons.semester", {
+      season: t(seasonKeyMap[season] || season),
+      year,
+    });
+  };
+
   const semesterOptions = generateSemesterOptions();
   const currentSemester = getCurrentSemester();
 
@@ -269,13 +290,13 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
               </option>
               {semesterOptions.map((option) => (
                 <option key={option.value} value={option.value}>
-                  {option.label}
+                  {translateSemester(option.value)}
                 </option>
               ))}
             </select>
             <p className="text-xs text-gray-500 mt-1">
               {t("courses.addModal.semesterDefault", {
-                semester: currentSemester,
+                semester: translateSemester(currentSemester),
               })}
             </p>
           </div>

@@ -11,6 +11,15 @@ export const EMAIL_PURPOSES = [
   "Other",
 ];
 
+export const EMAIL_PURPOSE_KEYS = {
+  "Request Deadline Extension": "courses.emailPurposes.deadlineExtension",
+  "Ask Question / Clarification": "courses.emailPurposes.askQuestion",
+  "Notify Absence": "courses.emailPurposes.notifyAbsence",
+  "Request Office Hours Meeting": "courses.emailPurposes.officeHours",
+  "Follow-up on Previous Discussion": "courses.emailPurposes.followUp",
+  Other: "courses.emailPurposes.other",
+};
+
 const getCourseLabel = (course) => {
   const code = course?.code || "N/A";
   const name = course?.name || course?.title || "Untitled Course";
@@ -291,7 +300,7 @@ export function GenerateEmailModal({
                             ? "border-teal-500 bg-teal-50 text-teal-700"
                             : "border-gray-200 bg-white text-gray-800 hover:bg-gray-50"
                         }`}>
-                        {item}
+                        {t(EMAIL_PURPOSE_KEYS[item])}
                       </button>
                     );
                   })}
