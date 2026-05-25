@@ -11,12 +11,16 @@ function Toggle({ enabled, onChange, onLabel, offLabel }) {
       }`}>
       <span
         className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
-          enabled ? "translate-x-9" : "translate-x-1"
+          enabled
+            ? "ltr:translate-x-9 rtl:translate-x-1"
+            : "ltr:translate-x-1 rtl:translate-x-9"
         }`}
       />
       <span
         className={`absolute text-[10px] font-bold tracking-wide transition-all ${
-          enabled ? "left-2 text-white" : "right-2 text-gray-400"
+          enabled
+            ? "ltr:left-2 rtl:right-2 text-white"
+            : "ltr:right-2 rtl:left-2 text-gray-400"
         }`}>
         {enabled ? onLabel : offLabel}
       </span>
