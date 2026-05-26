@@ -38,6 +38,12 @@ const userSchema = new mongoose.Schema(
       data: { type: mongoose.Schema.Types.Mixed, default: null },
       cachedAt: { type: Date, default: null },
     },
+    notificationPrefs: {
+      assignments: { type: Boolean, default: true },
+      quizzes: { type: Boolean, default: true },
+      performance: { type: Boolean, default: false },
+      emailDeadlines: { type: Boolean, default: false },
+    },
     resetPasswordToken: {
       type: String,
       select: false,

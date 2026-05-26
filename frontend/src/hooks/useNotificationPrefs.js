@@ -1,4 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import {
+  getNotificationPrefsFromServer,
+  updateNotificationPrefs,
+} from "../services/notificationService";
 
 const STORAGE_KEY = "notificationPrefs";
 
@@ -6,9 +10,10 @@ const DEFAULTS = {
   assignments: true,
   quizzes: true,
   performance: false,
+  emailDeadlines: false,
 };
 
-function load() {
+function loadLocal() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? { ...DEFAULTS, ...JSON.parse(raw) } : { ...DEFAULTS };
@@ -18,19 +23,34 @@ function load() {
 }
 
 export function useNotificationPrefs() {
-  const [prefs, setPrefs] = useState(load);
+  const [prefs, setPrefs] = useState(loadLocal);
 
-  const toggle = (id) => {
-    setPrefs((prev) => {
-      const next = { ...prev, [id]: !prev[id] };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      return next;
-    });
+  // Hydrate from server on mount
+  useEffect(() => {
+    getNotificationPrefsFromServer()
+      .then((serverPrefs) => {
+        const merged = { ...DEFAULTS, ...serverPrefs };
+        setPrefs(merged);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+      })
+      .catch(() => {}); // silently fall back to localStorage
+  }, []);
+
+  const toggle = async (id) => {
+    const next = { ...prefs, [id]: !prefs[id] };
+    setPrefs(next);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    try {
+      await updateNotificationPrefs({ [id]: next[id] });
+    } catch {
+      // Server update failed — local state is still updated
+    }
   };
 
   return { prefs, toggle };
 }
 
+// Synchronous read for places that can't use hooks (e.g., legacy code)
 export function getNotificationPrefs() {
-  return load();
+  return loadLocal();
 }

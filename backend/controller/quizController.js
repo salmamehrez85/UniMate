@@ -1,8 +1,10 @@
 const { evaluateQuizSubmission } = require("../services/quizEvaluationService");
 const { generatePracticeQuiz } = require("../services/quizGenerationService");
 const { getAvailableQuizzes } = require("../services/recommendationService");
+const { createNotification } = require("../services/notificationService");
 const QuizResult = require("../model/QuizResult");
 const Quiz = require("../model/Quiz");
+const Course = require("../model/Course");
 
 const parseSourceContext = (value) => {
   if (!value) {
@@ -60,6 +62,22 @@ exports.generateQuiz = async (req, res) => {
       useMock,
       language,
     });
+
+    // Fire-and-forget notification — don't block the response
+    Course.findById(courseId)
+      .lean()
+      .then((course) => {
+        if (!course) return;
+        const prefs = {}; // prefs checked server-side in createNotification
+        return createNotification({
+          userId,
+          type: "quiz",
+          title: `New quiz ready: ${course.name || course.code}`,
+          message: `A new ${difficulty || "mixed"} difficulty quiz with ${result.quiz.questions?.length || numberOfQuestions || "multiple"} questions has been generated for ${course.name || course.code}. Start practicing now!`,
+          metadata: { courseId, quizId: result.quiz._id },
+        });
+      })
+      .catch(() => {});
 
     return res.status(201).json({
       success: true,

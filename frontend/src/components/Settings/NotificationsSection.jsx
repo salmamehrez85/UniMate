@@ -48,6 +48,11 @@ export function NotificationsSection() {
       label: t("settings.notifications.performance"),
       description: t("settings.notifications.performanceDesc"),
     },
+    {
+      id: "emailDeadlines",
+      label: "Email deadline reminders",
+      description: "Receive an email when a task is due within 24 hours",
+    },
   ];
 
   return (

@@ -19,11 +19,13 @@ const courseRoutes = require("./routes/courseRoutes");
 const quizRoutes = require("./routes/quizRoutes");
 const summarizeRoutes = require("./routes/summarizeRoutes");
 const chatRoutes = require("./routes/chatRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 app.use("/api/auth", authRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/quizzes", quizRoutes);
 app.use("/api/summarize", summarizeRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // Health check endpoint
 app.get("/health", (req, res) => {
@@ -37,9 +39,11 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
+const { startScheduler } = require("./scheduler");
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  startScheduler();
 });
 
 module.exports = app;

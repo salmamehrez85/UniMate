@@ -6,6 +6,7 @@ const {
   generateActionableRecommendations,
   generateStructuredSummary,
 } = require("../services/aiPredictor");
+const { createNotification } = require("../services/notificationService");
 
 const UploadSummarySchema = {
   type: "object",
@@ -719,6 +720,30 @@ exports.refreshPredictedGPA = async (req, res) => {
       "gpaCache.data": result,
       "gpaCache.cachedAt": now,
     });
+
+    // Notify user if any active course is predicted as At Risk
+    const atRiskCourses = (result.activeCoursePredictions || []).filter(
+      (p) => p.status === "At Risk",
+    );
+    const user = await User.findById(req.user._id).select(
+      "email notificationPrefs",
+    );
+    if (atRiskCourses.length > 0 && user) {
+      for (const course of atRiskCourses) {
+        const prefs = user.notificationPrefs || {};
+        if (prefs.performance === false) continue;
+        createNotification({
+          userId: req.user._id,
+          type: "performance",
+          title: `At Risk: ${course.name || course.code}`,
+          message: `Your predicted grade for ${course.name || course.code} is at risk (predicted ${course.predictedMin ?? "?"}–${course.predictedMax ?? "?"}%). Consider reviewing this course soon.`,
+          metadata: { courseId: course.courseId },
+          userEmail: user.email,
+          sendEmail: false,
+        }).catch(() => {});
+      }
+    }
+
     return res.status(200).json({ ...result, cachedAt: now, fromCache: false });
   } catch (error) {
     console.error("Refresh predicted GPA error:", error);
