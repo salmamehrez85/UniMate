@@ -91,8 +91,7 @@ export function GenerateQuizForm({
             disabled={isGenerating}>
             <option value="all">{t("quizzes.generateForm.allTypes")}</option>
             <option value="mcq">MCQ</option>
-            <option value="choose">Choose</option>
-            <option value="complete">Complete</option>
+            <option value="complete">Written</option>
             <option value="truefalse">True/False</option>
           </select>
         </div>

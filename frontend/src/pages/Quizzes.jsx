@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AvailableQuizzes } from "../components/Quizzes/AvailableQuizzes";
 import { GenerateQuizForm } from "../components/Quizzes/GenerateQuizForm";
+import { QuizReviewModal } from "../components/Quizzes/QuizReviewModal";
 import { QuizSessionModal } from "../components/Quizzes/QuizSessionModal";
 import { RecentResults } from "../components/Quizzes/RecentResults";
 import { getCourses } from "../services/courseService";
@@ -50,6 +51,7 @@ export function Quizzes() {
   const [targetTopics, setTargetTopics] = useState([]);
   const [recentResults, setRecentResults] = useState(loadStoredRecentResults);
   const [activeQuiz, setActiveQuiz] = useState(null);
+  const [reviewData, setReviewData] = useState(null); // { quiz, quizResult, weakAreas }
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [loadingQuizzes, setLoadingQuizzes] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -161,6 +163,13 @@ export function Quizzes() {
       setRecentResults((currentResults) =>
         [recentResult, ...currentResults].slice(0, 10),
       );
+
+      // Show answer review before closing
+      setReviewData({
+        quiz: completedQuiz,
+        quizResult: response.quizResult,
+        weakAreas: response.weakAreas || [],
+      });
       setActiveQuiz(null);
 
       const refreshedQuizzes = await getAvailableQuizzes(selectedCourseId);
@@ -204,6 +213,12 @@ export function Quizzes() {
           setSubmitError("");
         }}
         onSubmit={handleSubmitQuiz}
+      />
+      <QuizReviewModal
+        quiz={reviewData?.quiz}
+        quizResult={reviewData?.quizResult}
+        weakAreas={reviewData?.weakAreas}
+        onClose={() => setReviewData(null)}
       />
     </div>
   );

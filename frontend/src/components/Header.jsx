@@ -22,6 +22,7 @@ const TYPE_STYLES = {
 export function Header({ activeView, onLogout }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [expandedId, setExpandedId] = useState(null);
   const panelRef = useRef(null);
 
   const {
@@ -50,6 +51,7 @@ export function Header({ activeView, onLogout }) {
 
   const handleOpen = (n) => {
     if (!n.read) markRead(n._id);
+    setExpandedId((prev) => (prev === n._id ? null : n._id));
   };
 
   const getTitle = () => {
@@ -126,6 +128,7 @@ export function Header({ activeView, onLogout }) {
                         const style =
                           TYPE_STYLES[n.type] || TYPE_STYLES.deadline;
                         const Icon = style.icon;
+                        const isExpanded = expandedId === n._id;
                         return (
                           <div
                             key={n._id}
@@ -141,9 +144,17 @@ export function Header({ activeView, onLogout }) {
                                 className={`text-sm leading-snug ${n.read ? "font-normal text-gray-600" : "font-medium text-gray-800"}`}>
                                 {n.title}
                               </p>
-                              <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                              <p
+                                className={`text-xs text-gray-500 mt-0.5 ${isExpanded ? "" : "line-clamp-2"}`}>
                                 {n.message}
                               </p>
+                              {!isExpanded &&
+                                n.message &&
+                                n.message.length > 100 && (
+                                  <p className="text-[10px] text-primary-500 mt-0.5 font-medium">
+                                    Tap to read more
+                                  </p>
+                                )}
                               <p className="text-[10px] text-gray-400 mt-1">
                                 {new Date(n.createdAt).toLocaleDateString()}
                               </p>
