@@ -29,6 +29,10 @@ export function AIChat() {
   // Track whether the last message was sent via voice so we auto-speak the reply
   const sentViaVoiceRef = useRef(false);
 
+  // Derive speech recognition language from current app language
+  const currentLang = getLanguagePrefs().language || "en";
+  const speechLang = currentLang === "ar" ? "ar-SA" : "en-US";
+
   // Phase 2 — Speech-to-Text
   // inputAtRecordStart captures whatever the user had typed before hitting the mic,
   // so voice transcript is appended rather than replacing existing text.
@@ -39,6 +43,7 @@ export function AIChat() {
     toggle: voiceToggle,
   } = useSpeechRecognition({
     onTranscript: (text) => setInput(text),
+    lang: speechLang,
   });
 
   const handleToggleRecording = () => {
@@ -157,7 +162,7 @@ export function AIChat() {
 
       // Auto-speak the reply only when the user sent via voice
       if (sentViaVoiceRef.current) {
-        ttsSpeak(reply);
+        ttsSpeak(reply, currentLang);
         sentViaVoiceRef.current = false;
       }
 

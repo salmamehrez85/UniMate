@@ -20,7 +20,7 @@ import { useRef, useState, useCallback, useEffect } from "react";
 const BAR_COUNT = 12;
 const SILENCE_HEIGHTS = Array(BAR_COUNT).fill(0.05);
 
-export function useSpeechRecognition({ onTranscript } = {}) {
+export function useSpeechRecognition({ onTranscript, lang = "en-US" } = {}) {
   const [isRecording, setIsRecording] = useState(false);
   const [barHeights, setBarHeights] = useState(SILENCE_HEIGHTS);
 
@@ -97,7 +97,7 @@ export function useSpeechRecognition({ onTranscript } = {}) {
       const rec = new SR();
       rec.continuous = true;
       rec.interimResults = true;
-      rec.lang = "en-US";
+      rec.lang = lang;
       recognitionRef.current = rec;
 
       // Accumulate confirmed finals across multiple result events

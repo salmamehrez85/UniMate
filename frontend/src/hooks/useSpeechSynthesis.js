@@ -61,7 +61,7 @@ export function useSpeechSynthesis() {
   }, []);
 
   const speak = useCallback(
-    (text) => {
+    (text, lang = "en") => {
       if (!window.speechSynthesis) return;
 
       // Cancel any ongoing speech first
@@ -73,19 +73,28 @@ export function useSpeechSynthesis() {
       const utterance = new SpeechSynthesisUtterance(clean);
       utteranceRef.current = utterance;
 
-      // Voice selection — prefer a natural English voice when available
-      const voices = window.speechSynthesis.getVoices();
-      const preferred = voices.find(
-        (v) =>
-          v.lang.startsWith("en") &&
-          (v.name.toLowerCase().includes("google") ||
-            v.name.toLowerCase().includes("natural") ||
-            v.name.toLowerCase().includes("enhanced") ||
-            v.name.toLowerCase().includes("premium")),
-      );
-      if (preferred) utterance.voice = preferred;
+      // Pick the best available voice for the requested language
+      const pickVoice = (voices, targetLang) => {
+        const isArabic = targetLang === "ar";
+        // Prefer high-quality voices first, then any matching lang
+        return (
+          voices.find(
+            (v) =>
+              v.lang.startsWith(isArabic ? "ar" : "en") &&
+              (v.name.toLowerCase().includes("google") ||
+                v.name.toLowerCase().includes("natural") ||
+                v.name.toLowerCase().includes("enhanced") ||
+                v.name.toLowerCase().includes("premium")),
+          ) || voices.find((v) => v.lang.startsWith(isArabic ? "ar" : "en"))
+        );
+      };
 
-      utterance.rate = 1.0;
+      const voices = window.speechSynthesis.getVoices();
+      const preferred = pickVoice(voices, lang);
+      if (preferred) utterance.voice = preferred;
+      utterance.lang = lang === "ar" ? "ar-SA" : "en-US";
+
+      utterance.rate = lang === "ar" ? 0.9 : 1.0; // slightly slower for Arabic
       utterance.pitch = 1.0;
       utterance.volume = 1.0;
 
@@ -100,18 +109,9 @@ export function useSpeechSynthesis() {
       };
 
       // Chrome bug: voices may not be loaded yet on first call.
-      // Using a small timeout ensures getVoices() has resolved.
       setTimeout(() => {
-        // Re-pick voice after the timeout to be safe
         const v2 = window.speechSynthesis.getVoices();
-        const best = v2.find(
-          (v) =>
-            v.lang.startsWith("en") &&
-            (v.name.toLowerCase().includes("google") ||
-              v.name.toLowerCase().includes("natural") ||
-              v.name.toLowerCase().includes("enhanced") ||
-              v.name.toLowerCase().includes("premium")),
-        );
+        const best = pickVoice(v2, lang);
         if (best) utterance.voice = best;
         window.speechSynthesis.speak(utterance);
       }, 50);
