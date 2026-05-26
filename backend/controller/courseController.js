@@ -346,6 +346,15 @@ exports.saveSummaryToCourse = async (req, res) => {
     course.savedSummaries.push({ mode: mode || "quick", text: text.trim() });
     await course.save();
 
+    // Fire-and-forget summary saved notification
+    createNotification({
+      userId: req.user._id,
+      type: "summary",
+      title: `Summary saved — ${course.name || course.code}`,
+      message: `Your ${mode || "quick"} summary for ${course.name || course.code} has been saved successfully. You can find it in the Summarizer page.`,
+      metadata: { courseId: course._id, mode: mode || "quick" },
+    }).catch(() => {});
+
     return res.status(200).json({
       success: true,
       message: "Summary saved to course",

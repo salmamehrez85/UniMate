@@ -154,6 +154,56 @@ exports.submitQuiz = async (req, res) => {
       completedAt: req.body.completedAt,
     });
 
+    // Fire-and-forget notifications after quiz submission
+    Promise.resolve().then(async () => {
+      try {
+        const qr = result.quizResult;
+        const score = qr?.score ?? 0;
+        const total = qr?.totalQuestions ?? 0;
+        const pct = total > 0 ? Math.round((score / total) * 100) : 0;
+
+        // Fetch course name for richer messages
+        const quiz = await Quiz.findById(quizId).select("courseId").lean();
+        const course = quiz
+          ? await Course.findById(quiz.courseId).select("name code").lean()
+          : null;
+        const courseName = course ? course.name || course.code : "your course";
+
+        // 1. Quiz result notification
+        const resultEmoji =
+          pct >= 80
+            ? "Great work!"
+            : pct >= 60
+              ? "Good effort."
+              : "Keep practicing.";
+        await createNotification({
+          userId,
+          type: "quiz",
+          title: `Quiz result: ${pct}% — ${courseName}`,
+          message: `You scored ${score}/${total} (${pct}%) on your ${courseName} quiz. ${resultEmoji}`,
+          metadata: { quizId, courseId: quiz?.courseId, score, total, pct },
+        });
+
+        // 2. Weak areas notification (only if score < 70% and weak areas exist)
+        const weakAreas = result.weakAreas || [];
+        if (pct < 70 && weakAreas.length > 0) {
+          const topWeak = weakAreas.slice(0, 3).join(", ");
+          await createNotification({
+            userId,
+            type: "performance",
+            title: `Weak areas detected — ${courseName}`,
+            message: `You struggled with: ${topWeak}. Consider reviewing these topics before your next quiz.`,
+            metadata: { quizId, courseId: quiz?.courseId, weakAreas },
+          });
+        }
+      } catch (err) {
+        console.error(
+          "[Notifications] submitQuiz post-processing failed:",
+          err.message,
+        );
+      }
+    });
+
     return res.status(201).json({
       success: true,
       message: "Quiz submitted successfully",
