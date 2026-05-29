@@ -1,5 +1,8 @@
 import { BookOpen, Clock, LoaderCircle, Play, Sparkles } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+
+const MAX_VISIBLE_TOPICS = 8;
 
 const formatCourseLabel = (course) => `${course.code} - ${course.name}`;
 
@@ -14,6 +17,7 @@ export function AvailableQuizzes({
   onStartQuiz,
 }) {
   const { t } = useTranslation();
+  const [showAllTopics, setShowAllTopics] = useState(false);
   const selectedCourse = courses.find(
     (course) => course._id === selectedCourseId,
   );
@@ -60,13 +64,26 @@ export function AvailableQuizzes({
             {selectedCourse ? selectedCourse.code : "this course"}
           </p>
           <div className="flex flex-wrap gap-2 mt-2">
-            {targetTopics.map((topic) => (
+            {(showAllTopics
+              ? targetTopics
+              : targetTopics.slice(0, MAX_VISIBLE_TOPICS)
+            ).map((topic) => (
               <span
                 key={topic.tag}
                 className="text-xs text-amber-800 bg-white border border-amber-200 px-2 py-1 rounded-md">
                 {topic.tag.replace(/_/g, " ")}
               </span>
             ))}
+            {targetTopics.length > MAX_VISIBLE_TOPICS && (
+              <button
+                type="button"
+                onClick={() => setShowAllTopics((v) => !v)}
+                className="text-xs text-amber-700 underline underline-offset-2 px-1">
+                {showAllTopics
+                  ? "Show less"
+                  : `+${targetTopics.length - MAX_VISIBLE_TOPICS} more`}
+              </button>
+            )}
           </div>
         </div>
       )}

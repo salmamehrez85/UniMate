@@ -210,6 +210,21 @@
       "officeHours": "Request Office Hours Meeting",
       "followUp": "Follow-up on Previous Discussion",
       "other": "Other"
+    },
+    "emailModal": {
+      "title": "Generate Email to Professor",
+      "courseLabel": "Course",
+      "purposeLabel": "Purpose",
+      "contextLabel": "Additional Context (Optional)",
+      "contextPlaceholder": "Add any extra details, specific dates, or context that might help...",
+      "generateButton": "Generate Email Draft",
+      "disclaimer": "AI-generated draft — review and personalise before sending.",
+      "aiDraftNote": "AI-generated draft — review before sending.",
+      "draftLabel": "Email Draft",
+      "backButton": "Back",
+      "copyButton": "Copy",
+      "copied": "Copied!",
+      "openEmailApp": "Open in Email App"
     }
   },
   "courseDetails": {
@@ -357,7 +372,8 @@
       "deleteCourse": "Delete Course",
       "deleteConfirmTitle": "Delete Course?",
       "deleteConfirmMessage": "This will permanently delete this course along with all its tasks, assessments, and project phases. This action cannot be undone.",
-      "confirmDelete": "Yes, Delete Course"
+      "confirmDelete": "Yes, Delete Course",
+      "notSpecified": "Not specified"
     }
   },
   "tasks": {
@@ -531,7 +547,8 @@
       "courseLabel": "Select Course",
       "questionTypeLabel": "Question Type",
       "numberOfQuestionsLabel": "Number of Questions",
-      "difficultyLabel": "Difficulty"
+      "difficultyLabel": "Difficulty",
+      "noOutlineWarning": "This course has no outline or syllabus. Add course content in the course Settings tab to enable quiz generation."
     },
     "available": {
       "title": "Available Quizzes",

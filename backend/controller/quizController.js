@@ -158,9 +158,9 @@ exports.submitQuiz = async (req, res) => {
     Promise.resolve().then(async () => {
       try {
         const qr = result.quizResult;
-        const score = qr?.score ?? 0;
+        const pct = Math.round(qr?.score ?? 0);
+        const correct = qr?.correctAnswers ?? 0;
         const total = qr?.totalQuestions ?? 0;
-        const pct = total > 0 ? Math.round((score / total) * 100) : 0;
 
         // Fetch course name for richer messages
         const quiz = await Quiz.findById(quizId).select("courseId").lean();
@@ -180,8 +180,8 @@ exports.submitQuiz = async (req, res) => {
           userId,
           type: "quiz",
           title: `Quiz result: ${pct}% — ${courseName}`,
-          message: `You scored ${score}/${total} (${pct}%) on your ${courseName} quiz. ${resultEmoji}`,
-          metadata: { quizId, courseId: quiz?.courseId, score, total, pct },
+          message: `You scored ${correct}/${total} (${pct}%) on your ${courseName} quiz. ${resultEmoji}`,
+          metadata: { quizId, courseId: quiz?.courseId, score: pct, total, pct },
         });
 
         // 2. Weak areas notification (only if score < 70% and weak areas exist)

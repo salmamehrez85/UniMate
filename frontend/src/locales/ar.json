@@ -219,6 +219,21 @@
       "addingButton": "جارِ الإضافة...",
       "failedToAdd": "فشل إضافة المقرر. يرجى المحاولة مجدداً."
     },
+    "emailModal": {
+      "title": "إنشاء بريد إلكتروني للأستاذ",
+      "courseLabel": "المقرر",
+      "purposeLabel": "الغرض",
+      "contextLabel": "سياق إضافي (اختياري)",
+      "contextPlaceholder": "أضف أي تفاصيل أو تواريخ محددة أو سياق قد يساعد...",
+      "generateButton": "إنشاء مسودة البريد",
+      "disclaimer": "مسودة من الذكاء الاصطناعي — راجعها وخصّصها قبل الإرسال.",
+      "aiDraftNote": "مسودة من الذكاء الاصطناعي — راجعها قبل الإرسال.",
+      "draftLabel": "مسودة البريد الإلكتروني",
+      "backButton": "رجوع",
+      "copyButton": "نسخ",
+      "copied": "تم النسخ!",
+      "openEmailApp": "فتح في تطبيق البريد"
+    },
     "emailPurposes": {
       "deadlineExtension": "طلب تمديد الموعد النهائي",
       "askQuestion": "طرح سؤال أو استفسار",
@@ -373,7 +388,8 @@
       "deleteCourse": "حذف المقرر",
       "deleteConfirmTitle": "حذف المقرر؟",
       "deleteConfirmMessage": "سيؤدي هذا إلى حذف هذا المقرر نهائيًا مع جميع مهامه وتقييماته ومراحل مشروعه. لا يمكن التراجع عن هذا الإجراء.",
-      "confirmDelete": "نعم، احذف المقرر"
+      "confirmDelete": "نعم، احذف المقرر",
+      "notSpecified": "غير محدد"
     }
   },
   "tasks": {
@@ -547,7 +563,8 @@
       "courseLabel": "اختر المقرر",
       "questionTypeLabel": "نوع الأسئلة",
       "numberOfQuestionsLabel": "عدد الأسئلة",
-      "difficultyLabel": "مستوى الصعوبة"
+      "difficultyLabel": "مستوى الصعوبة",
+      "noOutlineWarning": "هذا المقرر لا يحتوي على منهج أو خطة دراسية. أضف محتوى المقرر من تبويب الإعدادات لتفعيل توليد الاختبارات."
     },
     "available": {
       "title": "الاختبارات المتاحة",

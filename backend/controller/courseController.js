@@ -287,6 +287,23 @@ exports.createCourse = async (req, res) => {
       outlineText,
     } = req.body;
 
+    // Check for duplicate course code for this user (case-insensitive)
+    const duplicate = await Course.findOne({
+      userId: req.user._id,
+      code: {
+        $regex: new RegExp(
+          `^${code.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
+          "i",
+        ),
+      },
+    });
+    if (duplicate) {
+      return res.status(409).json({
+        success: false,
+        message: `A course with code "${code.trim().toUpperCase()}" already exists in your account.`,
+      });
+    }
+
     // Add userId to course data
     const courseData = {
       userId: req.user._id,

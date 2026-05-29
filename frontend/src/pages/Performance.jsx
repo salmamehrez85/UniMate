@@ -168,12 +168,14 @@ function ActiveCourseCard({
           </div>
 
           {/* View Insights Button */}
-          <button
-            onClick={() => onViewInsights(course.id, prediction)}
-            className="w-full mt-3 px-4 py-2 bg-teal-50 hover:bg-teal-100 text-teal-700 rounded-lg font-medium transition text-sm flex items-center justify-center gap-2">
-            <Zap className="w-4 h-4" />
-            {t("performance.viewInsights")}
-          </button>
+          {course.hasOutline && (
+            <button
+              onClick={() => onViewInsights(course.id, prediction)}
+              className="w-full mt-3 px-4 py-2 bg-teal-50 hover:bg-teal-100 text-teal-700 rounded-lg font-medium transition text-sm flex items-center justify-center gap-2">
+              <Zap className="w-4 h-4" />
+              {t("performance.viewInsights")}
+            </button>
+          )}
         </div>
       )}
 
@@ -380,6 +382,9 @@ export function Performance() {
               currentGrade: currentGrade || 0,
               isPredicted: false,
               isLoading: false,
+              hasOutline: !!(
+                course.outlineText && course.outlineText.trim().length > 0
+              ),
             };
           });
 

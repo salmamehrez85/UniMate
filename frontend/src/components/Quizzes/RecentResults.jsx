@@ -1,5 +1,34 @@
 import { TrendingDown } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+
+const MAX_VISIBLE_WEAK_AREAS = 5;
+
+function WeakAreasList({ areas }) {
+  const [expanded, setExpanded] = useState(false);
+  const visible = expanded ? areas : areas.slice(0, MAX_VISIBLE_WEAK_AREAS);
+  return (
+    <div className="flex flex-wrap gap-2 mt-2">
+      {visible.map((area) => (
+        <span
+          key={area}
+          className="text-xs text-red-700 bg-white border border-red-200 px-2 py-1 rounded-md">
+          {area}
+        </span>
+      ))}
+      {areas.length > MAX_VISIBLE_WEAK_AREAS && (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="text-xs text-red-600 underline underline-offset-2 px-1">
+          {expanded
+            ? "Show less"
+            : `+${areas.length - MAX_VISIBLE_WEAK_AREAS} more`}
+        </button>
+      )}
+    </div>
+  );
+}
 
 export function RecentResults({ results }) {
   const { t } = useTranslation();
@@ -45,15 +74,7 @@ export function RecentResults({ results }) {
                     <TrendingDown className="w-4 h-4" />
                     {t("quizzes.results.weakAreas")}
                   </div>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {result.weakAreas.map((area) => (
-                      <span
-                        key={area}
-                        className="text-xs text-red-700 bg-white border border-red-200 px-2 py-1 rounded-md">
-                        {area}
-                      </span>
-                    ))}
-                  </div>
+                  <WeakAreasList areas={result.weakAreas} />
                 </div>
               )}
             </div>
