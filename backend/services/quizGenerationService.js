@@ -6,7 +6,7 @@ const Quiz = require("../model/Quiz");
 
 const GEMINI_MODEL_CANDIDATES = [
   process.env.GEMINI_MODEL,
-  "gemini-2.5-flash",
+  "gemini-3.5-flash",
 ].filter(Boolean);
 
 const QUIZ_GENERATION_SYSTEM_PROMPT = `You are UniMate's expert professor-grade quiz generator.
@@ -48,6 +48,9 @@ Non-negotiable rules:
 
 const DEFAULT_GENERATION_CONFIG = {
   timeoutMs: 30000,
+  extractionTimeoutMs: 180000, // extraction can be slow for large PDFs (2 × 2MB needs ~2-3 min)
+  lectureQuizTimeoutMs: 90000, // quiz gen on large extracted text needs more time
+  maxLectureContentChars: 18000, // ~4500 tokens — keeps prompt well within limits
   maxQuestions: 25,
   minQuestions: 1,
 };
@@ -219,6 +222,10 @@ const readLectureFilesAsInlineParts = (lectures = []) => {
   const MAX_LECTURE_FILES = 5;
   const parts = [];
 
+  console.log(
+    `[Lecture Read] Processing ${lectures.length} lecture(s), max ${MAX_LECTURE_FILES}`,
+  );
+
   for (const lecture of lectures.slice(0, MAX_LECTURE_FILES)) {
     try {
       const filePath = path.join(
@@ -226,37 +233,155 @@ const readLectureFilesAsInlineParts = (lectures = []) => {
         "../uploads/lectures",
         lecture.filename,
       );
+      console.log(
+        `[Lecture Read] Reading: ${lecture.originalName} (${lecture.mimeType}) from ${filePath}`,
+      );
+      const fileExists = fs.existsSync(filePath);
+      if (!fileExists) {
+        console.warn(`[Lecture Read] File not found: ${filePath}`);
+        continue;
+      }
       const data = fs.readFileSync(filePath).toString("base64");
+      const sizeKB = Math.round((data.length * 3) / 4 / 1024);
+      console.log(
+        `[Lecture Read] OK — base64 encoded, original size ~${sizeKB}KB`,
+      );
       parts.push({ inlineData: { mimeType: lecture.mimeType, data } });
-    } catch {
-      // file missing or unreadable — skip silently
+    } catch (err) {
+      console.warn(
+        `[Lecture Read] Failed to read "${lecture.originalName}": ${err.message}`,
+      );
     }
   }
 
+  console.log(`[Lecture Read] Total inline parts ready: ${parts.length}`);
   return parts;
 };
 
-const getCourseContext = async (courseId, sourceContext, course) => {
+// Step 1 of the two-step lecture quiz flow.
+// Calls Gemini WITHOUT responseMimeType:"application/json" so it can freely
+// read PDF/image inline data and return thorough plain-text content extraction.
+const extractLectureContent = async (inlineParts) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || inlineParts.length === 0) return null;
+
+  const extractionPrompt = `You are a thorough academic content extractor for university courses.
+
+Read ALL the attached lecture files completely and extract:
+1. Every key concept, definition, theorem, formula, algorithm, and rule — quoted exactly as written
+2. All worked examples with their full solutions and explanations
+3. Every numbered/bulleted list of principles, steps, or properties
+4. Important relationships, comparisons, and distinctions between concepts
+5. Any tables or structured data
+
+Format as plain text with clear labeled sections.
+Be exhaustive — do NOT summarize or omit details.
+A student must be able to answer an exam solely from what you extract.`;
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+  let lastError;
+
+  console.log(
+    `[Extraction] Starting — ${inlineParts.length} inline part(s), models: ${GEMINI_MODEL_CANDIDATES.join(", ")}`,
+  );
+  console.log(
+    `[Extraction] Timeout: ${DEFAULT_GENERATION_CONFIG.extractionTimeoutMs}ms`,
+  );
+
+  for (const modelId of GEMINI_MODEL_CANDIDATES) {
+    const attemptStart = Date.now();
+    console.log(`[Extraction] Trying model: ${modelId} ...`);
+    try {
+      const model = genAI.getGenerativeModel({ model: modelId });
+      const response = await withTimeout(
+        model.generateContent({
+          contents: [
+            {
+              role: "user",
+              // Lecture files first, then the extraction instruction
+              parts: [...inlineParts, { text: extractionPrompt }],
+            },
+          ],
+          generationConfig: { temperature: 0.1 },
+          // NO responseMimeType — free-form text so Gemini reads PDFs fully
+        }),
+        DEFAULT_GENERATION_CONFIG.extractionTimeoutMs,
+        "Timed out while extracting lecture content",
+      );
+      const elapsed = Date.now() - attemptStart;
+      const extracted = response.response.text();
+      console.log(
+        `[Extraction] ${modelId} responded in ${elapsed}ms — extracted ${extracted?.length ?? 0} chars`,
+      );
+      if (extracted && extracted.trim().length > 100) {
+        // Truncate to avoid exceeding token limits in the subsequent quiz call
+        const text = extracted.trim();
+        const result =
+          text.length > DEFAULT_GENERATION_CONFIG.maxLectureContentChars
+            ? text.slice(0, DEFAULT_GENERATION_CONFIG.maxLectureContentChars) +
+              "\n\n[Content truncated for length]"
+            : text;
+        console.log(
+          `[Extraction] SUCCESS — returning ${result.length} chars of lecture content`,
+        );
+        return result;
+      }
+      console.warn(
+        `[Extraction] ${modelId} returned too little content (${extracted?.length ?? 0} chars), trying next model`,
+      );
+    } catch (err) {
+      const elapsed = Date.now() - attemptStart;
+      console.error(
+        `[Extraction] ${modelId} FAILED after ${elapsed}ms — status: ${err.status ?? "N/A"}, code: ${err.code ?? "N/A"}, message: ${err.message}`,
+      );
+      lastError = err;
+    }
+  }
+
+  console.error(
+    "[Extraction] All models failed. Last error:",
+    lastError?.status,
+    lastError?.message,
+  );
+  return null;
+};
+
+const getCourseContext = async (
+  courseId,
+  sourceContext,
+  course,
+  lectureContent = null,
+) => {
   // Placeholder for future RAG retrieval: this is where Pinecone/pgvector similarity
   // search will fetch the most relevant note chunks for the selected course/materials.
   const selectedContext = sourceContext
     ? JSON.stringify(sourceContext)
     : "No specific lecture note filters were provided.";
 
-  const lectureCount = Array.isArray(course.lectures)
-    ? course.lectures.length
-    : 0;
-
-  return [
+  const parts = [
     `Course: ${course.code} - ${course.name}`,
     `Instructor: ${course.instructor || "Unknown"}`,
-    `Outline: ${course.outlineText || "No outline available."}`,
-    `Selected source context: ${selectedContext}`,
-    lectureCount > 0
-      ? `Uploaded lecture files: ${lectureCount} file(s) are attached inline — base your questions primarily on these materials.`
-      : "No lecture files uploaded for this course.",
-    "Retrieved academic snippet: Students are expected to explain concepts precisely, compare related methods, and justify why a given solution is correct or incorrect using course terminology.",
-  ].join("\n\n");
+  ];
+
+  if (lectureContent) {
+    // Extracted lecture text takes priority over the outline
+    parts.push(
+      `LECTURE CONTENT (extracted from uploaded files — use this as the PRIMARY source for ALL questions):\n${lectureContent}`,
+    );
+    if (course.outlineText) {
+      parts.push(
+        `Course outline (supplementary context):\n${course.outlineText}`,
+      );
+    }
+  } else {
+    parts.push(`Outline: ${course.outlineText || "No outline available."}`);
+    parts.push(`Selected source context: ${selectedContext}`);
+    parts.push(
+      "Retrieved academic snippet: Students are expected to explain concepts precisely, compare related methods, and justify why a given solution is correct or incorrect using course terminology.",
+    );
+  }
+
+  return parts.join("\n\n");
 };
 
 const buildQuizGenerationUserPrompt = ({
@@ -271,6 +396,15 @@ const buildQuizGenerationUserPrompt = ({
     language === "ar"
       ? "\n\nIMPORTANT: Generate ALL question prompts, answer options, and explanations in Arabic (العربية). Do NOT use English for any text fields."
       : "";
+
+  const hasLectureContent = courseContext.includes("LECTURE CONTENT");
+  const sourceInstruction = hasLectureContent
+    ? `\n\nIMPORTANT — LECTURE-BASED GENERATION:
+- Questions MUST be grounded in the LECTURE CONTENT section above.
+- Every question must reference a specific concept, example, definition, formula, or fact from those materials.
+- Do NOT ask vague or generic questions — ask about the actual content covered in the lectures.
+- Incorrect answer options must be plausible but clearly wrong based on the lecture material.`
+    : "";
 
   return `Generate a new practice quiz for this course.
 
@@ -295,7 +429,7 @@ Return JSON with:
 Remember:
 - Every question must include 1 to 3 specific subTopicTags using the exact key subTopicTags.
 - Those tags must be micro-topic labels, not broad domains.
-- Keep the output strictly JSON.${languageInstruction}`;
+- Keep the output strictly JSON.${sourceInstruction}${languageInstruction}`;
 };
 
 const buildMockQuizPayload = ({
@@ -426,7 +560,10 @@ const shouldFallbackToMock = (error) => {
     errorMessage.includes("api_key_invalid") ||
     errorMessage.includes("timed out") ||
     errorMessage.includes("failed to generate quiz with gemini") ||
-    errorMessage.includes("failed to parse quiz json")
+    errorMessage.includes("failed to parse quiz json") ||
+    errorMessage.includes("too many requests") ||
+    errorMessage.includes("quota") ||
+    error?.status === 429
   );
 };
 
@@ -624,10 +761,20 @@ const generatePracticeQuiz = async ({
     throw error;
   }
 
-  // Read any uploaded lecture/note files to pass as multimodal context
+  // Two-step lecture flow:
+  // Step 1 — extract full text from PDFs/images without JSON-mode constraint
+  //           (Gemini ignores inline data when responseMimeType:"application/json" is set)
+  // Step 2 — inject extracted text into the normal JSON-mode quiz generation call
   const lectureParts = readLectureFilesAsInlineParts(course.lectures || []);
+  const lectureContent =
+    lectureParts.length > 0 ? await extractLectureContent(lectureParts) : null;
 
-  const courseContext = await getCourseContext(courseId, sourceContext, course);
+  const courseContext = await getCourseContext(
+    courseId,
+    sourceContext,
+    course,
+    lectureContent,
+  );
   const userPrompt = buildQuizGenerationUserPrompt({
     course,
     numberOfQuestions: normalizedQuestionCount,
@@ -651,8 +798,16 @@ const generatePracticeQuiz = async ({
       const rawResponse = await callGeminiForQuiz({
         systemPrompt: QUIZ_GENERATION_SYSTEM_PROMPT,
         userPrompt,
-        timeoutMs: timeoutMs || DEFAULT_GENERATION_CONFIG.timeoutMs,
-        inlineParts: lectureParts,
+        // Use a longer timeout when lecture content is present:
+        // the prompt is much larger and Gemini needs more time to process it.
+        timeoutMs:
+          timeoutMs ||
+          (lectureContent
+            ? DEFAULT_GENERATION_CONFIG.lectureQuizTimeoutMs
+            : DEFAULT_GENERATION_CONFIG.timeoutMs),
+        // Lecture content is already baked into userPrompt as extracted text;
+        // passing inline parts here would conflict with JSON mode.
+        inlineParts: [],
       });
 
       parsedQuizPayload = parseQuizGenerationResponse(
