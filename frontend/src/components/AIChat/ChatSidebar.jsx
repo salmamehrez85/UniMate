@@ -161,7 +161,7 @@ function SessionItem({ session, isActive, onSelect, onDelete, onRename }) {
                   onDelete(session._id);
                   setDeleteConfirm(false);
                 }}
-                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition">
+                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition cursor-pointer">
                 {t("aiChat.sidebar.deleteButton")}
               </button>
               <button
@@ -169,7 +169,7 @@ function SessionItem({ session, isActive, onSelect, onDelete, onRename }) {
                   e.stopPropagation();
                   setDeleteConfirm(false);
                 }}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition cursor-pointer">
                 {t("aiChat.sidebar.cancel")}
               </button>
             </div>

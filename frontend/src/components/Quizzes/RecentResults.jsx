@@ -78,19 +78,19 @@ export function RecentResults({ results, onDeleteResult }) {
                           onDeleteResult(result.id);
                           setConfirmDeleteId(null);
                         }}
-                        className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg font-medium transition">
+                        className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg font-medium transition cursor-pointer">
                         {t("quizzes.results.deleteConfirmYes")}
                       </button>
                       <button
                         onClick={() => setConfirmDeleteId(null)}
-                        className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg font-medium transition">
+                        className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg font-medium transition cursor-pointer">
                         {t("quizzes.results.deleteConfirmNo")}
                       </button>
                     </div>
                   ) : (
                     <button
                       onClick={() => setConfirmDeleteId(result.id)}
-                      className="mt-1 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+                      className="mt-1 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition cursor-pointer"
                       title={t("quizzes.results.deleteButton")}>
                       <Trash2 className="w-4 h-4" />
                     </button>

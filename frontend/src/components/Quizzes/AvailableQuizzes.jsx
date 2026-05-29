@@ -166,26 +166,26 @@ export function AvailableQuizzes({
                         onDeleteQuiz(quiz._id);
                         setConfirmDeleteId(null);
                       }}
-                      className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg font-medium transition">
+                      className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg font-medium transition cursor-pointer">
                       {t("quizzes.available.deleteConfirmYes")}
                     </button>
                     <button
                       onClick={() => setConfirmDeleteId(null)}
-                      className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg font-medium transition">
+                      className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg font-medium transition cursor-pointer">
                       {t("quizzes.available.deleteConfirmNo")}
                     </button>
                   </div>
                 ) : (
                   <button
                     onClick={() => setConfirmDeleteId(quiz._id)}
-                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition cursor-pointer"
                     title={t("quizzes.available.deleteButton")}>
                     <Trash2 className="w-4 h-4" />
                   </button>
                 )}
                 <button
                   onClick={() => onStartQuiz(quiz)}
-                  className="flex items-center gap-2 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
+                  className="flex items-center gap-2 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition cursor-pointer">
                   <Play className="w-4 h-4" />
                   {t("quizzes.available.startButton")}
                 </button>
