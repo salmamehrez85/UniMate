@@ -235,6 +235,7 @@
       "assessments": "Assessments",
       "tasks": "Tasks",
       "projectPhases": "Project Phases",
+      "lectures": "Lectures & Notes",
       "aiPractice": "AI Practice",
       "settings": "Settings"
     },
@@ -282,7 +283,9 @@
       "cancel": "Cancel",
       "deleteTitle": "Delete Task?",
       "deleteConfirm": "Are you sure you want to delete this task? This action cannot be undone.",
-      "deleteButton": "Delete"
+      "deleteButton": "Delete",
+      "noTasksYet": "No tasks added yet.",
+      "addFirstTask": "Add Your First Task"
     },
     "assessments": {
       "titleHeader": "Title",
@@ -312,7 +315,9 @@
       "add": "Add",
       "deleteTitle": "Delete Assessment?",
       "deleteConfirm": "Are you sure you want to delete this assessment? This action cannot be undone.",
-      "deleteButton": "Delete"
+      "deleteButton": "Delete",
+      "noAssessments": "No assessments added yet.",
+      "addFirst": "Add Your First Assessment"
     },
     "projectPhases": {
       "noPhases": "No project phases yet.",
@@ -373,7 +378,28 @@
       "deleteConfirmTitle": "Delete Course?",
       "deleteConfirmMessage": "This will permanently delete this course along with all its tasks, assessments, and project phases. This action cannot be undone.",
       "confirmDelete": "Yes, Delete Course",
-      "notSpecified": "Not specified"
+      "notSpecified": "Not specified",
+      "na": "N/A",
+      "noOutline": "No outline added yet."
+    },
+    "lectures": {
+      "title": "Lectures & Notes",
+      "subtitle": "Upload PDFs or photos of handwritten notes for this course.",
+      "uploadButton": "Upload File",
+      "uploading": "Uploading...",
+      "dropzone": "Click to upload or drag & drop files here",
+      "dropzoneHint": "PDF, JPG, PNG, WEBP — up to 50 MB each",
+      "empty": "No files uploaded yet.",
+      "openFile": "Open file",
+      "deleteFile": "Delete",
+      "previewFile": "Preview",
+      "deleteTitle": "Delete File?",
+      "deleteConfirm": "Are you sure you want to delete this file? This action cannot be undone.",
+      "deleteButton": "Delete",
+      "cancel": "Cancel",
+      "uploadFailed": "Failed to upload file. Please try again.",
+      "deleteFailed": "Failed to delete file. Please try again.",
+      "fileTooLarge": "File exceeds the {{max}} MB limit."
     }
   },
   "tasks": {
@@ -548,7 +574,7 @@
       "questionTypeLabel": "Question Type",
       "numberOfQuestionsLabel": "Number of Questions",
       "difficultyLabel": "Difficulty",
-      "noOutlineWarning": "This course has no outline or syllabus. Add course content in the course Settings tab to enable quiz generation."
+      "noOutlineWarning": "This course has no outline, syllabus, or uploaded lecture files. Add course content in the Settings tab or upload lecture files in the Lectures tab to enable quiz generation."
     },
     "available": {
       "title": "Available Quizzes",
@@ -604,7 +630,7 @@
     "form": {
       "sourceLabel": "Source",
       "pasteText": "Paste Text",
-      "courseOutline": "Course Outline",
+      "courseOutline": "Course",
       "uploadFile": "Upload File",
       "handwrittenNotes": "Handwritten Notes",
       "modeLabel": "Summary Mode",

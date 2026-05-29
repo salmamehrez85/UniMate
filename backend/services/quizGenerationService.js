@@ -1,3 +1,5 @@
+const fs = require("fs");
+const path = require("path");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const Course = require("../model/Course");
 const Quiz = require("../model/Quiz");
@@ -211,6 +213,29 @@ const buildTagsFromCourse = (course) => {
   return getMockFallbackTags(course);
 };
 
+// Reads up to 5 uploaded lecture/note files from disk and returns Gemini inlineData parts.
+// Silently skips any file that cannot be read (e.g. already deleted).
+const readLectureFilesAsInlineParts = (lectures = []) => {
+  const MAX_LECTURE_FILES = 5;
+  const parts = [];
+
+  for (const lecture of lectures.slice(0, MAX_LECTURE_FILES)) {
+    try {
+      const filePath = path.join(
+        __dirname,
+        "../uploads/lectures",
+        lecture.filename,
+      );
+      const data = fs.readFileSync(filePath).toString("base64");
+      parts.push({ inlineData: { mimeType: lecture.mimeType, data } });
+    } catch {
+      // file missing or unreadable — skip silently
+    }
+  }
+
+  return parts;
+};
+
 const getCourseContext = async (courseId, sourceContext, course) => {
   // Placeholder for future RAG retrieval: this is where Pinecone/pgvector similarity
   // search will fetch the most relevant note chunks for the selected course/materials.
@@ -218,11 +243,18 @@ const getCourseContext = async (courseId, sourceContext, course) => {
     ? JSON.stringify(sourceContext)
     : "No specific lecture note filters were provided.";
 
+  const lectureCount = Array.isArray(course.lectures)
+    ? course.lectures.length
+    : 0;
+
   return [
     `Course: ${course.code} - ${course.name}`,
     `Instructor: ${course.instructor || "Unknown"}`,
     `Outline: ${course.outlineText || "No outline available."}`,
     `Selected source context: ${selectedContext}`,
+    lectureCount > 0
+      ? `Uploaded lecture files: ${lectureCount} file(s) are attached inline — base your questions primarily on these materials.`
+      : "No lecture files uploaded for this course.",
     "Retrieved academic snippet: Students are expected to explain concepts precisely, compare related methods, and justify why a given solution is correct or incorrect using course terminology.",
   ].join("\n\n");
 };
@@ -398,7 +430,12 @@ const shouldFallbackToMock = (error) => {
   );
 };
 
-const callGeminiForQuiz = async ({ systemPrompt, userPrompt, timeoutMs }) => {
+const callGeminiForQuiz = async ({
+  systemPrompt,
+  userPrompt,
+  timeoutMs,
+  inlineParts = [],
+}) => {
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
@@ -419,6 +456,8 @@ const callGeminiForQuiz = async ({ systemPrompt, userPrompt, timeoutMs }) => {
             {
               role: "user",
               parts: [
+                // Lecture files come first so Gemini reads material before instructions
+                ...inlineParts,
                 {
                   text: `${systemPrompt}\n\n${userPrompt}`,
                 },
@@ -585,6 +624,9 @@ const generatePracticeQuiz = async ({
     throw error;
   }
 
+  // Read any uploaded lecture/note files to pass as multimodal context
+  const lectureParts = readLectureFilesAsInlineParts(course.lectures || []);
+
   const courseContext = await getCourseContext(courseId, sourceContext, course);
   const userPrompt = buildQuizGenerationUserPrompt({
     course,
@@ -610,6 +652,7 @@ const generatePracticeQuiz = async ({
         systemPrompt: QUIZ_GENERATION_SYSTEM_PROMPT,
         userPrompt,
         timeoutMs: timeoutMs || DEFAULT_GENERATION_CONFIG.timeoutMs,
+        inlineParts: lectureParts,
       });
 
       parsedQuizPayload = parseQuizGenerationResponse(

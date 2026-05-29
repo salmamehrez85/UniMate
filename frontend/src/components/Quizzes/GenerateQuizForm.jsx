@@ -50,6 +50,10 @@ export function GenerateQuizForm({
 
   const selectedCourse = courses.find((c) => c._id === formValues.courseId);
   const hasOutline = selectedCourse?.outlineText?.trim()?.length > 0;
+  const hasLectures =
+    Array.isArray(selectedCourse?.lectures) &&
+    selectedCourse.lectures.length > 0;
+  const canGenerate = hasOutline || hasLectures;
 
   return (
     <section className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -138,7 +142,7 @@ export function GenerateQuizForm({
           </div>
         )}
 
-        {!hasOutline && formValues.courseId && (
+        {!canGenerate && formValues.courseId && (
           <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg text-sm">
             {t("quizzes.generateForm.noOutlineWarning")}
           </div>
@@ -147,7 +151,7 @@ export function GenerateQuizForm({
         <button
           type="submit"
           className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition disabled:opacity-60 disabled:cursor-not-allowed"
-          disabled={isGenerating || !formValues.courseId || !hasOutline}>
+          disabled={isGenerating || !formValues.courseId || !canGenerate}>
           {isGenerating ? (
             <>
               <LoaderCircle className="w-5 h-5 animate-spin" />

@@ -128,6 +128,29 @@ const normalizeImageData = (imageData) => {
   };
 };
 
+// Reads up to 5 uploaded lecture/note files from disk and returns Gemini inlineData parts.
+// Silently skips any file that cannot be read (e.g. already deleted).
+const readLectureFilesAsInlineParts = (lectures = []) => {
+  const MAX_LECTURE_FILES = 5;
+  const parts = [];
+
+  for (const lecture of lectures.slice(0, MAX_LECTURE_FILES)) {
+    try {
+      const filePath = path.join(
+        __dirname,
+        "../uploads/lectures",
+        lecture.filename,
+      );
+      const data = fs.readFileSync(filePath).toString("base64");
+      parts.push({ inlineData: { mimeType: lecture.mimeType, data } });
+    } catch {
+      // file missing or unreadable — skip silently
+    }
+  }
+
+  return parts;
+};
+
 const parseSummaryOptionsFromBody = (body = {}) => {
   const allowedLanguages = ["en", "ar"];
   const allowedLengths = ["short", "medium", "long"];
@@ -1194,6 +1217,7 @@ exports.summarizeCourseContent = async (req, res) => {
 
     let content = (text || "").trim();
     let courseContext = null;
+    let lectureParts = [];
 
     if (sourceType === "courseOutline") {
       if (!courseId) {
@@ -1217,7 +1241,11 @@ exports.summarizeCourseContent = async (req, res) => {
 
       const outline = (course.outlineText || "").trim();
 
-      if (!outline) {
+      // Allow summarization when there are lectures even if outline is empty
+      const hasLectures =
+        Array.isArray(course.lectures) && course.lectures.length > 0;
+
+      if (!outline && !hasLectures) {
         return res.status(400).json({
           success: false,
           message: "Selected course has no outline text to summarize",
@@ -1230,16 +1258,106 @@ exports.summarizeCourseContent = async (req, res) => {
         code: course.code,
         name: course.name,
       };
+
+      // Read uploaded lecture/note files to pass as multimodal context
+      lectureParts = readLectureFilesAsInlineParts(course.lectures || []);
     }
 
     if (!content || content.length < 20) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Please provide at least 20 characters of content to summarize",
+      // Allow proceeding with only lecture files when outline is too short
+      if (lectureParts.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Please provide at least 20 characters of content to summarize",
+        });
+      }
+    }
+
+    // ── Multimodal path: course has uploaded lecture files ─────────────
+    if (lectureParts.length > 0) {
+      const langNote =
+        summaryOptions.language === "ar"
+          ? "\n\nIMPORTANT: Respond entirely in Arabic (العربية). Keep technical terms in English in parentheses where helpful."
+          : "";
+
+      const modeInstructions = {
+        quick: `QUICK MODE — populate ONLY:
+- overview: 1-2 sentences, the core idea only.
+- keyTopics: 4-6 short key takeaways.
+- importantDefinitions: return []
+- studyPlan: return []
+- possibleQuestions: return []`,
+        detailed: `DETAILED MODE — populate ALL fields fully:
+- overview: 3-4 sentences synthesizing the full picture.
+- keyTopics: 6-8 topics/outcomes with verbs (explain, compare, apply).
+- importantDefinitions: 6-8 terms with short definitions.
+- studyPlan: 5-6 ordered steps for deep learning.
+- possibleQuestions: 4-5 likely questions.`,
+        exam: `EXAM FOCUS MODE — exam prep only:
+- overview: 2 sentences max, what is most testable.
+- keyTopics: 4-5 highly specific exam-focus bullets.
+- importantDefinitions: 5-7 must-know terms with definitions.
+- studyPlan: 3-4 steps — a tight revision plan for an upcoming test.
+- possibleQuestions: 5-6 realistic instructor-style exam questions.`,
+        action: `ACTION MODE — actionable study steps:
+- overview: 2 sentences.
+- keyTopics: 4-6 items with actionable verbs.
+- importantDefinitions: 3-5 key terms.
+- studyPlan: 5-6 concrete practice steps.
+- possibleQuestions: 3-4 practice questions.`,
+        custom: `CUSTOM MODE (length: ${summaryOptions.length || "medium"}, focus: ${summaryOptions.focus || "general"}):
+- overview: 2-3 sentences.
+- keyTopics: 4-5 items.
+- importantDefinitions: 4-6 terms with short definitions.
+- studyPlan: 3-4 ordered steps.
+- possibleQuestions: 3-4 likely questions.`,
+      };
+
+      const activeModeInstruction =
+        modeInstructions[selectedMode] || modeInstructions.quick;
+
+      const promptText = [
+        `You are an expert academic assistant for the course: ${courseContext?.name || ""}${courseContext?.code ? ` (${courseContext.code})` : ""}.`,
+        content
+          ? `Course outline / syllabus:\n${content}`
+          : "No course outline is available — rely on the attached lecture files.",
+        `The uploaded lecture files for this course are attached. Use ALL attached materials (outline + lecture files) to generate a comprehensive study resource.`,
+        `\nSummary mode: ${selectedMode}\n${activeModeInstruction}`,
+        `\nRules:\n- Return strictly valid JSON only.\n- Keep content concise, academic, and useful.\n- If a field has no evidence, return [] or "N/A".\n- Keep JSON keys in English exactly as shown.${langNote}`,
+      ]
+        .filter(Boolean)
+        .join("\n\n");
+
+      const parts = [{ text: promptText }, ...lectureParts];
+      const uploadResult = await callGeminiUploadSummary(parts);
+
+      // Normalize upload schema → generateStructuredSummary schema so the
+      // frontend receives the same shape regardless of lecture presence.
+      const summaryResult = {
+        summary: uploadResult.overview || "",
+        plainLanguageSummary: uploadResult.overview || "",
+        learningOutcomes: uploadResult.keyTopics || [],
+        importantTerms: uploadResult.importantDefinitions || [],
+        studyPlan: uploadResult.studyPlan || [],
+        actionItems: uploadResult.studyPlan || [],
+        possibleQuestions: uploadResult.possibleQuestions || [],
+      };
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          sourceType,
+          mode: selectedMode,
+          options: summaryOptions,
+          result: summaryResult,
+          generatedAt: new Date().toISOString(),
+          usedLectures: lectureParts.length,
+        },
       });
     }
 
+    // ── Text-only path (no lecture files) ──────────────────────────────
     const summaryResult = await generateStructuredSummary({
       content,
       mode: selectedMode,
@@ -1525,12 +1643,10 @@ exports.uploadLecture = async (req, res) => {
   } catch (error) {
     console.error("Upload lecture error:", error);
     if (req.file) fs.unlink(req.file.path, () => {});
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: error.message || "Failed to upload lecture.",
-      });
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to upload lecture.",
+    });
   }
 };
 
@@ -1572,11 +1688,9 @@ exports.deleteLecture = async (req, res) => {
     res.status(200).json({ success: true });
   } catch (error) {
     console.error("Delete lecture error:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: error.message || "Failed to delete lecture.",
-      });
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to delete lecture.",
+    });
   }
 };

@@ -7,3 +7,9 @@ yarn-debug.log*
 yarn-error.log*
 .npm
 .eslintcache
+
+# Uploaded files — keep folder structure but ignore all uploaded content
+uploads/lectures/*
+!uploads/lectures/.gitkeep
+uploads/*
+!uploads/.gitkeep
