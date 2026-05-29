@@ -405,3 +405,37 @@ export const deleteCourse = async (id) => {
 
   return data;
 };
+
+// ── Lectures ────────────────────────────────────────────────────────
+
+export const uploadLecture = async (courseId, file) => {
+  const token = getAuthToken();
+  if (!token) throw new Error("Your session has expired. Please log in again.");
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${API_BASE_URL}/courses/${courseId}/lectures`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || "Failed to upload file.");
+  return data;
+};
+
+export const deleteLecture = async (courseId, lectureId) => {
+  const response = await fetch(
+    `${API_BASE_URL}/courses/${courseId}/lectures/${lectureId}`,
+    { method: "DELETE", headers: getAuthHeaders() },
+  );
+  const data = await response.json();
+  if (!response.ok)
+    throw new Error(data.message || "Failed to delete lecture.");
+  return data;
+};
+
+export const getLectureUrl = (filename) =>
+  `http://localhost:3000/uploads/lectures/${filename}`;

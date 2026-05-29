@@ -38,6 +38,15 @@ const phaseSchema = new mongoose.Schema({
   requirements: [requirementSchema],
 });
 
+const lectureSchema = new mongoose.Schema({
+  id: String,
+  originalName: String,
+  filename: String,
+  mimeType: String,
+  size: Number,
+  uploadedAt: { type: Date, default: Date.now },
+});
+
 const courseSchema = new mongoose.Schema(
   {
     userId: {
@@ -89,6 +98,7 @@ const courseSchema = new mongoose.Schema(
     assessments: [assessmentSchema],
     tasks: [taskSchema],
     phases: [phaseSchema],
+    lectures: { type: [lectureSchema], default: [] },
     isOldCourse: {
       type: Boolean,
       default: false,

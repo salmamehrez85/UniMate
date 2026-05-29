@@ -1,5 +1,7 @@
 const Course = require("../model/Course");
 const User = require("../model/User");
+const path = require("path");
+const fs = require("fs");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const {
   calculateAIPrediction,
@@ -1482,5 +1484,99 @@ Rules:
     }
 
     parsedImages = [];
+  }
+};
+
+// @desc    Upload a lecture/note file to a course
+// @route   POST /api/courses/:id/lectures
+// @access  Private
+exports.uploadLecture = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No file uploaded." });
+    }
+
+    const course = await Course.findOne({
+      _id: req.params.id,
+      userId: req.user._id,
+    });
+    if (!course) {
+      fs.unlink(req.file.path, () => {});
+      return res
+        .status(404)
+        .json({ success: false, message: "Course not found." });
+    }
+
+    const lecture = {
+      id: require("crypto").randomUUID(),
+      originalName: req.file.originalname,
+      filename: req.file.filename,
+      mimeType: req.file.mimetype,
+      size: req.file.size,
+      uploadedAt: new Date(),
+    };
+
+    course.lectures.push(lecture);
+    await course.save();
+
+    res.status(201).json({ success: true, lecture });
+  } catch (error) {
+    console.error("Upload lecture error:", error);
+    if (req.file) fs.unlink(req.file.path, () => {});
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: error.message || "Failed to upload lecture.",
+      });
+  }
+};
+
+// @desc    Delete a lecture/note file from a course
+// @route   DELETE /api/courses/:id/lectures/:lectureId
+// @access  Private
+exports.deleteLecture = async (req, res) => {
+  try {
+    const course = await Course.findOne({
+      _id: req.params.id,
+      userId: req.user._id,
+    });
+    if (!course) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Course not found." });
+    }
+
+    const lecture = course.lectures.find((l) => l.id === req.params.lectureId);
+    if (!lecture) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Lecture not found." });
+    }
+
+    // Delete file from disk
+    const filePath = path.join(
+      __dirname,
+      "../uploads/lectures",
+      lecture.filename,
+    );
+    fs.unlink(filePath, () => {});
+
+    course.lectures = course.lectures.filter(
+      (l) => l.id !== req.params.lectureId,
+    );
+    await course.save();
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("Delete lecture error:", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: error.message || "Failed to delete lecture.",
+      });
   }
 };

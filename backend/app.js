@@ -13,6 +13,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Serve uploaded lecture files
+const path = require("path");
+app.use("/uploads", require("express").static(path.join(__dirname, "uploads")));
+
 // Routes
 const authRoutes = require("./routes/authRoutes");
 const courseRoutes = require("./routes/courseRoutes");

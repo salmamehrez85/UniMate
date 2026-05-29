@@ -6,6 +6,7 @@ import { TasksTab } from "../components/CourseDetails/TasksTab";
 import { ProjectPhasesTab } from "../components/CourseDetails/ProjectPhasesTab";
 import { SettingsTab } from "../components/CourseDetails/SettingsTab";
 import { AIPracticeTab } from "../components/CourseDetails/AIPracticeTab";
+import { LecturesTab } from "../components/CourseDetails/LecturesTab";
 import { updateCourse, deleteCourse } from "../services/courseService";
 import { useTranslation } from "react-i18next";
 
@@ -25,6 +26,7 @@ export function CourseDetails({
     { id: "assessments", label: t("courseDetails.tabs.assessments") },
     { id: "tasks", label: t("courseDetails.tabs.tasks") },
     { id: "phases", label: t("courseDetails.tabs.projectPhases") },
+    { id: "lectures", label: t("courseDetails.tabs.lectures") },
     { id: "ai-practice", label: t("courseDetails.tabs.aiPractice") },
     { id: "settings", label: t("courseDetails.tabs.settings") },
   ];
@@ -67,6 +69,13 @@ export function CourseDetails({
         );
       case "ai-practice":
         return <AIPracticeTab course={courseData} />;
+      case "lectures":
+        return (
+          <LecturesTab
+            course={courseData}
+            onCourseUpdate={handleCourseUpdate}
+          />
+        );
       case "settings":
         return (
           <SettingsTab
