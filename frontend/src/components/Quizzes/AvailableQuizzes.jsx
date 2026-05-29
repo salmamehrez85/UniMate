@@ -1,4 +1,11 @@
-import { BookOpen, Clock, LoaderCircle, Play, Sparkles } from "lucide-react";
+import {
+  BookOpen,
+  Clock,
+  LoaderCircle,
+  Play,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -15,9 +22,11 @@ export function AvailableQuizzes({
   targetTopics,
   onSelectCourse,
   onStartQuiz,
+  onDeleteQuiz,
 }) {
   const { t } = useTranslation();
   const [showAllTopics, setShowAllTopics] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const selectedCourse = courses.find(
     (course) => course._id === selectedCourseId,
   );
@@ -146,12 +155,41 @@ export function AvailableQuizzes({
                   </span>
                 </div>
               </div>
-              <button
-                onClick={() => onStartQuiz(quiz)}
-                className="flex items-center gap-2 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
-                <Play className="w-4 h-4" />
-                {t("quizzes.available.startButton")}
-              </button>
+              <div className="flex items-center gap-2">
+                {confirmDeleteId === quiz._id ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600">
+                      {t("quizzes.available.confirmDelete")}
+                    </span>
+                    <button
+                      onClick={() => {
+                        onDeleteQuiz(quiz._id);
+                        setConfirmDeleteId(null);
+                      }}
+                      className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg font-medium transition">
+                      {t("quizzes.available.deleteConfirmYes")}
+                    </button>
+                    <button
+                      onClick={() => setConfirmDeleteId(null)}
+                      className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg font-medium transition">
+                      {t("quizzes.available.deleteConfirmNo")}
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setConfirmDeleteId(quiz._id)}
+                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+                    title={t("quizzes.available.deleteButton")}>
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+                <button
+                  onClick={() => onStartQuiz(quiz)}
+                  className="flex items-center gap-2 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
+                  <Play className="w-4 h-4" />
+                  {t("quizzes.available.startButton")}
+                </button>
+              </div>
             </div>
           ))}
         </div>

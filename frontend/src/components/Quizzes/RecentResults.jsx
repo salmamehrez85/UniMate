@@ -1,4 +1,4 @@
-import { TrendingDown } from "lucide-react";
+import { TrendingDown, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -30,8 +30,9 @@ function WeakAreasList({ areas }) {
   );
 }
 
-export function RecentResults({ results }) {
+export function RecentResults({ results, onDeleteResult }) {
   const { t } = useTranslation();
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   return (
     <section className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
       <div className="px-6 py-5 border-b border-gray-100">
@@ -59,12 +60,41 @@ export function RecentResults({ results }) {
                     {result.course} • {result.date}
                   </p>
                 </div>
-                <div className="text-right">
-                  <p
-                    className={`text-lg font-bold ${result.score >= 85 ? "text-emerald-600" : result.score >= 70 ? "text-yellow-600" : "text-orange-600"}`}>
-                    {result.score}/100
-                  </p>
-                  <p className="text-sm text-gray-500">{result.score}%</p>
+                <div className="flex items-start gap-3">
+                  <div className="text-right">
+                    <p
+                      className={`text-lg font-bold ${result.score >= 85 ? "text-emerald-600" : result.score >= 70 ? "text-yellow-600" : "text-orange-600"}`}>
+                      {result.score}/100
+                    </p>
+                    <p className="text-sm text-gray-500">{result.score}%</p>
+                  </div>
+                  {confirmDeleteId === result.id ? (
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-sm text-gray-600">
+                        {t("quizzes.results.confirmDelete")}
+                      </span>
+                      <button
+                        onClick={() => {
+                          onDeleteResult(result.id);
+                          setConfirmDeleteId(null);
+                        }}
+                        className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg font-medium transition">
+                        {t("quizzes.results.deleteConfirmYes")}
+                      </button>
+                      <button
+                        onClick={() => setConfirmDeleteId(null)}
+                        className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg font-medium transition">
+                        {t("quizzes.results.deleteConfirmNo")}
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmDeleteId(result.id)}
+                      className="mt-1 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+                      title={t("quizzes.results.deleteButton")}>
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               </div>
 

@@ -181,7 +181,13 @@ exports.submitQuiz = async (req, res) => {
           type: "quiz",
           title: `Quiz result: ${pct}% — ${courseName}`,
           message: `You scored ${correct}/${total} (${pct}%) on your ${courseName} quiz. ${resultEmoji}`,
-          metadata: { quizId, courseId: quiz?.courseId, score: pct, total, pct },
+          metadata: {
+            quizId,
+            courseId: quiz?.courseId,
+            score: pct,
+            total,
+            pct,
+          },
         });
 
         // 2. Weak areas notification (only if score < 70% and weak areas exist)
@@ -368,5 +374,80 @@ exports.getResultsByCourse = async (req, res) => {
       message: "Failed to fetch quiz results",
       error: error.message,
     });
+  }
+};
+
+// @desc    Delete an available quiz (and its associated results)
+// @route   DELETE /api/quizzes/:quizId
+// @access  Private
+exports.deleteQuiz = async (req, res) => {
+  try {
+    const userId = req.user?._id;
+    const { quizId } = req.params;
+
+    if (!userId) {
+      return res
+        .status(401)
+        .json({ success: false, message: "User authentication is required" });
+    }
+
+    const quiz = await Quiz.findOne({ _id: quizId, userId });
+    if (!quiz) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Quiz not found" });
+    }
+
+    await Quiz.deleteOne({ _id: quizId });
+    await QuizResult.deleteMany({ quizId, userId });
+
+    return res.status(200).json({ success: true, message: "Quiz deleted" });
+  } catch (error) {
+    console.error("Delete quiz error:", error);
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to delete quiz",
+        error: error.message,
+      });
+  }
+};
+
+// @desc    Delete a single quiz result
+// @route   DELETE /api/quizzes/results/:resultId
+// @access  Private
+exports.deleteQuizResult = async (req, res) => {
+  try {
+    const userId = req.user?._id;
+    const { resultId } = req.params;
+
+    if (!userId) {
+      return res
+        .status(401)
+        .json({ success: false, message: "User authentication is required" });
+    }
+
+    const result = await QuizResult.findOne({ _id: resultId, userId });
+    if (!result) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Quiz result not found" });
+    }
+
+    await QuizResult.deleteOne({ _id: resultId });
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Quiz result deleted" });
+  } catch (error) {
+    console.error("Delete quiz result error:", error);
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to delete quiz result",
+        error: error.message,
+      });
   }
 };

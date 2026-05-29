@@ -592,7 +592,11 @@
       "questions": "questions",
       "min": "min",
       "startButton": "Start",
-      "subtitle": "AI-generated from your course notes and ranked by what needs review."
+      "subtitle": "AI-generated from your course notes and ranked by what needs review.",
+      "deleteButton": "Delete quiz",
+      "confirmDelete": "Delete this quiz?",
+      "deleteConfirmYes": "Delete",
+      "deleteConfirmNo": "Cancel"
     },
     "session": {
       "practiceQuiz": "Practice quiz",
@@ -613,7 +617,11 @@
     "results": {
       "title": "Recent Results",
       "empty": "No submitted quiz results yet. Start a quiz and your weak areas will appear here.",
-      "weakAreas": "Weak Areas"
+      "weakAreas": "Weak Areas",
+      "deleteButton": "Delete result",
+      "confirmDelete": "Remove this result?",
+      "deleteConfirmYes": "Remove",
+      "deleteConfirmNo": "Cancel"
     }
   },
   "summarizer": {

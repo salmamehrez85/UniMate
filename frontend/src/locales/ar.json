@@ -609,7 +609,11 @@
       "startButton": "ابدأ",
       "subtitle": "مولّدة بالذكاء الاصطناعي من ملاحظاتك ومرتبة حسب ما يحتاج مراجعة.",
       "start": "ابدأ",
-      "noQuizzes": "لا تتوفر اختبارات لهذا المقرر بعد. ولّد اختباراً أدناه للبدء."
+      "noQuizzes": "لا تتوفر اختبارات لهذا المقرر بعد. ولّد اختباراً أدناه للبدء.",
+      "deleteButton": "حذف الاختبار",
+      "confirmDelete": "حذف هذا الاختبار؟",
+      "deleteConfirmYes": "حذف",
+      "deleteConfirmNo": "إلغاء"
     },
     "session": {
       "practiceQuiz": "اختبار تدريبي",
@@ -630,7 +634,11 @@
     "results": {
       "title": "النتائج الأخيرة",
       "empty": "لا توجد نتائج اختبارات بعد. ابدأ اختباراً وستظهر نقاط ضعفك هنا.",
-      "weakAreas": "نقاط الضعف"
+      "weakAreas": "نقاط الضعف",
+      "deleteButton": "حذف النتيجة",
+      "confirmDelete": "إزالة هذه النتيجة؟",
+      "deleteConfirmYes": "إزالة",
+      "deleteConfirmNo": "إلغاء"
     }
   },
   "summarizer": {

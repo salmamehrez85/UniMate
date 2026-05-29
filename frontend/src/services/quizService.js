@@ -100,3 +100,21 @@ export const getQuizResultsByCourse = async (courseId) => {
 
   return parseJsonResponse(response, "Failed to fetch quiz results");
 };
+
+export const deleteQuiz = async (quizId) => {
+  const response = await fetch(`${API_BASE_URL}/quizzes/${quizId}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+
+  return parseJsonResponse(response, "Failed to delete quiz");
+};
+
+export const deleteQuizResult = async (resultId) => {
+  const response = await fetch(`${API_BASE_URL}/quizzes/results/${resultId}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+
+  return parseJsonResponse(response, "Failed to delete quiz result");
+};

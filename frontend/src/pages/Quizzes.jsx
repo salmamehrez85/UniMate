@@ -9,6 +9,8 @@ import {
   generateQuiz,
   getAvailableQuizzes,
   submitQuiz,
+  deleteQuiz,
+  deleteQuizResult,
 } from "../services/quizService";
 
 const RECENT_RESULTS_STORAGE_KEY = "quizRecentResults";
@@ -182,6 +184,24 @@ export function Quizzes() {
     }
   };
 
+  const handleDeleteQuiz = async (quizId) => {
+    try {
+      await deleteQuiz(quizId);
+      setQuizzes((current) => current.filter((q) => q._id !== quizId));
+    } catch (error) {
+      setPageError(error.message || "Failed to delete quiz");
+    }
+  };
+
+  const handleDeleteResult = async (resultId) => {
+    try {
+      await deleteQuizResult(resultId);
+    } catch {
+      // Best-effort — remove from local state even if server call fails
+    }
+    setRecentResults((current) => current.filter((r) => r.id !== resultId));
+  };
+
   return (
     <div className="space-y-6 mt-20 px-6 pb-24 md:pb-6">
       <AvailableQuizzes
@@ -193,8 +213,12 @@ export function Quizzes() {
         targetTopics={targetTopics}
         onSelectCourse={setSelectedCourseId}
         onStartQuiz={setActiveQuiz}
+        onDeleteQuiz={handleDeleteQuiz}
       />
-      <RecentResults results={recentResults} />
+      <RecentResults
+        results={recentResults}
+        onDeleteResult={handleDeleteResult}
+      />
       <GenerateQuizForm
         courses={activeCourses}
         selectedCourseId={selectedCourseId}
