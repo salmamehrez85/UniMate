@@ -14,9 +14,10 @@ import {
   renameChatSession,
 } from "../services/chatService";
 import { getCourses } from "../services/courseService";
-import { getLanguagePrefs } from "../hooks/useLanguage";
+import { useTranslation } from "react-i18next";
 
 export function AIChat() {
+  const { i18n } = useTranslation();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -29,9 +30,8 @@ export function AIChat() {
   // Track whether the last message was sent via voice so we auto-speak the reply
   const sentViaVoiceRef = useRef(false);
 
-  // Derive speech recognition language from current app language
-  const currentLang = getLanguagePrefs().language || "en";
-  const speechLang = currentLang === "ar" ? "ar-SA" : "en-US";
+  // Derive speech recognition language reactively from i18n (re-renders on language change)
+  const speechLang = i18n.language === "ar" ? "ar-SA" : "en-US";
 
   // Phase 2 — Speech-to-Text
   // inputAtRecordStart captures whatever the user had typed before hitting the mic,
@@ -149,7 +149,7 @@ export function AIChat() {
     setError(null);
 
     try {
-      const language = getLanguagePrefs().language || "en";
+      const language = i18n.language || "en";
       const { reply, sessionId, title } = await sendChatMessage(
         updatedMessages,
         activeSessionId,
@@ -162,7 +162,7 @@ export function AIChat() {
 
       // Auto-speak the reply only when the user sent via voice
       if (sentViaVoiceRef.current) {
-        ttsSpeak(reply, currentLang);
+        ttsSpeak(reply, i18n.language);
         sentViaVoiceRef.current = false;
       }
 

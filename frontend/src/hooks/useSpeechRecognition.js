@@ -136,7 +136,7 @@ export function useSpeechRecognition({ onTranscript, lang = "en-US" } = {}) {
       setIsRecording(true);
       startAnalyser();
     },
-    [startAnalyser, stopAnalyser],
+    [lang, startAnalyser, stopAnalyser],
   );
 
   // ── Stop ─────────────────────────────────────────────────────────
