@@ -121,6 +121,7 @@ const courseSchema = new mongoose.Schema(
       similarCourses: { type: mongoose.Schema.Types.Mixed, default: [] },
       usedAI: { type: Boolean, default: false },
       predictedAt: { type: Date, default: null },
+      recommendation: { type: String, default: null },
     },
   },
   {

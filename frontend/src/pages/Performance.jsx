@@ -315,19 +315,21 @@ function AIInsightsModal({
           </div>
 
           {/* Recommendation */}
-          <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <h3 className="font-semibold text-amber-900 mb-1">
-                  {t("performance.aiInsights.recommendation")}
-                </h3>
-                <p className="text-sm text-amber-800 whitespace-pre-line">
-                  {prediction.recommendation}
-                </p>
+          {prediction.recommendation && (
+            <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-semibold text-amber-900 mb-1">
+                    {t("performance.aiInsights.recommendation")}
+                  </h3>
+                  <p className="text-sm text-amber-800 whitespace-pre-line">
+                    {prediction.recommendation}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Close Button */}
           <button
@@ -422,8 +424,7 @@ export function Performance() {
                 similarity: Math.round((sc.similarity || 0) * 100),
                 reason: sc.reason,
               })),
-              recommendation:
-                "Keep up consistent effort to improve your grade.",
+              recommendation: p.recommendation || null,
             };
           });
         if (Object.keys(savedPredictions).length > 0) {
@@ -479,7 +480,7 @@ export function Performance() {
             similarity: Math.round(sc.similarity * 100),
             reason: sc.reason,
           })),
-          recommendation: "Keep up consistent effort to improve your grade.",
+          recommendation: coursePrediction.prediction.recommendation || null,
         };
 
         setPredictions((prev) => ({ ...prev, [courseId]: prediction }));

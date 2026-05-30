@@ -898,6 +898,26 @@ exports.predictSingleCourse = async (req, res) => {
       );
     }
 
+    // Generate personalized recommendation for this course
+    try {
+      const recResult = await generateActionableRecommendations(
+        [
+          {
+            ...course.toObject(),
+            currentPerformance: currentPerformance ?? 0,
+          },
+        ],
+        "en",
+      );
+      const recItem = (recResult.recommendations || [])[0];
+      prediction.recommendation = recItem
+        ? recItem.detailedAnalysis || recItem.summaryAdvice || null
+        : null;
+    } catch (recErr) {
+      console.error("Recommendation generation failed:", recErr.message);
+      prediction.recommendation = null;
+    }
+
     // Save to the course document
     await Course.findByIdAndUpdate(course._id, {
       aiPrediction: {
@@ -907,6 +927,7 @@ exports.predictSingleCourse = async (req, res) => {
         similarCourses: prediction.similarCourses,
         usedAI: prediction.usedAI,
         predictedAt: new Date(),
+        recommendation: prediction.recommendation || null,
       },
     });
 

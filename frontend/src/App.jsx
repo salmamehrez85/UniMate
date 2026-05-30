@@ -151,7 +151,11 @@ export default function App() {
     <div className="min-h-screen bg-gray-50">
       <Header activeView={activeView} onLogout={handleLogout} />
       <main className="pb-20 md:pb-6 md:ms-64">
-        <div className="max-w-7xl mx-auto px-4 py-6">{renderView()}</div>
+        <div
+          key={activeView}
+          className="page-transition max-w-7xl mx-auto px-4 py-6">
+          {renderView()}
+        </div>
       </main>
       <Navigation activeView={activeView} setActiveView={setActiveView} />
     </div>
