@@ -4,6 +4,7 @@ import { GenerateQuizForm } from "../components/Quizzes/GenerateQuizForm";
 import { QuizReviewModal } from "../components/Quizzes/QuizReviewModal";
 import { QuizSessionModal } from "../components/Quizzes/QuizSessionModal";
 import { RecentResults } from "../components/Quizzes/RecentResults";
+import { getUserData } from "../services/authService";
 import { getCourses } from "../services/courseService";
 import {
   generateQuiz,
@@ -13,10 +14,14 @@ import {
   deleteQuizResult,
 } from "../services/quizService";
 
-const RECENT_RESULTS_STORAGE_KEY = "quizRecentResults";
+const getStorageKey = () => {
+  const user = getUserData();
+  const userId = user?._id || user?.id || "guest";
+  return `quizRecentResults_${userId}`;
+};
 
 const loadStoredRecentResults = () => {
-  const rawValue = localStorage.getItem(RECENT_RESULTS_STORAGE_KEY);
+  const rawValue = localStorage.getItem(getStorageKey());
 
   if (!rawValue) {
     return [];
@@ -96,7 +101,7 @@ export function Quizzes() {
 
   useEffect(() => {
     localStorage.setItem(
-      RECENT_RESULTS_STORAGE_KEY,
+      getStorageKey(),
       JSON.stringify(recentResults),
     );
   }, [recentResults]);

@@ -22,7 +22,11 @@ import {
 } from "../components/Courses/GenerateEmailModal";
 import { useTranslation } from "react-i18next";
 
-const HISTORY_KEY = "emailProfessorHistory";
+const getHistoryKey = () => {
+  const user = getUserData();
+  const userId = user?._id || user?.id || "guest";
+  return `emailProfessorHistory_${userId}`;
+};
 
 // status: "pending" | "awaiting_reply" | "replied"
 // pending       = draft generated, never opened in email app
@@ -417,7 +421,7 @@ export function EmailProfessor() {
   const [loadingCourses, setLoadingCourses] = useState(true);
 
   const [history, setHistory] = useState(() => {
-    const saved = localStorage.getItem(HISTORY_KEY);
+    const saved = localStorage.getItem(getHistoryKey());
     const parsed = saved ? JSON.parse(saved) : [];
     // backfill: old "sent" entries → "awaiting_reply"; missing status → "pending"
     return parsed.map((e) => ({
@@ -437,7 +441,7 @@ export function EmailProfessor() {
 
   const persistHistory = (updated) => {
     setHistory(updated);
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+    localStorage.setItem(getHistoryKey(), JSON.stringify(updated));
   };
 
   const handleSaved = (generatedDraft, course, emailPurpose) => {
