@@ -106,7 +106,7 @@ export function RecentResults({ results, onDeleteResult }) {
       {/* Delete Confirmation Dialog */}
       {confirmDeleteId &&
         createPortal(
-          <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 p-2 md:p-4 overflow-hidden overflow-x-hidden">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
             <div className="bg-white rounded-xl shadow-lg max-w-sm md:max-w-md w-full p-4 md:p-6 max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
               <h3 className="text-lg font-bold text-primary-900 mb-2">
                 {t("quizzes.results.deleteTitle")}

@@ -194,7 +194,7 @@ export function AIChat() {
 
   return (
     <div
-      className="mt-20 flex flex-col"
+      className="flex flex-col"
       style={{ height: "calc(100vh - 120px)" }}>
       {/* Header */}
       <ChatHeader

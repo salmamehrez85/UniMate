@@ -7,7 +7,7 @@ import { SignOutSection } from "../components/Settings/SignOutSection";
 
 export function Settings({ onLogout }) {
   return (
-    <div className="mt-20">
+    <div className="">
       <div className="max-w-2xl mx-auto space-y-6">
         <SettingsHeader />
 

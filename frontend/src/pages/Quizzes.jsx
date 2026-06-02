@@ -208,7 +208,7 @@ export function Quizzes() {
   };
 
   return (
-    <div className="space-y-6 mt-20 px-6 pb-24 md:pb-6">
+    <div className="space-y-6 px-6 pb-6">
       <AvailableQuizzes
         courses={activeCourses}
         quizzes={quizzes}

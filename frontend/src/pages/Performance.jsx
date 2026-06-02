@@ -203,7 +203,7 @@ function AIInsightsModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 p-2 md:p-4 overflow-x-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="bg-white rounded-xl shadow-xl max-w-sm md:max-w-lg lg:max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100 sticky top-0 bg-white">
@@ -504,7 +504,7 @@ export function Performance() {
   };
 
   return (
-    <div className="space-y-8 mt-20 px-6 pb-24 md:pb-6">
+    <div className="space-y-8 px-6 pb-6">
       {/* Page Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">

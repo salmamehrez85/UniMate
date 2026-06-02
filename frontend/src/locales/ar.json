@@ -13,7 +13,7 @@
     "performance": "الأداء",
     "settings": "الإعدادات",
     "tagline": "منصة التعلّم الأكاديمي",
-    "footer": "يونيميت • الذكاء الاصطناعي الأكاديمي"
+    "footer": "UniMate • الذكاء الاصطناعي الأكاديمي"
   },
   "header": {
     "dashboard": "لوحة التحكم",
@@ -26,7 +26,7 @@
     "schedule": "الجدول الزمني",
     "emailProfessor": "مراسلة الأستاذ",
     "settings": "الإعدادات",
-    "unimate": "يونيميت",
+    "unimate": "UniMate",
     "notifications": "الإشعارات",
     "taskDueToday": "موعد التسليم اليوم",
     "taskDaysLeft_zero": "لا أيام متبقّية",
@@ -42,7 +42,7 @@
   "auth": {
     "login": {
       "title": "مرحباً بعودتك",
-      "subtitle": "سجّل دخولك للمتابعة في يونيميت",
+      "subtitle": "سجّل دخولك للمتابعة في UniMate",
       "emailLabel": "البريد الإلكتروني",
       "emailPlaceholder": "you@university.edu",
       "passwordLabel": "كلمة المرور",
@@ -58,7 +58,7 @@
     },
     "register": {
       "title": "إنشاء حسابك",
-      "subtitle": "انضم إلى يونيميت وتفوّق في دراستك",
+      "subtitle": "انضم إلى UniMate وتفوّق في دراستك",
       "fullNameLabel": "الاسم الكامل",
       "fullNamePlaceholder": "الاسم الكامل",
       "emailLabel": "البريد الإلكتروني",
@@ -762,7 +762,7 @@
       "sendMessage": "إرسال رسالة",
       "startVoiceInput": "بدء الإدخال الصوتي",
       "stopRecording": "إيقاف التسجيل",
-      "disclaimer": "قد يُخطئ ذكاء يونيميت. تحقق من المعلومات المهمة."
+      "disclaimer": "قد يُخطئ ذكاء UniMate. تحقق من المعلومات المهمة."
     },
     "sidebar": {
       "title": "المحادثات",
@@ -893,7 +893,7 @@
     "close": "إغلاق"
   },
   "settings": {
-    "subtitle": "خصّص تجربتك في يونيميت",
+    "subtitle": "خصّص تجربتك في UniMate",
     "profile": {
       "title": "الملف الشخصي",
       "edit": "تعديل",
@@ -934,7 +934,7 @@
     "privacy": {
       "title": "الخصوصية",
       "analytics": "تحليلات الاستخدام",
-      "analyticsDesc": "ساعد في تحسين يونيميت بمشاركة بيانات الاستخدام المجهولة",
+      "analyticsDesc": "ساعد في تحسين UniMate بمشاركة بيانات الاستخدام المجهولة",
       "recommendations": "التوصيات الشخصية",
       "recommendationsDesc": "السماح للذكاء الاصطناعي باستخدام بيانات تقدمك للتوصيات",
       "on": "مفعّل",

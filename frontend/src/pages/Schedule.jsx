@@ -122,7 +122,7 @@ export function Schedule() {
 
   if (loading) {
     return (
-      <div className="mt-20 px-6">
+      <div className="px-6">
         <ScheduleHeader />
         <div className="space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -137,7 +137,7 @@ export function Schedule() {
   }
 
   return (
-    <div className="mt-20 px-6 pb-24 md:pb-6 space-y-6">
+    <div className="px-6 pb-6 space-y-6">
       {/* Header + toggle */}
       <div className="flex items-start justify-between gap-4">
         <ScheduleHeader />

@@ -82,7 +82,7 @@ export function Header({ activeView, onLogout }) {
   };
 
   return (
-    <header className="bg-white border-b border-gray-100 fixed top-0 left-0 right-0 z-10 md:ms-64 shadow-sm">
+    <header className="bg-white border-b border-gray-100 sticky top-0 z-10 shadow-sm">
       <div className="mx-auto px-3 md:px-6 py-3 md:py-5">
         <div className="flex items-center justify-between gap-2 md:gap-4">
           <h1 className="text-lg md:text-2xl font-bold text-primary-700 text-left tracking-tight truncate">
@@ -103,7 +103,7 @@ export function Header({ activeView, onLogout }) {
               </button>
 
               {open && (
-                <div className="fixed inset-x-0 top-14 md:top-16 md:absolute md:right-0 md:inset-x-auto md:mt-2 mx-2 md:mx-0 w-auto md:w-72 lg:w-80 bg-white rounded-xl shadow-lg border border-gray-100 z-50 overflow-hidden max-h-[60vh] md:max-h-80">
+                <div className="absolute right-0 mt-2 w-72 lg:w-80 bg-white rounded-xl shadow-lg border border-gray-100 z-50 overflow-hidden max-h-80">
                   <div className="px-3 md:px-4 py-2 md:py-3 border-b border-gray-100 flex items-center justify-between">
                     <span className="font-semibold text-gray-800 text-xs md:text-sm">
                       {t("header.notifications")}

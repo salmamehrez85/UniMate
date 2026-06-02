@@ -91,7 +91,7 @@ export function CourseDetails({
   };
 
   return (
-    <div className="space-y-4 md:space-y-6 mt-20 px-3 md:px-6 pb-24 md:pb-6">
+    <div className="flex flex-col flex-1 min-h-full space-y-4 md:space-y-6 px-3 md:px-6 pb-6">
       {/* Header with Breadcrumb */}
       <div className="flex items-center gap-2 md:gap-4 mb-4 md:mb-6">
         <button

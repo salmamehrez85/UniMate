@@ -72,7 +72,7 @@ export function QuizReviewModal({ quiz, quizResult, weakAreas = [], onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/20 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-start justify-between px-6 py-5 border-b border-gray-100">

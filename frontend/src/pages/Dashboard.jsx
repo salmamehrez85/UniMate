@@ -20,7 +20,7 @@ export function Dashboard({ onNavigate }) {
   } = useDashboardData();
 
   return (
-    <div className="mt-20 pb-24">
+    <div className="pb-24">
       <div className="max-w-7xl mx-auto px-6 space-y-10">
         <WelcomeSection userName={userName} tasksToday={tasksToday} />
 

@@ -115,7 +115,7 @@ function Composer({
   };
 
   return (
-    <div className="mt-20 max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-6">
       {/* Back button */}
       <button
         type="button"
@@ -282,7 +282,7 @@ function EmailDetail({ entry, onBack, onStatusChange, onDelete }) {
   };
 
   return (
-    <div className="mt-20 max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-6">
       <button
         type="button"
         onClick={onBack}
@@ -380,7 +380,7 @@ function EmailDetail({ entry, onBack, onStatusChange, onDelete }) {
 
       {/* Delete Confirmation Dialog */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6">
             <h3 className="text-lg font-bold text-primary-900 mb-2">
               {t("emailProfessor.deleteTitle")}
@@ -525,7 +525,7 @@ export function EmailProfessor() {
 
   // ── Dashboard ──────────────────────────────────────────────────────────────
   return (
-    <div className="mt-20 max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-6">
       {/* Action bar */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-500">

@@ -87,7 +87,7 @@ function AddPhaseModal({ isOpen, onClose, onAdd }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 p-2 md:p-4 overflow-hidden overflow-x-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <form
         onSubmit={handleSubmit}
         className="bg-white rounded-xl shadow-lg max-w-sm md:max-w-md w-full p-6 md:p-8 space-y-5 max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
@@ -352,7 +352,7 @@ export function ProjectPhasesTab({ course, onCourseUpdate }) {
 
       {/* Delete Confirmation Dialog */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 p-2 md:p-4 overflow-x-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="bg-white rounded-xl shadow-lg max-w-sm md:max-w-md w-full p-6 md:p-8">
             <h3 className="text-lg font-bold text-primary-900 mb-2">
               {t("courseDetails.projectPhases.deleteTitle")}

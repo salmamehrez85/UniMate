@@ -241,7 +241,7 @@ export function Tasks() {
 
   if (loading) {
     return (
-      <div className="mt-20">
+      <div className="">
         <div className="bg-white rounded-xl p-8 shadow-sm border border-neutral-200 text-center">
           <h2 className="text-2xl font-bold text-neutral-900 mb-2">Tasks</h2>
           <p className="text-neutral-600">Loading your tasks...</p>
@@ -251,7 +251,7 @@ export function Tasks() {
   }
 
   return (
-    <div className="mt-20 space-y-6">
+    <div className="space-y-6">
       <TasksHeader onAddTask={() => setShowAddModal(true)} />
 
       {error && (
@@ -294,7 +294,7 @@ export function Tasks() {
       {/* Delete Confirmation Dialog */}
       {deleteConfirmId &&
         createPortal(
-          <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 p-2 md:p-4 overflow-hidden overflow-x-hidden">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
             <div className="bg-white rounded-xl shadow-lg max-w-sm md:max-w-md w-full p-6 md:p-8 max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
               <h3 className="text-lg font-bold text-primary-900 mb-2">
                 {t("tasks.deleteTitle")}

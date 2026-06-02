@@ -105,7 +105,7 @@ export function Courses({ onSelectCourse }) {
 
   if (loading) {
     return (
-      <div className="space-y-6 mt-20 px-6 pb-24 md:pb-6">
+      <div className="space-y-6 px-6 pb-6">
         <div className="flex items-center justify-center py-12">
           <div className="text-gray-600">{t("courses.loading")}</div>
         </div>
@@ -114,7 +114,7 @@ export function Courses({ onSelectCourse }) {
   }
 
   return (
-    <div className="space-y-6 mt-20 px-6 pb-24 md:pb-6">
+    <div className="space-y-6 px-6 pb-6">
       <CoursesHeader
         totalCourses={
           viewMode === "completed"

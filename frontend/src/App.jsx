@@ -148,16 +148,18 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header activeView={activeView} onLogout={handleLogout} />
-      <main className="pb-20 md:pb-6 md:ms-64">
-        <div
-          key={activeView}
-          className="page-transition max-w-7xl mx-auto px-4 py-6">
-          {renderView()}
-        </div>
-      </main>
+    <div className="flex h-screen w-full overflow-hidden bg-gray-50">
       <Navigation activeView={activeView} setActiveView={setActiveView} />
+      <div className="flex flex-col flex-1 w-full md:ms-64 overflow-hidden">
+        <Header activeView={activeView} onLogout={handleLogout} />
+        <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
+          <div
+            key={activeView}
+            className="page-transition max-w-7xl mx-auto px-4 py-6">
+            {renderView()}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
