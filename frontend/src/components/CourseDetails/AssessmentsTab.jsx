@@ -296,7 +296,7 @@ export function AssessmentsTab({ course, onCourseUpdate }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col flex-1 min-h-full space-y-6 bg-gray-50 rounded-xl p-4">
       {course.isOldCourse}
 
       <div className="flex justify-end">

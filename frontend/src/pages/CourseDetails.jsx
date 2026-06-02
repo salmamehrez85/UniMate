@@ -132,7 +132,7 @@ export function CourseDetails({
       </div>
 
       {/* Tab Content */}
-      <div>{renderTab()}</div>
+      <div className="flex flex-col flex-1">{renderTab()}</div>
     </div>
   );
 }

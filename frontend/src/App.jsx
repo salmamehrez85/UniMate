@@ -155,7 +155,7 @@ export default function App() {
         <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
           <div
             key={activeView}
-            className="page-transition max-w-7xl mx-auto px-4 py-6">
+            className="page-transition min-h-full flex flex-col max-w-7xl mx-auto px-4 py-6">
             {renderView()}
           </div>
         </main>
