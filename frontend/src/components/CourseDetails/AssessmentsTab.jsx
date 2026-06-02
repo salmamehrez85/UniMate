@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Plus, Edit2, Trash2, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -34,6 +35,8 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
   ];
   const [formData, setFormData] = useState(defaultFormData);
   const [error, setError] = useState("");
+  const [showFinalConfirm, setShowFinalConfirm] = useState(false);
+  const [pendingSubmitData, setPendingSubmitData] = useState(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -88,14 +91,49 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
       return;
     }
 
-    onSubmit({
+    const score = parseFloat(formData.score);
+    const maxScore = parseFloat(formData.maxScore);
+
+    if (score > maxScore) {
+      setError(t("courseDetails.assessments.scoreGreaterThanMax"));
+      return;
+    }
+
+    const selectedDate = new Date(formData.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedDate > today) {
+      setError(t("courseDetails.assessments.dateFuture"));
+      return;
+    }
+
+    const submitData = {
       id: initialData?.id ?? Date.now(),
       ...formData,
-      score: parseFloat(formData.score),
-      maxScore: parseFloat(formData.maxScore),
+      score,
+      maxScore,
       weight: formData.weight ? parseFloat(formData.weight) : null,
-    });
+    };
+
+    // Show confirmation if adding a final assessment (and not editing)
+    if (formData.type === "final" && !initialData) {
+      setPendingSubmitData(submitData);
+      setShowFinalConfirm(true);
+      return;
+    }
+
+    onSubmit(submitData);
     onClose();
+  };
+
+  const handleConfirmFinal = () => {
+    if (pendingSubmitData) {
+      onSubmit(pendingSubmitData);
+      setShowFinalConfirm(false);
+      setPendingSubmitData(null);
+      onClose();
+    }
   };
 
   if (!isOpen) return null;
@@ -232,6 +270,37 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
           </button>
         </div>
       </form>
+
+      {/* Final Assessment Confirmation */}
+      {showFinalConfirm &&
+        createPortal(
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div className="bg-white rounded-xl shadow-lg max-w-sm md:max-w-md w-full p-6 md:p-8 max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
+              <h3 className="text-lg font-bold text-primary-900 mb-2">
+                {t("courseDetails.assessments.finalWarningTitle")}
+              </h3>
+              <p className="text-gray-600 mb-6">
+                {t("courseDetails.assessments.finalWarningMessage")}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleConfirmFinal}
+                  className="flex-1 px-4 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-semibold transition cursor-pointer">
+                  {t("courseDetails.assessments.finalWarningConfirm")}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowFinalConfirm(false);
+                    setPendingSubmitData(null);
+                  }}
+                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition cursor-pointer">
+                  {t("courseDetails.assessments.cancel")}
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
