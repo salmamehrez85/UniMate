@@ -116,8 +116,18 @@ export function Tasks() {
         );
       })
       .sort((a, b) => {
+        // Done tasks always go to the bottom
         if (a.status === "done" && b.status !== "done") return 1;
         if (a.status !== "done" && b.status === "done") return -1;
+
+        // Sort by priority (high → medium → low)
+        const priorityOrder = { high: 0, medium: 1, low: 2 };
+        const aPriority = priorityOrder[a.priority] ?? 1;
+        const bPriority = priorityOrder[b.priority] ?? 1;
+        if (aPriority !== bPriority) return aPriority - bPriority;
+
+        // Within same priority, sort by due date (earliest first)
+        if (!a.dueDate && !b.dueDate) return 0;
         if (!a.dueDate) return 1;
         if (!b.dueDate) return -1;
         return new Date(a.dueDate) - new Date(b.dueDate);
@@ -284,8 +294,8 @@ export function Tasks() {
       {/* Delete Confirmation Dialog */}
       {deleteConfirmId &&
         createPortal(
-          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-2 md:p-4 overflow-hidden overflow-x-hidden">
-            <div className="bg-white rounded-xl shadow-lg max-w-sm md:max-w-md w-full p-4 md:p-6 max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 p-2 md:p-4 overflow-hidden overflow-x-hidden">
+            <div className="bg-white rounded-xl shadow-lg max-w-sm md:max-w-md w-full p-6 md:p-8 max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
               <h3 className="text-lg font-bold text-primary-900 mb-2">
                 {t("tasks.deleteTitle")}
               </h3>

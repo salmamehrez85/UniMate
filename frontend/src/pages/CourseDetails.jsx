@@ -115,12 +115,12 @@ export function CourseDetails({
         </div>
 
         {/* Tabs Navigation */}
-        <div className="flex gap-1 md:gap-2 border-b border-gray-200 overflow-x-auto -mx-3 md:-mx-6 px-3 md:px-6">
+        <div className="flex flex-wrap gap-1 md:gap-2 border-b border-gray-200 -mx-3 md:-mx-6 px-3 md:px-6">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-3 md:px-6 py-2 md:py-3 font-medium transition text-xs md:text-sm whitespace-nowrap ${
+              className={`px-2 md:px-4 py-2 md:py-3 font-medium transition text-sm md:text-base whitespace-nowrap ${
                 activeTab === tab.id
                   ? "text-teal-600 border-b-2 border-teal-600 -mb-1"
                   : "text-gray-600 hover:text-gray-900"

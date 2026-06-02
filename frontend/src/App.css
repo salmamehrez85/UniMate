@@ -14,3 +14,13 @@
 .page-transition {
   animation: page-enter 0.25s ease-out both;
 }
+
+/* Hide scrollbar but keep scrolling functional */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
