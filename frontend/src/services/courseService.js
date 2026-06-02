@@ -1,6 +1,5 @@
 import { getAuthToken } from "./authService";
-
-const API_BASE_URL = "http://localhost:3000/api";
+import { API_BASE_URL, SERVER_URL } from "../config/api";
 
 // Get auth headers
 const getAuthHeaders = () => {
@@ -438,4 +437,4 @@ export const deleteLecture = async (courseId, lectureId) => {
 };
 
 export const getLectureUrl = (filename) =>
-  `http://localhost:3000/uploads/lectures/${filename}`;
+  `${SERVER_URL}/uploads/lectures/${filename}`;
