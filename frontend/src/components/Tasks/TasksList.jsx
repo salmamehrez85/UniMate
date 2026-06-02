@@ -1,4 +1,4 @@
-import { CheckCircle, Circle } from "lucide-react";
+import { CheckCircle, Circle, Trash2 } from "lucide-react";
 import { formatDueLabel, getDaysUntil } from "./taskUtils";
 import { useTranslation } from "react-i18next";
 
@@ -14,7 +14,14 @@ const statusStyles = {
   done: "bg-emerald-100 text-emerald-700",
 };
 
-export function TasksList({ tasks, onToggleStatus, updatingTaskId }) {
+export function TasksList({
+  tasks,
+  onToggleStatus,
+  onDeleteTask,
+  deleteConfirmId,
+  setDeleteConfirmId,
+  updatingTaskId,
+}) {
   const { t } = useTranslation();
   if (tasks.length === 0) {
     return (
@@ -93,10 +100,21 @@ export function TasksList({ tasks, onToggleStatus, updatingTaskId }) {
                     ? t(`tasks.priority.${task.priority}`)
                     : t("tasks.priority.medium")}
                 </span>
-                <span
-                  className={`text-xs font-semibold px-3 py-1 rounded-full ${statusClass}`}>
-                  {t(`tasks.status.${task.status}`)}
-                </span>
+                <div className="flex flex-col items-center gap-1">
+                  <span
+                    className={`text-xs font-semibold px-3 py-1 rounded-full ${statusClass}`}>
+                    {t(`tasks.status.${task.status}`)}
+                  </span>
+                  {task.status === "done" && (
+                    <button
+                      onClick={() => setDeleteConfirmId(task.id)}
+                      disabled={updatingTaskId === task.id}
+                      title={t("tasks.deleteTooltip") || "Delete task"}
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded-md transition disabled:opacity-50">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
                 {daysLeft !== null && task.status !== "done" && (
                   <span
                     className={`text-xs font-semibold px-3 py-1 rounded-full ${

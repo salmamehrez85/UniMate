@@ -469,7 +469,12 @@
       "cancel": "Cancel",
       "cancelButton": "Cancel",
       "failedToAdd": "Failed to add task. Please try again."
-    }
+    },
+    "deleteConfirm": "Are you sure you want to delete this task?",
+    "deleteTitle": "Delete Task?",
+    "deleteButton": "Yes, Delete Task",
+    "cancel": "Cancel",
+    "deleteTooltip": "Delete task"
   },
   "performance": {
     "pageTitle": "Academic Performance",
@@ -595,7 +600,9 @@
       "subtitle": "AI-generated from your course notes and ranked by what needs review.",
       "deleteButton": "Delete quiz",
       "confirmDelete": "Delete this quiz?",
-      "deleteConfirmYes": "Delete",
+      "deleteTitle": "Delete Quiz?",
+      "deleteConfirmMessage": "This will permanently delete this quiz. This action cannot be undone.",
+      "deleteConfirmYes": "Yes, Delete Quiz",
       "deleteConfirmNo": "Cancel"
     },
     "session": {
@@ -620,7 +627,9 @@
       "weakAreas": "Weak Areas",
       "deleteButton": "Delete result",
       "confirmDelete": "Remove this result?",
-      "deleteConfirmYes": "Remove",
+      "deleteTitle": "Delete Quiz Result?",
+      "deleteConfirmMessage": "This will permanently delete this quiz result. This action cannot be undone.",
+      "deleteConfirmYes": "Yes, Delete Result",
       "deleteConfirmNo": "Cancel"
     }
   },

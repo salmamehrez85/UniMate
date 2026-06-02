@@ -68,33 +68,12 @@ export function RecentResults({ results, onDeleteResult }) {
                     </p>
                     <p className="text-sm text-gray-500">{result.score}%</p>
                   </div>
-                  {confirmDeleteId === result.id ? (
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-sm text-gray-600">
-                        {t("quizzes.results.confirmDelete")}
-                      </span>
-                      <button
-                        onClick={() => {
-                          onDeleteResult(result.id);
-                          setConfirmDeleteId(null);
-                        }}
-                        className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg font-medium transition cursor-pointer">
-                        {t("quizzes.results.deleteConfirmYes")}
-                      </button>
-                      <button
-                        onClick={() => setConfirmDeleteId(null)}
-                        className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg font-medium transition cursor-pointer">
-                        {t("quizzes.results.deleteConfirmNo")}
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setConfirmDeleteId(result.id)}
-                      className="mt-1 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition cursor-pointer"
-                      title={t("quizzes.results.deleteButton")}>
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
+                  <button
+                    onClick={() => setConfirmDeleteId(result.id)}
+                    className="mt-1 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition cursor-pointer"
+                    title={t("quizzes.results.deleteButton")}>
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
 
@@ -109,6 +88,35 @@ export function RecentResults({ results, onDeleteResult }) {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6">
+            <h3 className="text-lg font-bold text-primary-900 mb-2">
+              {t("quizzes.results.deleteTitle")}
+            </h3>
+            <p className="text-gray-600 mb-4">
+              {t("quizzes.results.deleteConfirmMessage")}
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  onDeleteResult(confirmDeleteId);
+                  setConfirmDeleteId(null);
+                }}
+                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition cursor-pointer">
+                {t("quizzes.results.deleteConfirmYes")}
+              </button>
+              <button
+                onClick={() => setConfirmDeleteId(null)}
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition cursor-pointer">
+                {t("quizzes.results.deleteConfirmNo")}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </section>

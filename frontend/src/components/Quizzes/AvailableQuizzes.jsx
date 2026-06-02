@@ -156,33 +156,12 @@ export function AvailableQuizzes({
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                {confirmDeleteId === quiz._id ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">
-                      {t("quizzes.available.confirmDelete")}
-                    </span>
-                    <button
-                      onClick={() => {
-                        onDeleteQuiz(quiz._id);
-                        setConfirmDeleteId(null);
-                      }}
-                      className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg font-medium transition cursor-pointer">
-                      {t("quizzes.available.deleteConfirmYes")}
-                    </button>
-                    <button
-                      onClick={() => setConfirmDeleteId(null)}
-                      className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg font-medium transition cursor-pointer">
-                      {t("quizzes.available.deleteConfirmNo")}
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setConfirmDeleteId(quiz._id)}
-                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition cursor-pointer"
-                    title={t("quizzes.available.deleteButton")}>
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
+                <button
+                  onClick={() => setConfirmDeleteId(quiz._id)}
+                  className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition cursor-pointer"
+                  title={t("quizzes.available.deleteButton")}>
+                  <Trash2 className="w-4 h-4" />
+                </button>
                 <button
                   onClick={() => onStartQuiz(quiz)}
                   className="flex items-center gap-2 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition cursor-pointer">
@@ -192,6 +171,35 @@ export function AvailableQuizzes({
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6">
+            <h3 className="text-lg font-bold text-primary-900 mb-2">
+              {t("quizzes.available.deleteTitle")}
+            </h3>
+            <p className="text-gray-600 mb-4">
+              {t("quizzes.available.deleteConfirmMessage")}
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  onDeleteQuiz(confirmDeleteId);
+                  setConfirmDeleteId(null);
+                }}
+                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition cursor-pointer">
+                {t("quizzes.available.deleteConfirmYes")}
+              </button>
+              <button
+                onClick={() => setConfirmDeleteId(null)}
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition cursor-pointer">
+                {t("quizzes.available.deleteConfirmNo")}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </section>

@@ -485,7 +485,12 @@
       "cancel": "إلغاء",
       "cancelButton": "إلغاء",
       "failedToAdd": "فشل إضافة المهمة. يرجى المحاولة مجدداً."
-    }
+    },
+    "deleteConfirm": "هل أنت متأكد من رغبتك في حذف هذه المهمة؟",
+    "deleteTitle": "حذف المهمة؟",
+    "deleteButton": "نعم، احذف المهمة",
+    "cancel": "إلغاء",
+    "deleteTooltip": "حذف المهمة"
   },
   "performance": {
     "pageTitle": "الأداء الأكاديمي",
@@ -612,7 +617,9 @@
       "noQuizzes": "لا تتوفر اختبارات لهذا المقرر بعد. ولّد اختباراً أدناه للبدء.",
       "deleteButton": "حذف الاختبار",
       "confirmDelete": "حذف هذا الاختبار؟",
-      "deleteConfirmYes": "حذف",
+      "deleteTitle": "حذف الاختبار؟",
+      "deleteConfirmMessage": "سيؤدي هذا إلى حذف هذا الاختبار بشكل دائم. لا يمكن التراجع عن هذا الإجراء.",
+      "deleteConfirmYes": "نعم، احذف الاختبار",
       "deleteConfirmNo": "إلغاء"
     },
     "session": {
@@ -637,7 +644,9 @@
       "weakAreas": "نقاط الضعف",
       "deleteButton": "حذف النتيجة",
       "confirmDelete": "إزالة هذه النتيجة؟",
-      "deleteConfirmYes": "إزالة",
+      "deleteTitle": "حذف نتيجة الاختبار؟",
+      "deleteConfirmMessage": "سيؤدي هذا إلى حذف نتيجة الاختبار هذه بشكل دائم. لا يمكن التراجع عن هذا الإجراء.",
+      "deleteConfirmYes": "نعم، احذف النتيجة",
       "deleteConfirmNo": "إلغاء"
     }
   },

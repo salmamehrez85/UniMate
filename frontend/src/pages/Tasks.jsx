@@ -31,6 +31,7 @@ export function Tasks() {
   const [query, setQuery] = useState("");
   const [updatingTaskId, setUpdatingTaskId] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
   // Active (non-old) courses available for the modal dropdown
   const activeCourses = useMemo(
@@ -185,6 +186,38 @@ export function Tasks() {
     }
   };
 
+  const handleDeleteTask = async (task) => {
+    if (!task?.courseId) return;
+
+    setUpdatingTaskId(task.id);
+
+    const course = courses.find((c) => c._id === task.courseId);
+    if (!course) {
+      setUpdatingTaskId(null);
+      return;
+    }
+
+    const updatedTasks = (course.tasks || []).filter((t) => t.id !== task.id);
+    const updatedCourse = { ...course, tasks: updatedTasks };
+
+    setCourses((prev) =>
+      prev.map((c) => (c._id === course._id ? updatedCourse : c)),
+    );
+
+    try {
+      await updateCourse(course._id, updatedCourse);
+      setDeleteConfirmId(null);
+    } catch (err) {
+      console.error("Failed to delete task:", err);
+      setCourses((prev) =>
+        prev.map((c) => (c._id === course._id ? course : c)),
+      );
+      setError(err.message || "Failed to delete task");
+    } finally {
+      setUpdatingTaskId(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="mt-20">
@@ -222,6 +255,9 @@ export function Tasks() {
         <TasksList
           tasks={filteredTasks}
           onToggleStatus={handleToggleStatus}
+          onDeleteTask={handleDeleteTask}
+          deleteConfirmId={deleteConfirmId}
+          setDeleteConfirmId={setDeleteConfirmId}
           updatingTaskId={updatingTaskId}
         />
       </div>
@@ -232,6 +268,35 @@ export function Tasks() {
           onClose={() => setShowAddModal(false)}
           onAdd={handleAddTask}
         />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirmId && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6">
+            <h3 className="text-lg font-bold text-primary-900 mb-2">
+              {t("tasks.deleteTitle")}
+            </h3>
+            <p className="text-gray-600 mb-4">{t("tasks.deleteConfirm")}</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  const task = filteredTasks.find(
+                    (t) => t.id === deleteConfirmId,
+                  );
+                  if (task) handleDeleteTask(task);
+                }}
+                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition cursor-pointer">
+                {t("tasks.deleteButton")}
+              </button>
+              <button
+                onClick={() => setDeleteConfirmId(null)}
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition cursor-pointer">
+                {t("tasks.cancel")}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
