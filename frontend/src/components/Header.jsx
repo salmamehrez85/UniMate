@@ -103,8 +103,8 @@ export function Header({ activeView, onLogout }) {
               </button>
 
               {open && (
-                <div className="absolute right-0 mt-2 w-72 lg:w-80 bg-white rounded-xl shadow-lg border border-gray-100 z-50 overflow-hidden max-h-80">
-                  <div className="px-3 md:px-4 py-2 md:py-3 border-b border-gray-100 flex items-center justify-between">
+                <div className="absolute right-0 mt-2 w-72 lg:w-80 bg-white rounded-xl shadow-lg border border-gray-100 z-50 flex flex-col max-h-96">
+                  <div className="px-3 md:px-4 py-2 md:py-3 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <span className="font-semibold text-gray-800 text-xs md:text-sm">
                       {t("header.notifications")}
                     </span>
@@ -118,7 +118,7 @@ export function Header({ activeView, onLogout }) {
                     )}
                   </div>
 
-                  <div className="overflow-y-auto divide-y divide-gray-50">
+                  <div className="overflow-y-auto divide-y divide-gray-50 flex-1 min-h-0">
                     {notifications.length === 0 ? (
                       <div className="px-3 md:px-4 py-6 md:py-8 text-center text-xs md:text-sm text-gray-400">
                         No new notifications
