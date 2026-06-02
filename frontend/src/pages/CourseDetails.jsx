@@ -48,7 +48,12 @@ export function CourseDetails({
   const renderTab = () => {
     switch (activeTab) {
       case "overview":
-        return <OverviewTab course={courseData} />;
+        return (
+          <OverviewTab
+            course={courseData}
+            onCourseUpdate={handleCourseUpdate}
+          />
+        );
       case "assessments":
         return (
           <AssessmentsTab

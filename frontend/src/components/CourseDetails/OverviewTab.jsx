@@ -1,11 +1,23 @@
-import { useState } from "react";
-import { CheckCircle, BookOpen, Zap } from "lucide-react";
+import { useState, useEffect } from "react";
+import { CheckCircle, BookOpen, Zap, Trash2 } from "lucide-react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 
-export function OverviewTab({ course }) {
+export function OverviewTab({ course, onCourseUpdate }) {
   const { t } = useTranslation();
   const [expandedSummaryKey, setExpandedSummaryKey] = useState(null);
   const [copiedSummaryKey, setCopiedSummaryKey] = useState(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
+  // Disable body scroll when delete modal is open
+  useEffect(() => {
+    if (confirmDeleteId !== null) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+  }, [confirmDeleteId]);
 
   const upcomingTasksCount = (course.tasks || []).filter(
     (t) => t.status !== "done",
@@ -41,6 +53,20 @@ export function OverviewTab({ course }) {
     } catch (error) {
       console.error("Failed to copy summary:", error);
     }
+  };
+
+  const handleDeleteSummary = (summaryIndex) => {
+    const updatedSummaries = savedSummaries.filter(
+      (_, idx) => idx !== summaryIndex,
+    );
+    const updatedCourse = {
+      ...course,
+      savedSummaries: updatedSummaries,
+    };
+    if (onCourseUpdate) {
+      onCourseUpdate(updatedCourse);
+    }
+    setConfirmDeleteId(null);
   };
 
   const stats = [
@@ -210,6 +236,19 @@ export function OverviewTab({ course }) {
                             ? t("courseDetails.overview.copied")
                             : t("courseDetails.overview.copy")}
                         </button>
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setConfirmDeleteId(index);
+                          }}
+                          className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition cursor-pointer"
+                          title={
+                            t("courseDetails.overview.deleteSummary") ||
+                            "Delete summary"
+                          }>
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
                     <p className="text-sm text-gray-700 leading-6 whitespace-pre-wrap">
@@ -226,6 +265,37 @@ export function OverviewTab({ course }) {
                 );
               })(),
             )}
+            {/* Delete Confirmation Dialog */}
+            {confirmDeleteId !== null &&
+              createPortal(
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                  <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6 max-h-[90vh] overflow-y-auto">
+                    <h3 className="text-lg font-bold text-primary-900 mb-2">
+                      {t("courseDetails.overview.deleteSummaryTitle") ||
+                        "Delete Summary"}
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      {t("courseDetails.overview.deleteSummaryConfirm") ||
+                        "Are you sure you want to delete this summary? This action cannot be undone."}
+                    </p>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => handleDeleteSummary(confirmDeleteId)}
+                        className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition cursor-pointer">
+                        {t("courseDetails.overview.deleteConfirmYes") ||
+                          "Delete"}
+                      </button>
+                      <button
+                        onClick={() => setConfirmDeleteId(null)}
+                        className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition cursor-pointer">
+                        {t("courseDetails.overview.deleteConfirmNo") ||
+                          "Cancel"}
+                      </button>
+                    </div>
+                  </div>
+                </div>,
+                document.body,
+              )}
           </div>
         )}
       </div>

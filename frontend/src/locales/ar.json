@@ -274,7 +274,12 @@
       "na": "غ.م.",
       "unknownDate": "تاريخ غير معروف",
       "clickToCollapse": "انقر للطي",
-      "clickToRead": "انقر لقراءة الملخص كاملاً"
+      "clickToRead": "انقر لقراءة الملخص كاملاً",
+      "deleteSummary": "حذف الملخص",
+      "deleteSummaryTitle": "حذف الملخص",
+      "deleteSummaryConfirm": "هل أنت متأكد من رغبتك في حذف هذا الملخص؟ لا يمكن التراجع عن هذا الإجراء.",
+      "deleteConfirmYes": "حذف",
+      "deleteConfirmNo": "إلغاء"
     },
     "tasks": {
       "all": "الكل",
