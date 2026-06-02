@@ -101,9 +101,11 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-lg max-w-md w-full">
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-hidden overflow-x-hidden">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded-xl shadow-lg max-w-md w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-primary-900">
             {initialData
               ? t("courseDetails.assessments.editTitle")
@@ -116,122 +118,120 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">
-              {error}
-            </div>
-          )}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">
+            {error}
+          </div>
+        )}
 
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t("courseDetails.assessments.titleLabel")}
+          </label>
+          <input
+            type="text"
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            placeholder={t("courseDetails.assessments.titlePlaceholder")}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t("courseDetails.assessments.typeLabel")}
+          </label>
+          <select
+            name="type"
+            value={formData.type}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+            {ASSESSMENT_TYPES.map((type) => (
+              <option key={type.value} value={type.value}>
+                {type.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("courseDetails.assessments.titleLabel")}
-            </label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              placeholder={t("courseDetails.assessments.titlePlaceholder")}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("courseDetails.assessments.typeLabel")}
-            </label>
-            <select
-              name="type"
-              value={formData.type}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-              {ASSESSMENT_TYPES.map((type) => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("courseDetails.assessments.scoreLabel")}
-              </label>
-              <input
-                type="number"
-                name="score"
-                value={formData.score}
-                onChange={handleChange}
-                placeholder="0"
-                step="0.1"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("courseDetails.assessments.maxScoreLabel")}
-              </label>
-              <input
-                type="number"
-                name="maxScore"
-                value={formData.maxScore}
-                onChange={handleChange}
-                placeholder="100"
-                step="0.1"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("courseDetails.assessments.dateLabel")}
-            </label>
-            <input
-              type="date"
-              name="date"
-              value={formData.date}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("courseDetails.assessments.weightLabel")}
+              {t("courseDetails.assessments.scoreLabel")}
             </label>
             <input
               type="number"
-              name="weight"
-              value={formData.weight}
+              name="score"
+              value={formData.score}
               onChange={handleChange}
-              placeholder="e.g., 10"
+              placeholder="0"
               step="0.1"
-              min="0"
-              max="100"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
-
-          <div className="flex gap-3 pt-4">
-            <button
-              type="submit"
-              className="flex-1 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
-              {initialData
-                ? t("courseDetails.assessments.save")
-                : t("courseDetails.assessments.add")}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
-              {t("courseDetails.assessments.cancel")}
-            </button>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t("courseDetails.assessments.maxScoreLabel")}
+            </label>
+            <input
+              type="number"
+              name="maxScore"
+              value={formData.maxScore}
+              onChange={handleChange}
+              placeholder="100"
+              step="0.1"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            />
           </div>
-        </form>
-      </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t("courseDetails.assessments.dateLabel")}
+          </label>
+          <input
+            type="date"
+            name="date"
+            value={formData.date}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t("courseDetails.assessments.weightLabel")}
+          </label>
+          <input
+            type="number"
+            name="weight"
+            value={formData.weight}
+            onChange={handleChange}
+            placeholder="e.g., 10"
+            step="0.1"
+            min="0"
+            max="100"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+          />
+        </div>
+
+        <div className="flex gap-3 pt-4">
+          <button
+            type="submit"
+            className="flex-1 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
+            {initialData
+              ? t("courseDetails.assessments.save")
+              : t("courseDetails.assessments.add")}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
+            {t("courseDetails.assessments.cancel")}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
@@ -387,7 +387,7 @@ export function AssessmentsTab({ course, onCourseUpdate }) {
 
       {/* Delete Confirmation Dialog */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-x-hidden">
           <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6">
             <h3 className="text-lg font-bold text-primary-900 mb-2">
               {t("courseDetails.assessments.deleteTitle")}

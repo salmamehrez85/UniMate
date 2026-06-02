@@ -87,9 +87,11 @@ function AddPhaseModal({ isOpen, onClose, onAdd }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b border-gray-100 sticky top-0 bg-white">
+    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-hidden overflow-x-hidden">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded-xl shadow-lg max-w-md w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-primary-900">
             {t("courseDetails.projectPhases.addTitle")}
           </h2>
@@ -99,96 +101,91 @@ function AddPhaseModal({ isOpen, onClose, onAdd }) {
             <X className="w-5 h-5" />
           </button>
         </div>
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">
+            {error}
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">
-              {error}
-            </div>
-          )}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t("courseDetails.projectPhases.phaseTitleLabel")}
+          </label>
+          <input
+            type="text"
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            placeholder={t("courseDetails.projectPhases.phaseTitlePlaceholder")}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+          />
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("courseDetails.projectPhases.phaseTitleLabel")}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t("courseDetails.projectPhases.dueDateLabel")}
+          </label>
+          <input
+            type="date"
+            name="dueDate"
+            value={formData.dueDate}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+          />
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <label className="block text-sm font-medium text-gray-700">
+              {t("courseDetails.projectPhases.requirementsLabel")}
             </label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              placeholder={t(
-                "courseDetails.projectPhases.phaseTitlePlaceholder",
-              )}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("courseDetails.projectPhases.dueDateLabel")}
-            </label>
-            <input
-              type="date"
-              name="dueDate"
-              value={formData.dueDate}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-            />
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <label className="block text-sm font-medium text-gray-700">
-                {t("courseDetails.projectPhases.requirementsLabel")}
-              </label>
-              <button
-                type="button"
-                onClick={addRequirement}
-                className="text-xs text-teal-600 hover:text-teal-700 font-semibold">
-                {t("courseDetails.projectPhases.addRequirement")}
-              </button>
-            </div>
-
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-              {formData.requirements.map((req, index) => (
-                <div key={index} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={req}
-                    onChange={(e) =>
-                      handleRequirementChange(index, e.target.value)
-                    }
-                    placeholder={t(
-                      "courseDetails.projectPhases.requirementPlaceholder",
-                    )}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeRequirement(index)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded transition">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex gap-3 pt-4">
-            <button
-              type="submit"
-              className="flex-1 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
-              {t("courseDetails.projectPhases.addButton")}
-            </button>
             <button
               type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
-              {t("courseDetails.projectPhases.cancel")}
+              onClick={addRequirement}
+              className="text-xs text-teal-600 hover:text-teal-700 font-semibold">
+              {t("courseDetails.projectPhases.addRequirement")}
             </button>
           </div>
-        </form>
-      </div>
+
+          <div className="space-y-2 max-h-48 overflow-y-auto">
+            {formData.requirements.map((req, index) => (
+              <div key={index} className="flex gap-2">
+                <input
+                  type="text"
+                  value={req}
+                  onChange={(e) =>
+                    handleRequirementChange(index, e.target.value)
+                  }
+                  placeholder={t(
+                    "courseDetails.projectPhases.requirementPlaceholder",
+                  )}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeRequirement(index)}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded transition">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex gap-3 pt-4">
+          <button
+            type="submit"
+            className="flex-1 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
+            {t("courseDetails.projectPhases.addButton")}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
+            {t("courseDetails.projectPhases.cancel")}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
@@ -355,7 +352,7 @@ export function ProjectPhasesTab({ course, onCourseUpdate }) {
 
       {/* Delete Confirmation Dialog */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-x-hidden">
           <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6">
             <h3 className="text-lg font-bold text-primary-900 mb-2">
               {t("courseDetails.projectPhases.deleteTitle")}

@@ -31,7 +31,7 @@ export function ForgotPasswordModal({ onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm overflow-x-hidden">
       <div className="bg-white rounded-2xl shadow-lg w-full max-w-md relative">
         {/* Close button */}
         <button

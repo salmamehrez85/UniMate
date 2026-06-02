@@ -89,14 +89,12 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
   };
 
   return (
-    <div
-      className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}>
-      <div className="bg-white rounded-xl shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-hidden overflow-x-hidden">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded-xl shadow-lg max-w-md w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-primary-900">
             {t("tasks.addModal.title")}
           </h2>
@@ -106,147 +104,143 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
             <X className="w-5 h-5" />
           </button>
         </div>
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">
+            {error}
+          </div>
+        )}
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">
-              {error}
-            </div>
-          )}
+        {/* Title */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t("tasks.addModal.titleLabel")}
+          </label>
+          <input
+            ref={titleRef}
+            type="text"
+            name="title"
+            value={form.title}
+            onChange={handleChange}
+            placeholder={t("tasks.addModal.titlePlaceholder")}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+          />
+        </div>
 
-          {/* Title */}
+        {/* Description */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t("tasks.addModal.descriptionLabel")}
+          </label>
+          <textarea
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            placeholder={t("tasks.addModal.descriptionPlaceholder")}
+            rows={3}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+          />
+        </div>
+
+        {/* Course */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t("tasks.addModal.courseLabel")}
+          </label>
+          <select
+            name="courseId"
+            value={form.courseId}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer">
+            {courses.map((c) => (
+              <option key={c._id} value={c._id}>
+                {c.code ? `${c.code} – ${c.name}` : c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Due Date + Due Time */}
+        <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("tasks.addModal.titleLabel")}
+              {t("tasks.addModal.dueDateLabel")}
             </label>
             <input
-              ref={titleRef}
-              type="text"
-              name="title"
-              value={form.title}
+              type="date"
+              name="dueDate"
+              value={form.dueDate}
               onChange={handleChange}
-              placeholder={t("tasks.addModal.titlePlaceholder")}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer"
             />
           </div>
-
-          {/* Description */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("tasks.addModal.descriptionLabel")}
+              {t("tasks.addModal.dueTimeLabel")}
             </label>
-            <textarea
-              name="description"
-              value={form.description}
+            <input
+              type="time"
+              name="dueTime"
+              value={form.dueTime}
               onChange={handleChange}
-              placeholder={t("tasks.addModal.descriptionPlaceholder")}
-              rows={3}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer"
             />
           </div>
+        </div>
 
-          {/* Course */}
+        {/* Status + Priority */}
+        <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("tasks.addModal.courseLabel")}
+              {t("tasks.addModal.statusLabel")}
             </label>
             <select
-              name="courseId"
-              value={form.courseId}
+              name="status"
+              value={form.status}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer">
-              {courses.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.code ? `${c.code} – ${c.name}` : c.name}
+              {STATUS_OPTIONS.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
                 </option>
               ))}
             </select>
           </div>
-
-          {/* Due Date + Due Time */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("tasks.addModal.dueDateLabel")}
-              </label>
-              <input
-                type="date"
-                name="dueDate"
-                value={form.dueDate}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("tasks.addModal.dueTimeLabel")}
-              </label>
-              <input
-                type="time"
-                name="dueTime"
-                value={form.dueTime}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer"
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t("tasks.addModal.priorityLabel")}
+            </label>
+            <select
+              name="priority"
+              value={form.priority}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer">
+              {PRIORITY_OPTIONS.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
           </div>
+        </div>
 
-          {/* Status + Priority */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("tasks.addModal.statusLabel")}
-              </label>
-              <select
-                name="status"
-                value={form.status}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer">
-                {STATUS_OPTIONS.map((s) => (
-                  <option key={s.value} value={s.value}>
-                    {s.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("tasks.addModal.priorityLabel")}
-              </label>
-              <select
-                name="priority"
-                value={form.priority}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer">
-                {PRIORITY_OPTIONS.map((p) => (
-                  <option key={p.value} value={p.value}>
-                    {p.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-3 pt-4">
-            <button
-              type="submit"
-              disabled={submitting}
-              className="flex-1 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
-              {submitting
-                ? t("tasks.addModal.adding")
-                : t("tasks.addModal.addButton")}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition cursor-pointer">
-              {t("tasks.addModal.cancelButton")}
-            </button>
-          </div>
-        </form>
-      </div>
+        {/* Actions */}
+        <div className="flex gap-3 pt-4">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="flex-1 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+            {submitting
+              ? t("tasks.addModal.adding")
+              : t("tasks.addModal.addButton")}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition cursor-pointer">
+            {t("tasks.addModal.cancelButton")}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

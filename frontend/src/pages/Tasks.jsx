@@ -284,7 +284,7 @@ export function Tasks() {
       {/* Delete Confirmation Dialog */}
       {deleteConfirmId &&
         createPortal(
-          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-hidden">
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-hidden overflow-x-hidden">
             <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6 max-h-[90vh] overflow-y-auto">
               <h3 className="text-lg font-bold text-primary-900 mb-2">
                 {t("tasks.deleteTitle")}

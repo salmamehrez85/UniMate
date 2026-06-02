@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import { Plus, Trash2, X, CheckCircle, Circle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -78,9 +77,11 @@ function AddTaskModal({ isOpen, onClose, onAdd }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-lg max-w-md w-full">
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-hidden overflow-x-hidden">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded-xl shadow-lg max-w-md w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-primary-900">
             {t("courseDetails.tasks.addTitle")}
           </h2>
@@ -90,120 +91,117 @@ function AddTaskModal({ isOpen, onClose, onAdd }) {
             <X className="w-5 h-5" />
           </button>
         </div>
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">
+            {error}
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">
-              {error}
-            </div>
-          )}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t("courseDetails.tasks.titleLabel")}
+          </label>
+          <input
+            type="text"
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            placeholder={t("courseDetails.tasks.titlePlaceholder")}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+          />
+        </div>
 
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t("courseDetails.tasks.descLabel")}
+          </label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            placeholder={t("courseDetails.tasks.descPlaceholder")}
+            rows="3"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("courseDetails.tasks.titleLabel")}
+              {t("courseDetails.tasks.dueDateLabel")}
             </label>
             <input
-              type="text"
-              name="title"
-              value={formData.title}
+              type="date"
+              name="dueDate"
+              value={formData.dueDate}
               onChange={handleChange}
-              placeholder={t("courseDetails.tasks.titlePlaceholder")}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t("courseDetails.tasks.dueTimeLabel")}
+            </label>
+            <input
+              type="time"
+              name="dueTime"
+              value={formData.dueTime}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t("courseDetails.tasks.statusLabel")}
+            </label>
+            <select
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+              {TASK_STATUS.map((status) => (
+                <option key={status.value} value={status.value}>
+                  {status.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("courseDetails.tasks.descLabel")}
+              {t("courseDetails.tasks.priorityLabel")}
             </label>
-            <textarea
-              name="description"
-              value={formData.description}
+            <select
+              name="priority"
+              value={formData.priority}
               onChange={handleChange}
-              placeholder={t("courseDetails.tasks.descPlaceholder")}
-              rows="3"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
-            />
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+              {TASK_PRIORITY.map((priority) => (
+                <option key={priority.value} value={priority.value}>
+                  {priority.label}
+                </option>
+              ))}
+            </select>
           </div>
+        </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("courseDetails.tasks.dueDateLabel")}
-              </label>
-              <input
-                type="date"
-                name="dueDate"
-                value={formData.dueDate}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("courseDetails.tasks.dueTimeLabel")}
-              </label>
-              <input
-                type="time"
-                name="dueTime"
-                value={formData.dueTime}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("courseDetails.tasks.statusLabel")}
-              </label>
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                {TASK_STATUS.map((status) => (
-                  <option key={status.value} value={status.value}>
-                    {status.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("courseDetails.tasks.priorityLabel")}
-              </label>
-              <select
-                name="priority"
-                value={formData.priority}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                {TASK_PRIORITY.map((priority) => (
-                  <option key={priority.value} value={priority.value}>
-                    {priority.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="flex gap-3 pt-4">
-            <button
-              type="submit"
-              className="flex-1 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
-              {t("courseDetails.tasks.addButton")}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
-              {t("courseDetails.tasks.cancel")}
-            </button>
-          </div>
-        </form>
-      </div>
+        <div className="flex gap-3 pt-4">
+          <button
+            type="submit"
+            className="flex-1 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
+            {t("courseDetails.tasks.addButton")}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
+            {t("courseDetails.tasks.cancel")}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
@@ -416,7 +414,7 @@ export function TasksTab({ course, onCourseUpdate }) {
       {/* Delete Confirmation Dialog */}
       {deleteConfirm &&
         createPortal(
-          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-hidden">
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-hidden overflow-x-hidden">
             <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6 max-h-[90vh] overflow-y-auto">
               <h3 className="text-lg font-bold text-primary-900 mb-2">
                 {t("courseDetails.tasks.deleteTitle")}
