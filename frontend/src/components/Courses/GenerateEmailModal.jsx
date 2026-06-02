@@ -203,12 +203,12 @@ export function GenerateEmailModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-x-hidden">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[92vh] overflow-y-auto border border-gray-100">
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-2 md:p-4 overflow-x-hidden">
+      <div className="bg-white rounded-2xl shadow-xl max-w-sm md:max-w-xl lg:max-w-3xl w-full max-h-[95vh] md:max-h-[92vh] overflow-y-auto border border-gray-100">
+        <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-5 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <Mail className="w-5 h-5 text-teal-600" />
-            <h2 className="text-xl font-bold text-gray-900">
+            <h2 className="text-lg md:text-xl font-bold text-gray-900">
               {t("courses.emailModal.title")}
             </h2>
           </div>

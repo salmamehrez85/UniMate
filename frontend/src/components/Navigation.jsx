@@ -52,18 +52,20 @@ export function Navigation({ activeView, setActiveView }) {
     <>
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-50 shadow-lg">
-        <div className="flex justify-around items-center h-16">
-          {allNavItems.slice(0, 5).map((item) => (
+        <div className="flex items-center h-14 md:h-16 overflow-x-auto scrollbar-hide">
+          {allNavItems.map((item) => (
             <button
               key={item.id}
               onClick={() => setActiveView(item.id)}
-              className={`flex flex-col items-center justify-center flex-1 h-full transition-all ${
+              className={`flex flex-col items-center justify-center px-2 md:px-3 h-full min-w-max transition-all ${
                 activeView === item.id
                   ? "text-primary-600"
                   : "text-gray-500 hover:text-primary-600"
               }`}>
-              <item.Icon className="w-5 h-5" />
-              <span className="text-xs mt-1 font-medium">{item.label}</span>
+              <item.Icon className="w-4 md:w-5 h-4 md:h-5" />
+              <span className="text-[10px] md:text-xs mt-0.5 md:mt-1 font-medium whitespace-nowrap">
+                {item.label}
+              </span>
             </button>
           ))}
         </div>

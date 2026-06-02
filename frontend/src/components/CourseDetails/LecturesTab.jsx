@@ -40,10 +40,10 @@ function PreviewModal({ lecture, onClose }) {
   const isPdf = lecture.mimeType === "application/pdf";
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-x-hidden">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 md:p-4 overflow-x-hidden">
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl flex flex-col overflow-hidden"
-        style={{ height: "90vh" }}>
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-sm md:max-w-2xl lg:max-w-5xl flex flex-col overflow-hidden max-h-[95vh] md:max-h-[90vh]"
+        style={{ height: "auto" }}>
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
           <div className="flex items-center gap-3 min-w-0">
@@ -326,8 +326,8 @@ export function LecturesTab({ course, onCourseUpdate }) {
       {/* ── Delete Confirmation Dialog ── */}
       {deleteConfirm &&
         createPortal(
-          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-hidden overflow-x-hidden">
-            <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6 max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-2 md:p-4 overflow-hidden overflow-x-hidden">
+            <div className="bg-white rounded-xl shadow-lg max-w-sm md:max-w-md w-full p-4 md:p-6 max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
               <h3 className="text-lg font-bold text-primary-900 mb-2">
                 {t("courseDetails.lectures.deleteTitle")}
               </h3>

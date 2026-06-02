@@ -89,10 +89,10 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-hidden overflow-x-hidden">
+    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-2 md:p-4 overflow-hidden overflow-x-hidden">
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-xl shadow-lg max-w-md w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        className="bg-white rounded-xl shadow-lg max-w-sm md:max-w-md w-full p-4 md:p-6 space-y-4 max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-primary-900">

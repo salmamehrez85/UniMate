@@ -217,14 +217,9 @@ const buildTagsFromCourse = (course) => {
 };
 
 // Reads up to 5 uploaded lecture/note files from disk and returns Gemini inlineData parts.
-// Silently skips any file that cannot be read (e.g. already deleted).
 const readLectureFilesAsInlineParts = (lectures = []) => {
   const MAX_LECTURE_FILES = 5;
   const parts = [];
-
-  console.log(
-    `[Lecture Read] Processing ${lectures.length} lecture(s), max ${MAX_LECTURE_FILES}`,
-  );
 
   for (const lecture of lectures.slice(0, MAX_LECTURE_FILES)) {
     try {
@@ -233,9 +228,7 @@ const readLectureFilesAsInlineParts = (lectures = []) => {
         "../uploads/lectures",
         lecture.filename,
       );
-      console.log(
-        `[Lecture Read] Reading: ${lecture.originalName} (${lecture.mimeType}) from ${filePath}`,
-      );
+
       const fileExists = fs.existsSync(filePath);
       if (!fileExists) {
         console.warn(`[Lecture Read] File not found: ${filePath}`);
@@ -243,9 +236,7 @@ const readLectureFilesAsInlineParts = (lectures = []) => {
       }
       const data = fs.readFileSync(filePath).toString("base64");
       const sizeKB = Math.round((data.length * 3) / 4 / 1024);
-      console.log(
-        `[Lecture Read] OK — base64 encoded, original size ~${sizeKB}KB`,
-      );
+
       parts.push({ inlineData: { mimeType: lecture.mimeType, data } });
     } catch (err) {
       console.warn(
@@ -254,7 +245,6 @@ const readLectureFilesAsInlineParts = (lectures = []) => {
     }
   }
 
-  console.log(`[Lecture Read] Total inline parts ready: ${parts.length}`);
   return parts;
 };
 
@@ -281,16 +271,8 @@ A student must be able to answer an exam solely from what you extract.`;
   const genAI = new GoogleGenerativeAI(apiKey);
   let lastError;
 
-  console.log(
-    `[Extraction] Starting — ${inlineParts.length} inline part(s), models: ${GEMINI_MODEL_CANDIDATES.join(", ")}`,
-  );
-  console.log(
-    `[Extraction] Timeout: ${DEFAULT_GENERATION_CONFIG.extractionTimeoutMs}ms`,
-  );
-
   for (const modelId of GEMINI_MODEL_CANDIDATES) {
     const attemptStart = Date.now();
-    console.log(`[Extraction] Trying model: ${modelId} ...`);
     try {
       const model = genAI.getGenerativeModel({ model: modelId });
       const response = await withTimeout(
@@ -310,9 +292,6 @@ A student must be able to answer an exam solely from what you extract.`;
       );
       const elapsed = Date.now() - attemptStart;
       const extracted = response.response.text();
-      console.log(
-        `[Extraction] ${modelId} responded in ${elapsed}ms — extracted ${extracted?.length ?? 0} chars`,
-      );
       if (extracted && extracted.trim().length > 100) {
         // Truncate to avoid exceeding token limits in the subsequent quiz call
         const text = extracted.trim();
@@ -321,9 +300,7 @@ A student must be able to answer an exam solely from what you extract.`;
             ? text.slice(0, DEFAULT_GENERATION_CONFIG.maxLectureContentChars) +
               "\n\n[Content truncated for length]"
             : text;
-        console.log(
-          `[Extraction] SUCCESS — returning ${result.length} chars of lecture content`,
-        );
+
         return result;
       }
       console.warn(

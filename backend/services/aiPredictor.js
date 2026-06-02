@@ -13,18 +13,11 @@ const MODEL_ID = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 let genAI;
 let model;
 
-console.log("[AI Predictor] GEMINI_API_KEY present:", !!GOOGLE_API_KEY);
-console.log(
-  "[AI Predictor] API Key format valid:",
-  GOOGLE_API_KEY?.startsWith("AIza") ? "✓" : "✗",
-);
-
 try {
   genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
   model = genAI.getGenerativeModel({ model: MODEL_ID });
-  console.log("✓ Gemini AI Client initialized successfully");
 } catch (error) {
-  console.error("✗ Failed to initialize Gemini Client:", error.message);
+  console.error("Failed to initialize Gemini Client:", error.message);
 }
 
 // ==========================================
@@ -368,11 +361,6 @@ const findSimilarCoursesFallback = (currentObj, pastObjs) => {
 
   const currentOutlineKeywords = extractKeywords(currentObj.outline_text);
 
-  console.log(
-    "Current course keywords from outline:",
-    currentOutlineKeywords.slice(0, 10),
-  );
-
   const scored = pastObjs.map((past) => {
     const pastTopics = (past.profile?.main_topics || [])
       .concat(past.profile?.skills || [])
@@ -393,9 +381,6 @@ const findSimilarCoursesFallback = (currentObj, pastObjs) => {
     ) {
       commonTopics = currentOutlineKeywords.filter((w) =>
         pastOutlineKeywords.includes(w),
-      );
-      console.log(
-        `Matching ${currentObj.name} with ${past.name} via outline keywords: ${commonTopics.length} matches`,
       );
     }
 
@@ -440,14 +425,6 @@ const findSimilarCoursesFallback = (currentObj, pastObjs) => {
 
   // Return top 3 by similarity
   const ranked = scored.sort((a, b) => b.similarity - a.similarity).slice(0, 3);
-
-  console.log(
-    "Fallback similarity results:",
-    ranked.map((r) => ({
-      name: r.name,
-      similarity: Math.round(r.similarity * 100) + "%",
-    })),
-  );
 
   return {
     ranked_past_courses: ranked.map((r) => ({

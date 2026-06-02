@@ -103,10 +103,6 @@ async function sendEmailNotification({ to, title, message }) {
   const info = await transporter.sendMail(mailOptions);
 
   if (isTest) {
-    console.log(
-      "[NotificationService] Dev email preview:",
-      nodemailer.getTestMessageUrl(info),
-    );
   }
 }
 

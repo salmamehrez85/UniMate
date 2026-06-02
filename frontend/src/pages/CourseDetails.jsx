@@ -91,36 +91,36 @@ export function CourseDetails({
   };
 
   return (
-    <div className="space-y-6 mt-20 px-6 pb-24 md:pb-6">
+    <div className="space-y-4 md:space-y-6 mt-20 px-3 md:px-6 pb-24 md:pb-6">
       {/* Header with Breadcrumb */}
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center gap-2 md:gap-4 mb-4 md:mb-6">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-primary-600 hover:text-primary-700 transition font-medium">
-          <ChevronLeft className="w-5 h-5" />
+          className="flex items-center gap-1 md:gap-2 text-primary-600 hover:text-primary-700 transition font-medium text-sm md:text-base">
+          <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
           {t("courseDetails.backToCourses")}
         </button>
       </div>
 
-      <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
+      <div className="bg-white rounded-xl p-3 md:p-6 border border-gray-100 shadow-sm">
+        <div className="flex items-center justify-between mb-4 md:mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-primary-900 mb-2">
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-primary-900 mb-1 md:mb-2">
               {courseData.name || courseData.title}
             </h1>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-sm md:text-base">
               {t("courseDetails.courseCode", { code: courseData.code })}
             </p>
           </div>
         </div>
 
         {/* Tabs Navigation */}
-        <div className="flex gap-2 border-b border-gray-200">
+        <div className="flex gap-1 md:gap-2 border-b border-gray-200 overflow-x-auto -mx-3 md:-mx-6 px-3 md:px-6">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-6 py-3 font-medium transition whitespace-nowrap ${
+              className={`px-3 md:px-6 py-2 md:py-3 font-medium transition text-xs md:text-sm whitespace-nowrap ${
                 activeTab === tab.id
                   ? "text-teal-600 border-b-2 border-teal-600 -mb-1"
                   : "text-gray-600 hover:text-gray-900"

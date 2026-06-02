@@ -131,11 +131,11 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-x-hidden">
-      <div className="bg-white rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-2 md:p-4 overflow-x-hidden">
+      <div className="bg-white rounded-2xl shadow-xl max-w-sm md:max-w-md w-full max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <h2 className="text-xl font-bold text-gray-900">
+        <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-100">
+          <h2 className="text-lg md:text-xl font-bold text-gray-900">
             {t("courses.addModal.title")}
           </h2>
           <button

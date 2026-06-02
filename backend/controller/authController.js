@@ -202,9 +202,6 @@ exports.forgotPassword = async (req, res) => {
 
     // In development, log the Ethereal preview URL to the console
     if (!process.env.EMAIL_USER) {
-      console.log("\n Password reset email preview (development only):");
-      console.log("   URL:", nodemailer.getTestMessageUrl(info));
-      console.log("   Reset link:", resetUrl, "\n");
     }
 
     res.status(200).json({
