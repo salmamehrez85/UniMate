@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Plus, Trash2, X, CheckCircle, Circle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -235,6 +236,16 @@ export function TasksTab({ course, onCourseUpdate }) {
   const [filterStatus, setFilterStatus] = useState("all");
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
+  // Disable body scroll when delete modal is open
+  useEffect(() => {
+    if (deleteConfirm) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+  }, [deleteConfirm]);
+
   const tasks = course.tasks || [];
 
   const filteredTasks = tasks.filter((task) =>
@@ -403,30 +414,32 @@ export function TasksTab({ course, onCourseUpdate }) {
       )}
 
       {/* Delete Confirmation Dialog */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6">
-            <h3 className="text-lg font-bold text-primary-900 mb-2">
-              {t("courseDetails.tasks.deleteTitle")}
-            </h3>
-            <p className="text-gray-600 mb-4">
-              {t("courseDetails.tasks.deleteConfirm")}
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => handleDeleteTask(deleteConfirm)}
-                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition">
-                {t("courseDetails.tasks.deleteButton")}
-              </button>
-              <button
-                onClick={() => setDeleteConfirm(null)}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
-                {t("courseDetails.tasks.cancel")}
-              </button>
+      {deleteConfirm &&
+        createPortal(
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-hidden">
+            <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6 max-h-[90vh] overflow-y-auto">
+              <h3 className="text-lg font-bold text-primary-900 mb-2">
+                {t("courseDetails.tasks.deleteTitle")}
+              </h3>
+              <p className="text-gray-600 mb-4">
+                {t("courseDetails.tasks.deleteConfirm")}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => handleDeleteTask(deleteConfirm)}
+                  className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition">
+                  {t("courseDetails.tasks.deleteButton")}
+                </button>
+                <button
+                  onClick={() => setDeleteConfirm(null)}
+                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
+                  {t("courseDetails.tasks.cancel")}
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
 
       <AddTaskModal
         isOpen={isModalOpen}

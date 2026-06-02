@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { TasksHeader } from "../components/Tasks/TasksHeader";
 import { TasksSummary } from "../components/Tasks/TasksSummary";
 import { TasksFilters } from "../components/Tasks/TasksFilters";
@@ -38,6 +39,16 @@ export function Tasks() {
     () => courses.filter((c) => c.isOldCourse !== true),
     [courses],
   );
+
+  // Disable body scroll when delete modal is open
+  useEffect(() => {
+    if (deleteConfirmId) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+  }, [deleteConfirmId]);
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -271,33 +282,35 @@ export function Tasks() {
       )}
 
       {/* Delete Confirmation Dialog */}
-      {deleteConfirmId && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6">
-            <h3 className="text-lg font-bold text-primary-900 mb-2">
-              {t("tasks.deleteTitle")}
-            </h3>
-            <p className="text-gray-600 mb-4">{t("tasks.deleteConfirm")}</p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  const task = filteredTasks.find(
-                    (t) => t.id === deleteConfirmId,
-                  );
-                  if (task) handleDeleteTask(task);
-                }}
-                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition cursor-pointer">
-                {t("tasks.deleteButton")}
-              </button>
-              <button
-                onClick={() => setDeleteConfirmId(null)}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition cursor-pointer">
-                {t("tasks.cancel")}
-              </button>
+      {deleteConfirmId &&
+        createPortal(
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-hidden">
+            <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6 max-h-[90vh] overflow-y-auto">
+              <h3 className="text-lg font-bold text-primary-900 mb-2">
+                {t("tasks.deleteTitle")}
+              </h3>
+              <p className="text-gray-600 mb-4">{t("tasks.deleteConfirm")}</p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    const task = filteredTasks.find(
+                      (t) => t.id === deleteConfirmId,
+                    );
+                    if (task) handleDeleteTask(task);
+                  }}
+                  className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition cursor-pointer">
+                  {t("tasks.deleteButton")}
+                </button>
+                <button
+                  onClick={() => setDeleteConfirmId(null)}
+                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition cursor-pointer">
+                  {t("tasks.cancel")}
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

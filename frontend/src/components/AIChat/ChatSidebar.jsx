@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   MessageSquare,
   Trash2,
@@ -35,6 +36,16 @@ function SessionItem({ session, isActive, onSelect, onDelete, onRename }) {
       inputRef.current?.select();
     }
   }, [editing]);
+
+  // Disable body scroll when delete modal is open
+  useEffect(() => {
+    if (deleteConfirm) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+  }, [deleteConfirm]);
 
   const startEdit = (e) => {
     e.stopPropagation();
@@ -145,37 +156,39 @@ function SessionItem({ session, isActive, onSelect, onDelete, onRename }) {
       )}
 
       {/* Delete Confirmation Dialog */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6">
-            <h3 className="text-lg font-bold text-primary-900 mb-2">
-              {t("aiChat.sidebar.deleteSessionTitle")}
-            </h3>
-            <p className="text-gray-600 mb-4">
-              {t("aiChat.sidebar.deleteSessionConfirm")}
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(session._id);
-                  setDeleteConfirm(false);
-                }}
-                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition cursor-pointer">
-                {t("aiChat.sidebar.deleteButton")}
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDeleteConfirm(false);
-                }}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition cursor-pointer">
-                {t("aiChat.sidebar.cancel")}
-              </button>
+      {deleteConfirm &&
+        createPortal(
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-hidden">
+            <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6 max-h-[90vh] overflow-y-auto">
+              <h3 className="text-lg font-bold text-primary-900 mb-2">
+                {t("aiChat.sidebar.deleteSessionTitle")}
+              </h3>
+              <p className="text-gray-600 mb-4">
+                {t("aiChat.sidebar.deleteSessionConfirm")}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(session._id);
+                    setDeleteConfirm(false);
+                  }}
+                  className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition cursor-pointer">
+                  {t("aiChat.sidebar.deleteButton")}
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteConfirm(false);
+                  }}
+                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition cursor-pointer">
+                  {t("aiChat.sidebar.cancel")}
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
