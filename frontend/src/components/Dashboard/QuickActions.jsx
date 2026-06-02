@@ -1,10 +1,17 @@
-import { Plus, FileText, HelpCircle } from "lucide-react";
+import { Plus, FileText, HelpCircle, BookOpen } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 export function QuickActions({ onNavigate }) {
   const { t } = useTranslation();
   return (
     <div className="flex flex-wrap gap-4 pt-2 justify-center">
+      <button
+        onClick={() => onNavigate("courses")}
+        className="flex items-center gap-2 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-sm hover:shadow-md cursor-pointer"
+        style={{ backgroundColor: "#10B981" }}>
+        <BookOpen className="w-5 h-5" />
+        {t("dashboard.quickActions.addCourse")}
+      </button>
       <button
         onClick={() => onNavigate("tasks")}
         className="flex items-center gap-2 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-sm hover:shadow-md cursor-pointer"

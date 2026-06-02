@@ -39,11 +39,11 @@ function PreviewModal({ lecture, onClose }) {
   const isImage = lecture.mimeType?.startsWith("image/");
   const isPdf = lecture.mimeType === "application/pdf";
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-sm md:max-w-2xl lg:max-w-5xl flex flex-col overflow-hidden max-h-[95vh] md:max-h-[90vh]"
-        style={{ height: "auto" }}>
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl lg:max-w-6xl flex flex-col overflow-hidden"
+        style={{ height: "80vh", aspectRatio: "1 / 1" }}>
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
           <div className="flex items-center gap-3 min-w-0">
@@ -94,7 +94,8 @@ function PreviewModal({ lecture, onClose }) {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

@@ -124,6 +124,7 @@
       "completedTasks": "المهام المنجزة"
     },
     "quickActions": {
+      "addCourse": "إضافة مقرر",
       "addTask": "إضافة مهمة",
       "summarize": "تلخيص",
       "takeQuiz": "ابدأ اختباراً"
@@ -306,6 +307,7 @@
       "deleteConfirm": "هل أنت متأكد من حذف هذه المهمة؟ لا يمكن التراجع عن هذا الإجراء.",
       "deleteButton": "حذف",
       "noTasksYet": "لم يتم إضافة أي مهام بعد.",
+      "noStatusTasks": "لا توجد مهام {{status}} بعد.",
       "addFirstTask": "أضف مهمتك الأولى"
     },
     "assessments": {
@@ -495,7 +497,9 @@
     "deleteTitle": "حذف المهمة؟",
     "deleteButton": "نعم، احذف المهمة",
     "cancel": "إلغاء",
-    "deleteTooltip": "حذف المهمة"
+    "deleteTooltip": "حذف المهمة",
+    "noCourses": "لا توجد مقررات نشطة",
+    "noCoursesMessage": "عليك إضافة مقرر أولاً قبل إنشاء المهام. يرجى إضافة مقرر من صفحة المقررات."
   },
   "performance": {
     "pageTitle": "الأداء الأكاديمي",

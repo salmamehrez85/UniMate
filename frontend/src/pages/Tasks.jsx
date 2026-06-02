@@ -283,6 +283,29 @@ export function Tasks() {
         />
       </div>
 
+      {showAddModal &&
+        activeCourses.length === 0 &&
+        createPortal(
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div className="bg-white rounded-xl shadow-lg max-w-sm md:max-w-md w-full p-6 md:p-8 max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
+              <h3 className="text-lg font-bold text-primary-900 mb-2">
+                {t("tasks.noCourses")}
+              </h3>
+              <p className="text-gray-600 mb-6">
+                {t("tasks.noCoursesMessage")}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition cursor-pointer">
+                  {t("tasks.cancel")}
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
+
       {showAddModal && activeCourses.length > 0 && (
         <AddTaskModal
           courses={activeCourses}
