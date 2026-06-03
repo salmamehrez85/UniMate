@@ -106,7 +106,7 @@ export function AIRecommendations() {
         <div className="text-center py-4">
           <p className="text-gray-600">
             {isRefreshing
-              ? t("performance.recommendations.analyzing")
+              ? t("performance.recommendations.runningAnalysis")
               : t("performance.recommendations.loading")}
           </p>
         </div>
