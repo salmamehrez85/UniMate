@@ -291,10 +291,10 @@ export function ProjectPhasesTab({ course, onCourseUpdate }) {
             return (
               <div
                 key={phase.id}
-                className="bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition">
+                className="bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-md transition-all duration-300">
                 <button
                   onClick={() => setExpandedPhase(isExpanded ? null : phase.id)}
-                  className="w-full p-6 flex items-center justify-between hover:bg-gray-50 transition">
+                  className="w-full p-6 flex items-center justify-between hover:bg-slate-50/50 transition-colors">
                   <div className="flex-1 text-left">
                     <h3 className="text-lg font-semibold text-primary-900">
                       {phase.title}
@@ -303,7 +303,7 @@ export function ProjectPhasesTab({ course, onCourseUpdate }) {
                       <span className="text-sm text-gray-600">
                         📅 {new Date(phase.dueDate).toLocaleDateString()}
                       </span>
-                      <span className="text-sm font-medium text-gray-600 bg-gray-100 px-3 py-1 rounded">
+                      <span className="text-sm font-medium text-gray-600 bg-slate-100 px-3 py-1 rounded-lg">
                         {completedRequirements} of {totalRequirements} completed
                       </span>
                     </div>
@@ -315,7 +315,7 @@ export function ProjectPhasesTab({ course, onCourseUpdate }) {
                         e.stopPropagation();
                         setDeleteConfirm(phase.id);
                       }}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded transition">
+                      className="p-2 text-red-600 hover:bg-red-50/80 rounded-lg transition-all duration-200 cursor-pointer">
                       <Trash2 className="w-5 h-5" />
                     </button>
                     {isExpanded ? (
@@ -327,7 +327,7 @@ export function ProjectPhasesTab({ course, onCourseUpdate }) {
                 </button>
 
                 {isExpanded && (
-                  <div className="border-t border-gray-100 p-6 bg-gray-50">
+                  <div className="border-t border-slate-100 p-6 bg-slate-50/30">
                     <h4 className="text-sm font-semibold text-gray-900 mb-4">
                       Requirements
                     </h4>
@@ -340,7 +340,7 @@ export function ProjectPhasesTab({ course, onCourseUpdate }) {
                         {phase.requirements.map((req) => (
                           <div
                             key={req.id}
-                            className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200">
+                            className="flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-100">
                             <button
                               onClick={() =>
                                 handleToggleRequirement(phase.id, req.id)

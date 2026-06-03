@@ -75,7 +75,7 @@ export function SettingsTab({
   return (
     <div className="space-y-8">
       {/* Edit Course Section */}
-      <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
+      <div className="bg-white rounded-2xl p-8 border border-slate-100 shadow-xs">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-primary-900">
             {t("courseDetails.settingsTab.editCourse")}
@@ -315,7 +315,7 @@ export function SettingsTab({
                 {t("courseDetails.settingsTab.outlineLabel")}
               </p>
               {course.outlineText ? (
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 max-h-64 overflow-y-auto">
+                <div className="bg-slate-50/50 p-4.5 rounded-xl border border-slate-100 max-h-64 overflow-y-auto">
                   <p className="text-gray-700 whitespace-pre-wrap text-sm leading-relaxed">
                     {course.outlineText}
                   </p>
@@ -331,7 +331,7 @@ export function SettingsTab({
       </div>
 
       {/* Delete Course Section - Danger Zone */}
-      <div className="bg-red-50 rounded-xl p-8 border border-red-200">
+      <div className="bg-red-50/50 rounded-2xl p-8 border border-red-100 shadow-xs">
         <h2 className="text-2xl font-bold text-red-900 mb-2">
           {t("courseDetails.settingsTab.dangerZone")}
         </h2>

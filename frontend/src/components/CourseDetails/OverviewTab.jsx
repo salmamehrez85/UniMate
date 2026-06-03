@@ -102,7 +102,7 @@ export function OverviewTab({ course, onCourseUpdate }) {
           return (
             <div
               key={stat.label}
-              className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition">
+              className="bg-white rounded-2xl p-6 border border-slate-100 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-300">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm font-medium">
@@ -122,7 +122,7 @@ export function OverviewTab({ course, onCourseUpdate }) {
       </div>
 
       {/* Course Info Block */}
-      <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
+      <div className="bg-white rounded-2xl p-8 border border-slate-100 shadow-xs">
         <h2 className="text-xl font-bold text-primary-900 mb-6">
           {t("courseDetails.overview.courseInfo")}
         </h2>
@@ -216,7 +216,7 @@ export function OverviewTab({ course, onCourseUpdate }) {
                           prev === summaryKey ? null : summaryKey,
                         );
                     }}
-                    className="w-full text-left border border-gray-100 rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition cursor-pointer">
+                    className="w-full text-left border border-slate-100 rounded-xl p-5 bg-slate-50/50 hover:bg-slate-50 transition-all duration-200 cursor-pointer">
                     <div className="flex items-center justify-between gap-3 mb-2">
                       <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold bg-teal-100 text-teal-700 uppercase">
                         {summary.mode || "quick"}

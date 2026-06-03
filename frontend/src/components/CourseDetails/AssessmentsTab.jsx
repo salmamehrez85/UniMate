@@ -391,7 +391,7 @@ export function AssessmentsTab({ course, onCourseUpdate }) {
   };
 
   return (
-    <div className="flex flex-col flex-1 min-h-full space-y-6 bg-gray-50 rounded-xl p-4">
+    <div className="flex flex-col flex-1 min-h-full space-y-6 bg-white rounded-2xl border border-slate-100 p-6 shadow-xs">
       {course.isOldCourse}
 
       <div className="flex justify-end">
@@ -415,10 +415,10 @@ export function AssessmentsTab({ course, onCourseUpdate }) {
           </button>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className="overflow-x-auto border border-slate-100 rounded-2xl">
+          <table className="w-full border-collapse">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
+              <tr className="border-b border-slate-100 bg-slate-50/70">
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
                   {t("courseDetails.assessments.titleHeader")}
                 </th>
@@ -443,7 +443,7 @@ export function AssessmentsTab({ course, onCourseUpdate }) {
               {assessments.map((assessment) => (
                 <tr
                   key={assessment.id}
-                  className="border-b border-gray-100 hover:bg-gray-50 transition">
+                  className="border-b border-slate-100 hover:bg-slate-50/40 transition-colors">
                   <td className="px-6 py-4 font-medium text-primary-900">
                     {assessment.title}
                   </td>
@@ -463,12 +463,12 @@ export function AssessmentsTab({ course, onCourseUpdate }) {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setEditingAssessment(assessment)}
-                        className="p-2 text-teal-600 hover:bg-teal-50 rounded transition">
+                        className="p-2 text-teal-600 hover:bg-teal-50/80 rounded-lg transition-all duration-200 cursor-pointer">
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => setDeleteConfirm(assessment.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded transition">
+                        className="p-2 text-red-600 hover:bg-red-50/80 rounded-lg transition-all duration-200 cursor-pointer">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>

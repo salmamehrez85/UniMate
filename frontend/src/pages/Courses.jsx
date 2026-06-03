@@ -131,22 +131,22 @@ export function Courses({ onSelectCourse }) {
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="inline-flex p-1 bg-slate-100/80 rounded-xl">
         <button
           onClick={() => setViewMode("active")}
-          className={`px-4 py-2 rounded-full text-sm font-semibold transition ${
+          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
             viewMode === "active"
-              ? "bg-teal-500 text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              ? "bg-white text-teal-600 shadow-sm"
+              : "text-gray-700 hover:text-gray-900"
           }`}>
           {t("courses.active", { count: activeCourses.length })}
         </button>
         <button
           onClick={() => setViewMode("completed")}
-          className={`px-4 py-2 rounded-full text-sm font-semibold transition ${
+          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
             viewMode === "completed"
-              ? "bg-teal-500 text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              ? "bg-white text-teal-600 shadow-sm"
+              : "text-gray-700 hover:text-gray-900"
           }`}>
           {t("courses.completed", { count: completedCourses.length })}
         </button>
