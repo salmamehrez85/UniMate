@@ -6,6 +6,7 @@ import { QuizSessionModal } from "../components/Quizzes/QuizSessionModal";
 import { RecentResults } from "../components/Quizzes/RecentResults";
 import { getUserData } from "../services/authService";
 import { getCourses } from "../services/courseService";
+import { useToast } from "../hooks/useToast";
 import {
   generateQuiz,
   getAvailableQuizzes,
@@ -67,6 +68,7 @@ export function Quizzes() {
   const [generateError, setGenerateError] = useState("");
   const [submitError, setSubmitError] = useState("");
 
+  const toast = useToast();
   const activeCourses = courses.filter((course) => course.isOldCourse !== true);
 
   const selectedCourse =
@@ -100,10 +102,7 @@ export function Quizzes() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(
-      getStorageKey(),
-      JSON.stringify(recentResults),
-    );
+    localStorage.setItem(getStorageKey(), JSON.stringify(recentResults));
   }, [recentResults]);
 
   useEffect(() => {
@@ -134,6 +133,7 @@ export function Quizzes() {
   const handleGenerateQuiz = async (formValues) => {
     setIsGenerating(true);
     setGenerateError("");
+    const infoToastId = toast.info("Generating quiz...", 0); // 0 means no auto-dismiss
 
     try {
       const response = await generateQuiz(formValues);
@@ -141,8 +141,13 @@ export function Quizzes() {
       setSelectedCourseId(formValues.courseId);
       setQuizzes((currentQuizzes) => [generatedQuiz, ...currentQuizzes]);
       setActiveQuiz(generatedQuiz);
+      toast.dismiss(infoToastId); // Dismiss the info toast
+      toast.success("Quiz generated successfully! You can now navigate away.");
     } catch (error) {
-      setGenerateError(error.message || "Failed to generate quiz");
+      const errorMessage = error.message || "Failed to generate quiz";
+      setGenerateError(errorMessage);
+      toast.dismiss(infoToastId); // Dismiss the info toast
+      toast.error(errorMessage);
     } finally {
       setIsGenerating(false);
     }
@@ -182,8 +187,12 @@ export function Quizzes() {
       const refreshedQuizzes = await getAvailableQuizzes(selectedCourseId);
       setQuizzes(refreshedQuizzes.quizzes || []);
       setTargetTopics(refreshedQuizzes.targetTopics || []);
+
+      toast.success("Quiz submitted successfully!");
     } catch (error) {
-      setSubmitError(error.message || "Failed to submit quiz");
+      const errorMessage = error.message || "Failed to submit quiz";
+      setSubmitError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -193,8 +202,11 @@ export function Quizzes() {
     try {
       await deleteQuiz(quizId);
       setQuizzes((current) => current.filter((q) => q._id !== quizId));
+      toast.success("Quiz deleted successfully");
     } catch (error) {
-      setPageError(error.message || "Failed to delete quiz");
+      const errorMessage = error.message || "Failed to delete quiz";
+      setPageError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 

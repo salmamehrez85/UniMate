@@ -15,6 +15,8 @@ import { Schedule } from "./pages/Schedule";
 import { EmailProfessor } from "./pages/EmailProfessor";
 import { Navigation } from "./components/Navigation";
 import { Header } from "./components/Header";
+import { Toast } from "./components/Toast";
+import { ToastProvider } from "./context/ToastContext";
 import { getAuthToken, logout as logoutService } from "./services/authService";
 import { applyAppearance, getAppearancePrefs } from "./hooks/useAppearance";
 import { applyLanguage, getLanguagePrefs } from "./hooks/useLanguage";
@@ -70,30 +72,39 @@ export default function App() {
   // Show authentication pages if not logged in
   if (resetToken) {
     return (
-      <ResetPassword
-        resetToken={resetToken}
-        onBackToLogin={() => {
-          setResetToken(null);
-          setAuthView("login");
-        }}
-      />
+      <ToastProvider>
+        <ResetPassword
+          resetToken={resetToken}
+          onBackToLogin={() => {
+            setResetToken(null);
+            setAuthView("login");
+          }}
+        />
+        <Toast />
+      </ToastProvider>
     );
   }
 
   if (!isAuthenticated) {
     if (authView === "login") {
       return (
-        <Login
-          onSwitchToRegister={() => setAuthView("register")}
-          onLoginSuccess={handleLoginSuccess}
-        />
+        <ToastProvider>
+          <Login
+            onSwitchToRegister={() => setAuthView("register")}
+            onLoginSuccess={handleLoginSuccess}
+          />
+          <Toast />
+        </ToastProvider>
       );
     } else {
       return (
-        <Register
-          onSwitchToLogin={() => setAuthView("login")}
-          onRegisterSuccess={handleRegisterSuccess}
-        />
+        <ToastProvider>
+          <Register
+            onSwitchToLogin={() => setAuthView("login")}
+            onRegisterSuccess={handleRegisterSuccess}
+          />
+          <Toast />
+        </ToastProvider>
       );
     }
   }
@@ -148,18 +159,21 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-gray-50">
-      <Navigation activeView={activeView} setActiveView={setActiveView} />
-      <div className="flex flex-col flex-1 w-full md:ms-64 overflow-hidden">
-        <Header activeView={activeView} onLogout={handleLogout} />
-        <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
-          <div
-            key={activeView}
-            className="page-transition min-h-full flex flex-col max-w-7xl mx-auto px-4 py-6">
-            {renderView()}
-          </div>
-        </main>
+    <ToastProvider>
+      <div className="flex h-screen w-full overflow-hidden bg-gray-50">
+        <Navigation activeView={activeView} setActiveView={setActiveView} />
+        <div className="flex flex-col flex-1 w-full md:ms-64 overflow-hidden">
+          <Header activeView={activeView} onLogout={handleLogout} />
+          <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
+            <div
+              key={activeView}
+              className="page-transition min-h-full flex flex-col max-w-7xl mx-auto px-4 py-6">
+              {renderView()}
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
+      <Toast />
+    </ToastProvider>
   );
 }
