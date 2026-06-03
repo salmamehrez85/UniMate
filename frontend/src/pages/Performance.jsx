@@ -19,6 +19,16 @@ import {
 } from "../services/courseService";
 import { useTranslation } from "react-i18next";
 
+/** Align UI with backend: one past course ≥80% similar → High confidence. */
+const confidenceFromTopSimilarity = (similarCourses, fallback) => {
+  const top = (similarCourses || []).reduce((max, sc) => {
+    const raw = Number(sc.similarity ?? 0);
+    const normalized = raw > 1 ? raw / 100 : raw;
+    return Math.max(max, normalized);
+  }, 0);
+  return top >= 0.8 ? "High" : fallback;
+};
+
 function PredictionSkeleton() {
   return (
     <div className="space-y-4">
@@ -428,7 +438,10 @@ export function Performance() {
             savedPredictions[c._id] = {
               predictedRange: { min: p.min, max: p.max },
               status,
-              confidence: p.confidence,
+              confidence: confidenceFromTopSimilarity(
+                p.similarCourses,
+                p.confidence,
+              ),
               usedAI: p.usedAI,
               currentPerformance: 0,
               predictionReason: null,
@@ -479,16 +492,20 @@ export function Performance() {
           status = "Watch";
         }
 
+        const similarCoursesRaw =
+          coursePrediction.prediction.similarCourses || [];
+
         const prediction = {
           predictedRange: { min: predictedMin, max: predictedMax },
           status,
-          confidence: coursePrediction.prediction.confidence,
+          confidence: confidenceFromTopSimilarity(
+            similarCoursesRaw,
+            coursePrediction.prediction.confidence,
+          ),
           usedAI: coursePrediction.prediction.usedAI,
           currentPerformance: currentPerf,
           predictionReason: coursePrediction.prediction.reason,
-          similarCoursesUsed: (
-            coursePrediction.prediction.similarCourses || []
-          ).map((sc) => ({
+          similarCoursesUsed: similarCoursesRaw.map((sc) => ({
             name: sc.name,
             similarity: Math.round(sc.similarity * 100),
             reason: sc.reason,

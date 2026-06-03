@@ -1,10 +1,13 @@
 const Course = require("../model/Course");
 const User = require("../model/User");
+const QuizResult = require("../model/QuizResult");
+const TopicMastery = require("../model/TopicMastery");
 const path = require("path");
 const fs = require("fs");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const {
   calculateAIPrediction,
+  deriveConfidenceFromSimilarCourses,
   generateActionableRecommendations,
   generateStructuredSummary,
 } = require("../services/aiPredictor");
@@ -848,17 +851,115 @@ exports.predictSingleCourse = async (req, res) => {
     const currentPerformance = calculateCurrentPerformance(
       course.assessments || [],
     );
+
+    // ── Enrich active course with quiz results, topic mastery, lectures, tasks, phases ──
+    let quiz_results_summary = null;
+    let topic_mastery = [];
+
+    try {
+      // Fetch all AI Practice quiz results for this course
+      const quizResults = await QuizResult.find({
+        courseId: course._id,
+        userId: req.user._id,
+      }).lean();
+
+      if (quizResults.length > 0) {
+        const totalScore = quizResults.reduce((sum, r) => sum + r.score, 0);
+        const avgScore = Math.round(totalScore / quizResults.length);
+
+        // Collect unique weak topic tags across all quiz results
+        const weakTopicsSet = new Set();
+        quizResults.forEach((r) => {
+          (r.weakAreas || []).forEach((tag) => weakTopicsSet.add(tag));
+          // Also collect subtopic tags from incorrect answers
+          (r.answeredQuestions || []).forEach((q) => {
+            if (!q.isCorrect) {
+              (q.subTopicTags || []).forEach((tag) => weakTopicsSet.add(tag));
+            }
+          });
+        });
+
+        quiz_results_summary = {
+          quizCount: quizResults.length,
+          avgScore,
+          weakTopics: Array.from(weakTopicsSet),
+        };
+      }
+    } catch (quizErr) {
+      console.warn("Could not fetch quiz results for prediction:", quizErr.message);
+    }
+
+    try {
+      // Fetch topic mastery scores for this course
+      const masteryRecords = await TopicMastery.find({
+        courseId: course._id,
+        userId: req.user._id,
+      })
+        .sort({ masteryScore: 1 }) // weakest first — most useful for Gemini
+        .lean();
+
+      topic_mastery = masteryRecords.map((m) => ({
+        tag: m.tag,
+        masteryScore: m.masteryScore,
+        needsReview: m.needsReview,
+      }));
+    } catch (masteryErr) {
+      console.warn("Could not fetch topic mastery for prediction:", masteryErr.message);
+    }
+
+    // Build assessment trend (sorted chronologically, excluding final)
+    const assessment_trend = (course.assessments || [])
+      .filter((a) => a.type !== "final" && a.score != null && a.maxScore != null)
+      .sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0))
+      .map((a) => ({
+        type: a.type,
+        scorePct: Math.round((a.score / a.maxScore) * 100),
+      }));
+
+    // Task completion rate
+    const tasks = course.tasks || [];
+    const completedTasks = tasks.filter(
+      (t) => t.status === "done" || t.completed === true,
+    ).length;
+    const task_completion_rate =
+      tasks.length > 0 ? completedTasks / tasks.length : null;
+
+    // Project phase completion rate
+    const phases = course.phases || [];
+    const completedPhases = phases.filter((ph) =>
+      (ph.requirements || []).every((r) => r.completed),
+    ).length;
+    const phase_completion_rate =
+      phases.length > 0 ? completedPhases / phases.length : null;
+
+    // Lecture signals
+    const lecture_count = (course.lectures || []).length;
+    const lecture_names = (course.lectures || []).map(
+      (l) => l.originalName || l.filename || "unknown",
+    );
+
+    // Assemble enriched active course object
+    const enrichedActiveCourse = {
+      code: course.code,
+      name: course.name,
+      outline_text: course.outlineText || course.name,
+      current_performance: currentPerformance ?? 0,
+      // enriched signals
+      quiz_results_summary,
+      topic_mastery,
+      lecture_count,
+      lecture_names,
+      assessment_trend,
+      task_completion_rate,
+      phase_completion_rate,
+    };
+
     let prediction;
 
     if (pastCoursesForAI.length > 0) {
       try {
         const aiResult = await calculateAIPrediction(
-          {
-            code: course.code,
-            name: course.name,
-            outline_text: course.outlineText || course.name,
-            current_performance: currentPerformance ?? 0,
-          },
+          enrichedActiveCourse,
           pastCoursesForAI,
         );
 
@@ -867,21 +968,28 @@ exports.predictSingleCourse = async (req, res) => {
           ? predictedScore
           : (currentPerformance ?? 0);
 
+        const similarCourses = (aiResult.similar_courses || []).map((sc) => ({
+          name: sc.name || sc.courseId,
+          similarity: sc.similarity ?? sc.similarity_score ?? 0,
+          reason: sc.reason,
+        }));
+
         prediction = {
           min: Math.max(Math.round(validPrediction - 3), 0),
           max: Math.min(Math.round(validPrediction + 3), 100),
-          confidence: aiResult.confidence,
-          similarCourses: (aiResult.similar_courses || []).map((sc) => ({
-            name: sc.name || sc.courseId,
-            similarity: sc.similarity || sc.similarity_score || 0,
-            reason: sc.reason,
-          })),
+          confidence: deriveConfidenceFromSimilarCourses(similarCourses, {
+            hasQuizSignal: (quiz_results_summary?.quizCount ?? 0) > 0,
+            hasMasterySignal: topic_mastery.length > 0,
+          }),
+          similarCourses,
           usedAI: !aiResult.error,
+          usedPerformanceContext: aiResult.used_performance_context || false,
         };
       } catch (err) {
         console.error("AI prediction failed, using fallback:", err.message);
         prediction = predictFinalGradeFallback(currentPerformance);
         prediction.usedAI = false;
+        prediction.usedPerformanceContext = false;
         prediction.confidence = calculateConfidenceFromPrediction(
           currentPerformance,
           prediction.min,
@@ -889,13 +997,33 @@ exports.predictSingleCourse = async (req, res) => {
         );
       }
     } else {
+      // No past courses — use enriched fallback: blend rule-based with mastery signal
       prediction = predictFinalGradeFallback(currentPerformance);
       prediction.usedAI = false;
-      prediction.confidence = calculateConfidenceFromPrediction(
-        currentPerformance,
-        prediction.min,
-        prediction.max,
-      );
+      prediction.usedPerformanceContext = false;
+
+      // If topic mastery is available, refine the prediction
+      if (topic_mastery.length > 0) {
+        const avgMastery =
+          topic_mastery.reduce((s, t) => s + t.masteryScore, 0) /
+          topic_mastery.length;
+        const midpoint = (prediction.min + prediction.max) / 2;
+        const blended = 0.6 * midpoint + 0.4 * avgMastery;
+        const halfRange = (prediction.max - prediction.min) / 2;
+        prediction.min = Math.max(Math.round(blended - halfRange), 0);
+        prediction.max = Math.min(Math.round(blended + halfRange), 100);
+        prediction.confidence = calculateConfidenceFromPrediction(
+          currentPerformance,
+          prediction.min,
+          prediction.max,
+        );
+      } else {
+        prediction.confidence = calculateConfidenceFromPrediction(
+          currentPerformance,
+          prediction.min,
+          prediction.max,
+        );
+      }
     }
 
     // Generate personalized recommendation for this course

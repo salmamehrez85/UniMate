@@ -7,7 +7,7 @@ require("dotenv").config({ override: true });
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const GOOGLE_API_KEY = process.env.GEMINI_API_KEY;
-const MODEL_ID = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const MODEL_ID = process.env.GEMINI_MODEL || "gemini-3.1-flash-lite";
 
 // Initialize Gemini Client
 let genAI;
@@ -244,18 +244,25 @@ const callLLMWithRetry = async (prompt, schema, maxRetries = 3) => {
 
 /**
  * Generate semantic profile for a course using LLM
+ * @param {string} courseName
+ * @param {string} outlineText
+ * @param {string|null} performanceContext - Optional enriched student performance block
  */
-const generateCourseProfile = async (courseName, outlineText) => {
+const generateCourseProfile = async (courseName, outlineText, performanceContext = null) => {
   try {
+    const performanceBlock = performanceContext
+      ? `\n\nSTUDENT PERFORMANCE DATA (use this to refine difficulty and domain accuracy):\n${performanceContext}`
+      : "";
+
     const prompt = `Analyze this course outline and extract semantic characteristics.
 Course Name: ${courseName}
-Outline: ${outlineText}
+Outline: ${outlineText}${performanceBlock}
 
 Return a JSON object with:
 - domain_tags: List of domain tags (e.g., "Programming", "Math", "Systems")
-- main_topics: 3-8 main topics covered in the course
+- main_topics: 3-8 main topics covered in the course (infer from outline + lecture names if available)
 - skills: 2-6 specific skills students learn
-- difficulty: One of "Intro", "Intermediate", "Advanced"
+- difficulty: One of "Intro", "Intermediate", "Advanced" (factor in quiz scores and topic mastery if provided)
 - assessment_style: One of "Implementation", "Analysis", "Mixed"`;
 
     const result = await callLLMWithRetry(prompt, CourseProfileSchema);
@@ -435,6 +442,83 @@ const findSimilarCoursesFallback = (currentObj, pastObjs) => {
   };
 };
 
+// ==========================================
+// PERFORMANCE CONTEXT BUILDER
+// ==========================================
+
+/**
+ * Builds a concise plain-text performance context block from enriched course data.
+ * This is appended to the Gemini prompt so it can factor in real student signals.
+ *
+ * @param {object} courseData - The active course object with enriched fields
+ * @returns {string|null} - Formatted context string, or null if nothing useful
+ */
+const buildPerformanceContext = (courseData) => {
+  const lines = [];
+
+  // --- Assessment score trend ---
+  if (courseData.assessment_trend && courseData.assessment_trend.length > 0) {
+    const trendStr = courseData.assessment_trend
+      .map((a) => `${a.type}: ${a.scorePct}%`)
+      .join(", ");
+    lines.push(`Assessments (chronological): ${trendStr}`);
+  }
+
+  // --- AI Practice Quiz performance ---
+  if (courseData.quiz_results_summary) {
+    const q = courseData.quiz_results_summary;
+    if (q.quizCount > 0) {
+      lines.push(
+        `AI Quiz Practice: ${q.quizCount} quiz(zes) taken, avg score ${q.avgScore}%`
+      );
+      if (q.weakTopics && q.weakTopics.length > 0) {
+        lines.push(`Weak topics from quizzes: ${q.weakTopics.slice(0, 6).join(", ")}`);
+      }
+    }
+  }
+
+  // --- Topic Mastery per-tag scores ---
+  if (courseData.topic_mastery && courseData.topic_mastery.length > 0) {
+    const masteryStr = courseData.topic_mastery
+      .slice(0, 8) // cap to avoid token bloat
+      .map(
+        (t) =>
+          `${t.tag}: ${t.masteryScore}%${t.needsReview ? " ⚠️needs-review" : ""}`
+      )
+      .join(", ");
+    lines.push(`Topic Mastery: ${masteryStr}`);
+  }
+
+  // --- Lecture file names (inferred topics) ---
+  if (courseData.lecture_names && courseData.lecture_names.length > 0) {
+    const names = courseData.lecture_names.slice(0, 10).join(", ");
+    lines.push(`Uploaded Lectures (${courseData.lecture_count} files): ${names}`);
+  } else if (courseData.lecture_count > 0) {
+    lines.push(`Uploaded Lectures: ${courseData.lecture_count} file(s)`);
+  }
+
+  // --- Task completion ---
+  if (
+    courseData.task_completion_rate !== null &&
+    courseData.task_completion_rate !== undefined
+  ) {
+    const pct = Math.round(courseData.task_completion_rate * 100);
+    lines.push(`Task completion: ${pct}%`);
+  }
+
+  // --- Project phase completion ---
+  if (
+    courseData.phase_completion_rate !== null &&
+    courseData.phase_completion_rate !== undefined
+  ) {
+    const pct = Math.round(courseData.phase_completion_rate * 100);
+    lines.push(`Project phase completion: ${pct}%`);
+  }
+
+  if (lines.length === 0) return null;
+  return lines.join("\n");
+};
+
 /**
  * Find similar courses using LLM semantic comparison
  */
@@ -485,6 +569,41 @@ Return JSON with a "ranked_past_courses" array.`;
 // PREDICTION CALCULATION
 // ==========================================
 
+/** Normalize LLM similarity to 0–1 (handles 0.95 vs 95). */
+const normalizeSimilarityScore = (score) => {
+  if (score == null || Number.isNaN(Number(score))) return 0;
+  const n = Number(score);
+  if (n > 1) return Math.min(n / 100, 1);
+  return Math.max(0, Math.min(n, 1));
+};
+
+/**
+ * Confidence from the strongest similar past course (not total weighted similarity).
+ * A single 80%+ match should yield High even when weaker matches pull totalSim below 1.5.
+ */
+const deriveConfidenceFromSimilarCourses = (
+  similarCourses,
+  { hasQuizSignal = false, hasMasterySignal = false, totalSim } = {},
+) => {
+  const sims = (similarCourses || []).map((sc) =>
+    normalizeSimilarityScore(sc.similarity ?? sc.similarity_score),
+  );
+  const topSimilarity = sims.length > 0 ? Math.max(...sims) : 0;
+  const weightedSum =
+    totalSim != null ? totalSim : sims.reduce((sum, s) => sum + s, 0);
+
+  const hasStrongMatch = topSimilarity >= 0.8;
+  const hasSolidMatch = topSimilarity >= 0.6;
+
+  if (hasStrongMatch) return "High";
+  if (hasSolidMatch && (hasQuizSignal || hasMasterySignal)) return "High";
+  if (hasSolidMatch || weightedSum > 1.5) {
+    return hasQuizSignal || hasMasterySignal ? "High" : "Medium";
+  }
+  if (hasQuizSignal || hasMasterySignal) return "Medium";
+  return "Low";
+};
+
 /**
  * Main prediction logic - replicates Python calculate_prediction function
  *
@@ -499,10 +618,14 @@ const calculateAIPrediction = async (activeCourse, pastCourses) => {
   try {
     const currentAvg = activeCourse.current_performance ?? 70;
 
-    // 1. Generate profile for active course
+    // 1. Build enriched performance context from all available student signals
+    const performanceContext = buildPerformanceContext(activeCourse);
+
+    // 2. Generate profile for active course (enriched with student performance data)
     const activeProfile = await generateCourseProfile(
       activeCourse.name,
       activeCourse.outline_text || activeCourse.name,
+      performanceContext,
     );
 
     const targetObj = {
@@ -512,7 +635,7 @@ const calculateAIPrediction = async (activeCourse, pastCourses) => {
       outline_text: activeCourse.outline_text || activeCourse.name,
     };
 
-    // 2. Generate profiles for all past courses
+    // 3. Generate profiles for all past courses (past courses use outline only — no live performance)
     const historyObjs = [];
     const pastDataMap = {};
 
@@ -527,6 +650,8 @@ const calculateAIPrediction = async (activeCourse, pastCourses) => {
       const pProfile = await generateCourseProfile(
         past.name,
         past.outline_text || past.name,
+        // Past courses: optionally pass their performance context if available
+        past.performance_context || null,
       );
 
       historyObjs.push({
@@ -537,10 +662,10 @@ const calculateAIPrediction = async (activeCourse, pastCourses) => {
       });
     }
 
-    // 3. Rank past courses by similarity
+    // 4. Rank past courses by semantic similarity
     const ranking = await findSimilarCourses(targetObj, historyObjs);
 
-    // 4. Calculate weighted prediction
+    // 5. Calculate weighted prediction using bias + historical final grade
     let weightedBias = 0;
     let weightedFinal = 0;
     let totalSim = 0;
@@ -551,7 +676,7 @@ const calculateAIPrediction = async (activeCourse, pastCourses) => {
 
       if (!pastDataMap[pid]) continue;
 
-      const sim = item.similarity_score;
+      const sim = normalizeSimilarityScore(item.similarity_score);
       const d = pastDataMap[pid];
 
       // BIAS = Final Grade % - Quiz Average %
@@ -575,7 +700,18 @@ const calculateAIPrediction = async (activeCourse, pastCourses) => {
     let confidence;
 
     if (totalSim === 0) {
+      // No similar past courses found — fall back to current avg, adjusted by topic mastery
       predPct = currentAvg;
+
+      // If we have topic mastery data, apply a small mastery-based adjustment
+      if (activeCourse.topic_mastery && activeCourse.topic_mastery.length > 0) {
+        const avgMastery =
+          activeCourse.topic_mastery.reduce((s, t) => s + t.masteryScore, 0) /
+          activeCourse.topic_mastery.length;
+        // Blend current avg with mastery signal (30% weight)
+        predPct = 0.7 * currentAvg + 0.3 * avgMastery;
+      }
+
       confidence = "Low";
     } else {
       const avgBias = weightedBias / totalSim;
@@ -585,8 +721,27 @@ const calculateAIPrediction = async (activeCourse, pastCourses) => {
       // pred_pct = 0.5 * (current_avg + avg_bias) + 0.5 * avg_past_final
       predPct = 0.5 * (currentAvg + avgBias) + 0.5 * avgPastFinal;
 
-      // Confidence based on similarity coverage
-      confidence = totalSim > 1.5 ? "High" : "Medium";
+      // Apply topic mastery adjustment if available (± up to 5 points)
+      if (activeCourse.topic_mastery && activeCourse.topic_mastery.length > 0) {
+        const avgMastery =
+          activeCourse.topic_mastery.reduce((s, t) => s + t.masteryScore, 0) /
+          activeCourse.topic_mastery.length;
+        // Small correction: if mastery diverges significantly from predicted, nudge toward mastery
+        const masteryDiff = avgMastery - predPct;
+        predPct = predPct + masteryDiff * 0.15; // 15% mastery pull
+      }
+
+      const hasQuizSignal =
+        activeCourse.quiz_results_summary &&
+        activeCourse.quiz_results_summary.quizCount > 0;
+      const hasMasterySignal =
+        activeCourse.topic_mastery && activeCourse.topic_mastery.length > 0;
+
+      confidence = deriveConfidenceFromSimilarCourses(similarCoursesOutput, {
+        hasQuizSignal,
+        hasMasterySignal,
+        totalSim,
+      });
     }
 
     // Clamp to valid percentage range [0, 100]
@@ -600,6 +755,7 @@ const calculateAIPrediction = async (activeCourse, pastCourses) => {
       predicted_score_pct: Math.round(finalPredictedScore * 100) / 100,
       confidence,
       similar_courses: similarCoursesOutput,
+      used_performance_context: !!performanceContext,
     };
   } catch (error) {
     console.error("AI Prediction calculation error:", error);
@@ -1754,6 +1910,8 @@ Constraints:
 
 module.exports = {
   calculateAIPrediction,
+  deriveConfidenceFromSimilarCourses,
+  normalizeSimilarityScore,
   generateActionableRecommendations,
   generateStructuredSummary,
 };
