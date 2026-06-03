@@ -6,22 +6,37 @@ const Quiz = require("../model/Quiz");
 
 const GEMINI_MODEL_CANDIDATES = [
   process.env.GEMINI_MODEL,
-  "gemini-3.5-flash",
+  "gemini-2.5-flash",
 ].filter(Boolean);
-
 const QUIZ_GENERATION_SYSTEM_PROMPT = `You are UniMate's expert professor-grade quiz generator.
 
-Your job is to create academically sound practice quizzes from retrieved course material.
+Your job is to create smart, reliable practice quizzes based strictly on the retrieved course material. You must prioritize high-yield concepts that test deep application and critical thinking.
 
-Non-negotiable rules:
-1. Return valid JSON only. No markdown, no code fences, no commentary, no explanation.
-2. The top-level JSON object must contain exactly these keys: title, description, questions.
-3. questions must be an array of question objects that match this structure exactly:
+## Question Generation Strategy (CRITICAL):
+1. **Scenario-Based Testing**: To test understanding rather than recall, you MUST invent realistic, hypothetical scenarios (e.g., a specific engineering problem, a patient case, a code bug, a business dilemma) that require the student to APPLY the course concepts to solve. 
+2. **Ban on Lazy Formats**: You are STRICTLY FORBIDDEN from generating questions that use the following formats:
+   - "Which of the following is NOT..."
+   - "All of the above" / "None of the above"
+   - "What is the definition of..."
+   - Simple True/False fact-checking
+3. **Plausible Distractors**: For MCQ/multiple_select, wrong answers must represent actual, common student misconceptions or logical errors based on the scenario. Do not use obvious throwaway options.
+4. **Scope Integrity**: While you MUST invent hypothetical scenarios for the question prompts, the underlying rules, formulas, and concepts required to arrive at the correct answer must be found STRICTLY in the provided course material. Do not introduce outside academic concepts.
+
+## Content & Quality Rules:
+1. Question prompts should be 2-4 sentences: establish the scenario, then ask the question.
+2. Explanations must be educational: state why the answer is correct and explicitly break down the logical flaw in the hardest distractor.
+3. Balance the mix: 20% fundamental concept application (medium), 60% scenario-based problem solving (hard), 20% complex analysis (hard). 
+4. Maintain academic correctness. A question should reward deep understanding, not penalize careful reading.
+
+## Non-Negotiable JSON Formatting Rules:
+1. Return valid JSON ONLY. No markdown formatting, no code fences (\`\`\`), no introductory or concluding commentary.
+2. The top-level JSON object must contain exactly: "title", "description", "questions".
+3. "questions" must be an array of objects matching this exact structure:
    {
-     "questionId": string,
+     "questionId": string, // short, unique, slug-like (e.g., "q-bst-deletion-1")
      "prompt": string,
      "type": "mcq" | "true_false" | "short_answer" | "multiple_select",
-     "difficulty": "easy" | "medium" | "hard",
+     "difficulty": "medium" | "hard", // Exclude "easy" to maintain rigor
      "options": [{ "key": string, "text": string }],
      "correctAnswer": string | boolean | string[],
      "explanation": string,
@@ -30,25 +45,17 @@ Non-negotiable rules:
      "subTopicTags": string[],
      "sourceChunks": string[]
    }
-4. Every question must include 1 to 3 highly specific subTopicTags.
-5. Never use broad tags like "math", "programming", "database", or "algorithms".
-6. Use specific micro-tags such as "bst_deletion", "inner_join_filtering", "matrix_multiplication", "chain_rule", or "avl_rotations".
-7. questionId must be short, unique, and slug-like.
-8. For mcq and multiple_select questions, options must contain 4 answer choices.
-9. For true_false questions, options must be an empty array and correctAnswer must be a boolean.
-10. For short_answer questions, options must be an empty array and correctAnswer must be a concise canonical answer string.
-11. explanation must be short, accurate, and educational.
-12. points must be a positive integer.
-13. estimatedSeconds must be realistic for the question difficulty.
-14. sourceChunks must point to the most relevant retrieved material fragments.
-15. Do not invent content unrelated to the provided course context.
-16. Maintain academic correctness and avoid ambiguous or trick questions unless explicitly requested.
-17. If the requested question type is "all", produce a sensible mix of types.
-18. Ensure the JSON is parseable by a production backend without manual cleanup.`;
+4. For "mcq" and "multiple_select", options must contain exactly 4 concise choices.
+5. For "true_false", options must be an empty array []. correctAnswer must be a boolean. (Use sparingly, only for complex applied logic, not fact recall).
+6. For "short_answer", options must be an empty array []. correctAnswer must be a short, canonical string.
+
+## Tagging Rules:
+1. Every question must include 1 to 3 highly specific micro-tags in subTopicTags (e.g., "avl_rotations", "chain_rule", "inner_join_filtering").
+2. NEVER use broad tags like "math", "programming", or "database".`;
 
 const DEFAULT_GENERATION_CONFIG = {
   timeoutMs: 30000,
-  extractionTimeoutMs: 180000, // extraction can be slow for large PDFs (2 × 2MB needs ~2-3 min)
+  extractionTimeoutMs: 300000, // extraction can be slow for large PDFs (2 × 2MB needs ~2-3 min)
   lectureQuizTimeoutMs: 90000, // quiz gen on large extracted text needs more time
   maxLectureContentChars: 18000, // ~4500 tokens — keeps prompt well within limits
   maxQuestions: 25,
@@ -221,6 +228,10 @@ const readLectureFilesAsInlineParts = (lectures = []) => {
   const MAX_LECTURE_FILES = 5;
   const parts = [];
 
+  console.log(
+    `\n[📚 DEBUG] readLectureFilesAsInlineParts - ${lectures?.length || 0} lecture(s) provided`,
+  );
+
   for (const lecture of lectures.slice(0, MAX_LECTURE_FILES)) {
     try {
       const filePath = path.join(
@@ -229,22 +240,28 @@ const readLectureFilesAsInlineParts = (lectures = []) => {
         lecture.filename,
       );
 
+      console.log(`[📚 DEBUG] Checking file: ${lecture.filename}`);
+
       const fileExists = fs.existsSync(filePath);
       if (!fileExists) {
-        console.warn(`[Lecture Read] File not found: ${filePath}`);
+        console.warn(`[❌ FILE NOT FOUND] ${filePath}`);
         continue;
       }
       const data = fs.readFileSync(filePath).toString("base64");
       const sizeKB = Math.round((data.length * 3) / 4 / 1024);
 
+      console.log(
+        `[✅ FILE READ] ${lecture.filename} (${sizeKB}KB, ${lecture.mimeType})`,
+      );
       parts.push({ inlineData: { mimeType: lecture.mimeType, data } });
     } catch (err) {
-      console.warn(
-        `[Lecture Read] Failed to read "${lecture.originalName}": ${err.message}`,
+      console.error(
+        `[❌ READ ERROR] "${lecture.originalName}": ${err.message}`,
       );
     }
   }
 
+  console.log(`[📚 DEBUG] Loaded ${parts.length} lecture file(s)\n`);
   return parts;
 };
 
@@ -253,7 +270,18 @@ const readLectureFilesAsInlineParts = (lectures = []) => {
 // read PDF/image inline data and return thorough plain-text content extraction.
 const extractLectureContent = async (inlineParts) => {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || inlineParts.length === 0) return null;
+
+  console.log(
+    `[🔍 EXTRACTION] Starting extraction of ${inlineParts.length} file(s)`,
+  );
+  console.log(
+    `[🔍 EXTRACTION] API Key available: ${apiKey ? "✅ YES" : "❌ NO"}`,
+  );
+
+  if (!apiKey || inlineParts.length === 0) {
+    console.log(`[⚠️  EXTRACTION SKIPPED] No API key or files\n`);
+    return null;
+  }
 
   const extractionPrompt = `You are a thorough academic content extractor for university courses.
 
@@ -273,6 +301,7 @@ A student must be able to answer an exam solely from what you extract.`;
 
   for (const modelId of GEMINI_MODEL_CANDIDATES) {
     const attemptStart = Date.now();
+    console.log(`[🤖 EXTRACTION] Trying model: ${modelId}`);
     try {
       const model = genAI.getGenerativeModel({ model: modelId });
       const response = await withTimeout(
@@ -292,6 +321,11 @@ A student must be able to answer an exam solely from what you extract.`;
       );
       const elapsed = Date.now() - attemptStart;
       const extracted = response.response.text();
+
+      console.log(
+        `[✅ EXTRACTED] ${modelId} got ${extracted?.length || 0} chars in ${elapsed}ms`,
+      );
+
       if (extracted && extracted.trim().length > 100) {
         // Truncate to avoid exceeding token limits in the subsequent quiz call
         const text = extracted.trim();
@@ -301,15 +335,16 @@ A student must be able to answer an exam solely from what you extract.`;
               "\n\n[Content truncated for length]"
             : text;
 
+        console.log(
+          `[✅ SUCCESS] Content prepared: ${result.length} chars (truncated: ${text.length > DEFAULT_GENERATION_CONFIG.maxLectureContentChars ? "YES" : "NO"})\n`,
+        );
         return result;
       }
-      console.warn(
-        `[Extraction] ${modelId} returned too little content (${extracted?.length ?? 0} chars), trying next model`,
-      );
+      console.log(`[⚠️  RETRY] Content too small, trying next model`);
     } catch (err) {
       const elapsed = Date.now() - attemptStart;
       console.error(
-        `[Extraction] ${modelId} FAILED after ${elapsed}ms — status: ${err.status ?? "N/A"}, code: ${err.code ?? "N/A"}, message: ${err.message}`,
+        `[❌ MODEL FAILED] ${modelId} in ${elapsed}ms: ${err.message}`,
       );
       lastError = err;
     }
@@ -423,6 +458,15 @@ const buildMockQuizPayload = ({
     "multiple_select",
   ];
 
+  // Helper to format tag names for human-readable questions
+  const formatTagAsLabel = (tag) => {
+    return tag
+      .replace(/_/g, " ")
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
   return {
     title: `${course.code} Practice Quiz`,
     description: `AI-generated practice set for ${course.name}`,
@@ -441,12 +485,12 @@ const buildMockQuizPayload = ({
       if (resolvedQuestionType === "true_false") {
         return {
           questionId,
-          prompt: `True or false: ${course.name} concept ${index + 1} can be justified directly from the provided course material.`,
+          prompt: `True or false: ${formatTagAsLabel(tagA)} is a fundamental principle covered in ${course.name}.`,
           type: "true_false",
           difficulty,
           options: [],
           correctAnswer: true,
-          explanation: `This statement aligns with the retrieved ${tagA} material.`,
+          explanation: `${formatTagAsLabel(tagA)} is indeed a key principle in ${course.name}. Students should understand its importance in the course context.`,
           points: 1,
           estimatedSeconds: difficulty === "hard" ? 75 : 45,
           subTopicTags: [tagA, tagB].slice(0, 2),
@@ -457,12 +501,12 @@ const buildMockQuizPayload = ({
       if (resolvedQuestionType === "short_answer") {
         return {
           questionId,
-          prompt: `Briefly explain the key idea behind ${tagA.replace(/_/g, " ")} in ${course.name}.`,
+          prompt: `Explain how ${formatTagAsLabel(tagA)} is applied in ${course.name}. Provide at least one specific example.`,
           type: "short_answer",
           difficulty,
           options: [],
-          correctAnswer: `${tagA.replace(/_/g, " ")} explanation`,
-          explanation: `A strong answer should define ${tagA.replace(/_/g, " ")} precisely and relate it to the course context.`,
+          correctAnswer: `${formatTagAsLabel(tagA)} is applied by...`,
+          explanation: `A strong answer should reference specific applications of ${formatTagAsLabel(tagA)} taught in this course and provide concrete examples from the material.`,
           points: 1,
           estimatedSeconds: difficulty === "hard" ? 90 : 60,
           subTopicTags: [tagA],
@@ -473,26 +517,29 @@ const buildMockQuizPayload = ({
       if (resolvedQuestionType === "multiple_select") {
         return {
           questionId,
-          prompt: `Select all statements that correctly describe ${tagA.replace(/_/g, " ")}.`,
+          prompt: `Which of the following correctly describe or apply ${formatTagAsLabel(tagA)}? (Select all that apply)`,
           type: "multiple_select",
           difficulty,
           options: [
             {
               key: "A",
-              text: `Correct statement about ${tagA.replace(/_/g, " ")}`,
+              text: `${formatTagAsLabel(tagA)} directly relates to ${formatTagAsLabel(tagB)}`,
             },
             {
               key: "B",
-              text: `Incorrect statement about ${tagA.replace(/_/g, " ")}`,
+              text: `${formatTagAsLabel(tagA)} is an outdated concept no longer relevant to ${course.name}`,
             },
             {
               key: "C",
-              text: `Another correct statement about ${tagB.replace(/_/g, " ")}`,
+              text: `${formatTagAsLabel(tagA)} requires understanding of foundational principles`,
             },
-            { key: "D", text: "Distractor option unrelated to the context" },
+            {
+              key: "D",
+              text: `${formatTagAsLabel(tagA)} is only applicable in advanced topics`,
+            },
           ],
           correctAnswer: ["A", "C"],
-          explanation: `The correct selections align with ${tagA} and ${tagB}.`,
+          explanation: `${formatTagAsLabel(tagA)} is a practical concept that connects to other course topics like ${formatTagAsLabel(tagB)}, and it builds on foundational knowledge. It is not outdated and is relevant throughout the course.`,
           points: 1,
           estimatedSeconds: difficulty === "hard" ? 80 : 55,
           subTopicTags: [tagA, tagB].slice(0, 2),
@@ -500,22 +547,49 @@ const buildMockQuizPayload = ({
         };
       }
 
+      // MCQ with more specific question styles
+      const mcqVariations = [
+        {
+          prompt: `What is the primary purpose of ${formatTagAsLabel(tagA)} in ${course.name}?`,
+          optionA: `To establish and apply ${formatTagAsLabel(tagA)} effectively`,
+          optionB: `To avoid understanding ${formatTagAsLabel(tagA)}`,
+          optionC: `To memorize definitions without application`,
+          optionD: `To replace ${formatTagAsLabel(tagB)} entirely`,
+          explanation: `${formatTagAsLabel(tagA)} serves a specific purpose in ${course.name}. Understanding this purpose helps students recognize when and how to apply it.`,
+        },
+        {
+          prompt: `How does ${formatTagAsLabel(tagA)} differ from ${formatTagAsLabel(tagB)}?`,
+          optionA: `${formatTagAsLabel(tagA)} focuses on one aspect while ${formatTagAsLabel(tagB)} covers a broader area`,
+          optionB: `They are identical concepts with different names`,
+          optionC: `${formatTagAsLabel(tagA)} is advanced while ${formatTagAsLabel(tagB)} is basic`,
+          optionD: `There is no meaningful difference between them`,
+          explanation: `${formatTagAsLabel(tagA)} and ${formatTagAsLabel(tagB)} are distinct concepts with different roles in ${course.name}. Understanding their differences is key to mastering the course material.`,
+        },
+        {
+          prompt: `Which scenario best illustrates the application of ${formatTagAsLabel(tagA)}?`,
+          optionA: `A situation requiring the principles of ${formatTagAsLabel(tagA)}`,
+          optionB: `Any random example unrelated to the course`,
+          optionC: `A situation where ${formatTagAsLabel(tagA)} would be inappropriate`,
+          optionD: `A topic covered in a different course entirely`,
+          explanation: `Recognizing where ${formatTagAsLabel(tagA)} applies is crucial. Students should be able to identify real-world or academic scenarios that require applying this principle.`,
+        },
+      ];
+
+      const mcqVariation = mcqVariations[index % mcqVariations.length];
+
       return {
         questionId,
-        prompt: `Which statement best matches ${tagA.replace(/_/g, " ")} in ${course.name}?`,
+        prompt: mcqVariation.prompt,
         type: resolvedQuestionType,
         difficulty,
         options: [
-          {
-            key: "A",
-            text: `Correct interpretation of ${tagA.replace(/_/g, " ")}`,
-          },
-          { key: "B", text: "Common misconception option" },
-          { key: "C", text: "Partially related but inaccurate option" },
-          { key: "D", text: "Irrelevant distractor" },
+          { key: "A", text: mcqVariation.optionA },
+          { key: "B", text: mcqVariation.optionB },
+          { key: "C", text: mcqVariation.optionC },
+          { key: "D", text: mcqVariation.optionD },
         ],
         correctAnswer: "A",
-        explanation: `Option A best reflects the course treatment of ${tagA.replace(/_/g, " ")}.`,
+        explanation: mcqVariation.explanation,
         points: 1,
         estimatedSeconds: difficulty === "hard" ? 70 : 50,
         subTopicTags: [tagA, tagB].slice(0, 2),
@@ -727,6 +801,17 @@ const generatePracticeQuiz = async ({
   timeoutMs,
   language,
 }) => {
+  console.log(`\n${"=".repeat(80)}`);
+  console.log("🎯 QUIZ GENERATION STARTED");
+  console.log(`${"=".repeat(80)}`);
+  console.log(`[INPUT] useMock: ${useMock}`);
+  console.log(`[INPUT] difficulty: ${difficulty}`);
+  console.log(`[INPUT] questionType: ${questionType}`);
+  console.log(`[INPUT] numberOfQuestions: ${numberOfQuestions}`);
+  console.log(
+    `[INPUT] GEMINI_API_KEY exists: ${process.env.GEMINI_API_KEY ? "✅ YES" : "❌ NO"}\n`,
+  );
+
   const normalizedDifficulty = normalizeDifficulty(difficulty);
   const normalizedQuestionType = normalizeQuestionType(questionType);
   const normalizedQuestionCount = normalizeQuestionCount(numberOfQuestions);
@@ -738,6 +823,9 @@ const generatePracticeQuiz = async ({
     throw error;
   }
 
+  console.log(`[COURSE] ${course.code} - ${course.name}`);
+  console.log(`[COURSE] Uploaded lectures: ${course.lectures?.length || 0}\n`);
+
   // Two-step lecture flow:
   // Step 1 — extract full text from PDFs/images without JSON-mode constraint
   //           (Gemini ignores inline data when responseMimeType:"application/json" is set)
@@ -745,6 +833,11 @@ const generatePracticeQuiz = async ({
   const lectureParts = readLectureFilesAsInlineParts(course.lectures || []);
   const lectureContent =
     lectureParts.length > 0 ? await extractLectureContent(lectureParts) : null;
+
+  console.log(`[EXTRACTION RESULT] Files read: ${lectureParts.length}`);
+  console.log(
+    `[EXTRACTION RESULT] Content extracted: ${lectureContent ? `✅ YES (${lectureContent.length} chars)` : "❌ NO"}\n`,
+  );
 
   const courseContext = await getCourseContext(
     courseId,
@@ -764,47 +857,76 @@ const generatePracticeQuiz = async ({
   let parsedQuizPayload;
 
   try {
+    console.log(`[🔴 DECISION POINT] Mock or Live?`);
+    console.log(
+      `  - useMock flag: ${useMock ? "✅ FORCE MOCK" : "❌ Try Live"}`,
+    );
+    console.log(
+      `  - GEMINI_API_KEY: ${process.env.GEMINI_API_KEY ? "✅ Available" : "❌ Missing"}\n`,
+    );
+
     if (useMock || !process.env.GEMINI_API_KEY) {
+      console.log(`[🎲 OPTION B] USING MOCK GENERATOR`);
+      const reason = useMock
+        ? "useMock flag is true"
+        : "GEMINI_API_KEY is missing";
+      console.log(`  Reason: ${reason}`);
+
       parsedQuizPayload = buildMockQuizPayload({
         course,
         numberOfQuestions: normalizedQuestionCount,
         difficulty: normalizedDifficulty,
         questionType: normalizedQuestionType,
       });
+      console.log(
+        `  ✅ Generated ${parsedQuizPayload.questions.length} mock questions\n`,
+      );
     } else {
+      console.log(`[🤖 OPTION A] USING LIVE GEMINI API`);
+      console.log(
+        `  With lecture content: ${lectureContent ? "✅ YES" : "❌ NO"}`,
+      );
+      const timeoutVal = lectureContent
+        ? DEFAULT_GENERATION_CONFIG.lectureQuizTimeoutMs
+        : DEFAULT_GENERATION_CONFIG.timeoutMs;
+      console.log(`  Timeout: ${timeoutVal}ms\n`);
+
       const rawResponse = await callGeminiForQuiz({
         systemPrompt: QUIZ_GENERATION_SYSTEM_PROMPT,
         userPrompt,
         // Use a longer timeout when lecture content is present:
         // the prompt is much larger and Gemini needs more time to process it.
-        timeoutMs:
-          timeoutMs ||
-          (lectureContent
-            ? DEFAULT_GENERATION_CONFIG.lectureQuizTimeoutMs
-            : DEFAULT_GENERATION_CONFIG.timeoutMs),
+        timeoutMs: timeoutMs || timeoutVal,
         // Lecture content is already baked into userPrompt as extracted text;
         // passing inline parts here would conflict with JSON mode.
         inlineParts: [],
       });
 
+      console.log(`  ✅ Gemini API call successful`);
       parsedQuizPayload = parseQuizGenerationResponse(
         rawResponse,
         normalizedDifficulty,
       );
+      console.log(
+        `  ✅ Parsed ${parsedQuizPayload.questions.length} questions\n`,
+      );
     }
   } catch (error) {
     if (shouldFallbackToMock(error)) {
-      console.warn(
-        "Falling back to mock quiz generation because live AI generation failed:",
-        error.message,
+      console.error(
+        `[⚠️  FALLBACK] Live generation failed, falling back to MOCK\n  Error: ${error.message}\n`,
       );
 
+      console.log(`[🎲 OPTION B] USING MOCK (FALLBACK)`);
       parsedQuizPayload = buildMockQuizPayload({
         course,
         numberOfQuestions: normalizedQuestionCount,
         difficulty: normalizedDifficulty,
         questionType: normalizedQuestionType,
       });
+      console.log(
+        `  ✅ Generated ${parsedQuizPayload.questions.length} fallback mock questions\n`,
+      );
     } else {
       if (!error.code) {
         error.code = "QUIZ_GENERATION_FAILED";
@@ -829,6 +951,8 @@ const generatePracticeQuiz = async ({
     new Set(questions.flatMap((question) => question.subTopicTags)),
   );
 
+  console.log(`[SAVED] Saving ${questions.length} questions to database...`);
+
   const quiz = await Quiz.create({
     userId,
     courseId,
@@ -851,6 +975,9 @@ const generatePracticeQuiz = async ({
       generatedAt: new Date(),
     },
   });
+
+  console.log(`[✅ COMPLETE] Quiz created and saved successfully`);
+  console.log(`${"=".repeat(80)}\n`);
 
   return {
     quiz,
