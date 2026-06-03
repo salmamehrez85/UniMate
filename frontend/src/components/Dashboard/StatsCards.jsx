@@ -36,17 +36,18 @@ export function StatsCards({ stats = {}, loading = false }) {
       {STATS_CONFIG.map((s) => (
         <div
           key={s.key}
-          className="bg-white rounded-lg p-7 shadow-sm border border-gray-200 hover:shadow-lg hover:border-gray-300 transition-all duration-300 cursor-pointer">
-          <div
-            className={`w-14 h-14 rounded-lg ${s.color} flex items-center justify-center mb-5`}>
-            <s.Icon className="w-7 h-7" />
+          className="glass-card rounded-2xl p-6 hover:-translate-y-1.5 hover:shadow-md transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[120px]">
+          <div className="flex items-start justify-between">
+            <span className="text-[10px] font-bold tracking-widest uppercase text-gray-400 leading-none">
+              {s.label}
+            </span>
+            <s.Icon className={`w-5 h-5 flex-shrink-0 opacity-80 ${s.color.split(" ")[1] || ""}`} />
           </div>
-          <p className="text-3xl font-bold text-primary-900 mb-1">
-            {loading ? "—" : (stats[s.key] ?? "—")}
-          </p>
-          <p className="text-xs text-gray-600 mt-2 font-semibold uppercase tracking-wide">
-            {s.label}
-          </p>
+          <div className="mt-auto pt-2">
+            <p className="text-3xl font-display font-extrabold text-primary-900 tracking-tight">
+              {loading ? "—" : (stats[s.key] ?? "—")}
+            </p>
+          </div>
         </div>
       ))}
     </div>

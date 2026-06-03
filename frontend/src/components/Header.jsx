@@ -82,10 +82,10 @@ export function Header({ activeView, onLogout }) {
   };
 
   return (
-    <header className="bg-white border-b border-gray-100 sticky top-0 z-10 shadow-sm">
-      <div className="mx-auto px-3 md:px-6 py-3 md:py-5">
+    <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-30 shadow-xs">
+      <div className="mx-auto px-3 md:px-6 py-3.5 md:py-4">
         <div className="flex items-center justify-between gap-2 md:gap-4">
-          <h1 className="text-lg md:text-2xl font-bold text-primary-700 text-left tracking-tight truncate">
+          <h1 className="text-lg md:text-2xl font-display font-extrabold text-slate-900 text-left tracking-tight truncate">
             {getTitle()}
           </h1>
           <div className="flex items-center gap-1 md:gap-4 flex-shrink-0">
@@ -93,7 +93,7 @@ export function Header({ activeView, onLogout }) {
             <div className="relative" ref={panelRef}>
               <button
                 onClick={() => setOpen((v) => !v)}
-                className="relative p-2 md:p-2.5 hover:bg-gray-50 rounded-lg transition-colors text-primary-600 cursor-pointer flex-shrink-0">
+                className="relative p-2 md:p-2.5 hover:bg-gray-50/80 rounded-lg transition-all active:scale-95 text-primary-600 cursor-pointer flex-shrink-0">
                 <Bell className="w-4 md:w-5 h-4 md:h-5" />
                 {unreadCount > 0 && (
                   <span className="absolute top-1 right-1 min-w-4 h-4 px-0.5 flex items-center justify-center bg-red-500 rounded-full text-white text-[10px] font-bold leading-none">
@@ -103,8 +103,8 @@ export function Header({ activeView, onLogout }) {
               </button>
 
               {open && (
-                <div className="absolute right-0 mt-2 w-72 lg:w-80 bg-white rounded-xl shadow-lg border border-gray-100 z-50 flex flex-col max-h-96">
-                  <div className="px-3 md:px-4 py-2 md:py-3 border-b border-gray-100 flex items-center justify-between shrink-0">
+                <div className="absolute right-0 mt-2 w-72 lg:w-80 bg-white rounded-xl shadow-lg border border-gray-100/80 z-50 flex flex-col max-h-96">
+                  <div className="px-3 md:px-4 py-2.5 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <span className="font-semibold text-gray-800 text-xs md:text-sm">
                       {t("header.notifications")}
                     </span>
@@ -180,7 +180,7 @@ export function Header({ activeView, onLogout }) {
 
             <button
               onClick={onLogout}
-              className="p-2 md:p-2.5 hover:bg-red-50 rounded-lg transition-colors text-red-600 cursor-pointer flex-shrink-0"
+              className="p-2 md:p-2.5 hover:bg-red-50 rounded-lg transition-all active:scale-95 text-red-600 cursor-pointer flex-shrink-0"
               title="Logout">
               <LogOut className="w-4 md:w-5 h-4 md:h-5" />
             </button>

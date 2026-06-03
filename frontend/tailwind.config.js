@@ -26,7 +26,8 @@ export default {
         },
       },
       fontFamily: {
-        sans: ["Cairo", "Inter", "system-ui", "sans-serif"],
+        sans: ["Inter", "Cairo", "system-ui", "sans-serif"],
+        display: ["Outfit", "Plus Jakarta Sans", "Cairo", "sans-serif"],
       },
     },
   },

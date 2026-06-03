@@ -1,8 +1,8 @@
 const STORAGE_KEY = "appearancePrefs";
 
-const DEFAULTS = { theme: "light", fontSize: "Medium" };
+const DEFAULTS = { theme: "light", fontSize: "Small" };
 
-const FONT_SIZE_MAP = { Small: "14px", Medium: "16px", Large: "18px" };
+const FONT_SIZE_MAP = { Small: "16px", Medium: "18px", Large: "20px" };
 
 function load() {
   try {

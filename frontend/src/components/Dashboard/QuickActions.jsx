@@ -7,28 +7,26 @@ export function QuickActions({ onNavigate }) {
     <div className="flex flex-wrap gap-4 pt-2 justify-center">
       <button
         onClick={() => onNavigate("courses")}
-        className="flex items-center gap-2 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-sm hover:shadow-md cursor-pointer"
-        style={{ backgroundColor: "#10B981" }}>
-        <BookOpen className="w-5 h-5" />
+        className="flex items-center gap-2 text-white px-6 py-3.5 rounded-xl font-bold tracking-wide transition-all shadow-md hover:shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 active:scale-95 hover:-translate-y-0.5 duration-200 cursor-pointer bg-gradient-to-r from-emerald-500 to-teal-500">
+        <BookOpen className="w-4.5 h-4.5" />
         {t("dashboard.quickActions.addCourse")}
       </button>
       <button
         onClick={() => onNavigate("tasks")}
-        className="flex items-center gap-2 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-sm hover:shadow-md cursor-pointer"
-        style={{ backgroundColor: "#398FAC" }}>
-        <Plus className="w-5 h-5" />
+        className="flex items-center gap-2 text-white px-6 py-3.5 rounded-xl font-bold tracking-wide transition-all shadow-md hover:shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/20 active:scale-95 hover:-translate-y-0.5 duration-200 cursor-pointer bg-gradient-to-r from-indigo-500 to-violet-500">
+        <Plus className="w-4.5 h-4.5" />
         {t("dashboard.quickActions.addTask")}
       </button>
       <button
         onClick={() => onNavigate("summarizer")}
-        className="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-900 px-6 py-3 rounded-lg font-semibold transition-colors shadow-sm hover:shadow-md border border-gray-200 cursor-pointer">
-        <FileText className="w-5 h-5" />
+        className="flex items-center gap-2 bg-white/70 backdrop-blur-md hover:bg-gray-50/50 text-gray-900 px-6 py-3.5 rounded-xl font-bold tracking-wide transition-all shadow-xs border border-gray-200 hover:border-gray-300 active:scale-95 hover:-translate-y-0.5 duration-200 cursor-pointer">
+        <FileText className="w-4.5 h-4.5 text-gray-500" />
         {t("dashboard.quickActions.summarize")}
       </button>
       <button
         onClick={() => onNavigate("quizzes")}
-        className="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-900 px-6 py-3 rounded-lg font-semibold transition-colors shadow-sm hover:shadow-md border border-gray-200 cursor-pointer">
-        <HelpCircle className="w-5 h-5" />
+        className="flex items-center gap-2 bg-white/70 backdrop-blur-md hover:bg-gray-50/50 text-gray-900 px-6 py-3.5 rounded-xl font-bold tracking-wide transition-all shadow-xs border border-gray-200 hover:border-gray-300 active:scale-95 hover:-translate-y-0.5 duration-200 cursor-pointer">
+        <HelpCircle className="w-4.5 h-4.5 text-gray-500" />
         {t("dashboard.quickActions.takeQuiz")}
       </button>
     </div>

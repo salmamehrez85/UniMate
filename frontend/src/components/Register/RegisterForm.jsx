@@ -84,18 +84,18 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-8">
-      <form onSubmit={handleSubmit} className="space-y-5">
+    <div className="glass-card rounded-2xl p-8 shadow-lg">
+      <form onSubmit={handleSubmit} className="space-y-4.5">
         {/* Full Name Field */}
         <div>
           <label
             htmlFor="fullName"
-            className="block text-sm font-medium text-gray-700 mb-2">
+            className="block text-xs font-bold tracking-wider uppercase text-gray-500 mb-2">
             {t("auth.register.fullNameLabel")}
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
-              <User className="h-5 w-5 text-gray-400" />
+            <div className="absolute inset-y-0 start-0 ps-3.5 flex items-center pointer-events-none">
+              <User className="h-4.5 w-4.5 text-gray-400" />
             </div>
             <input
               id="fullName"
@@ -103,7 +103,7 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
               type="text"
               value={formData.fullName}
               onChange={handleChange}
-              className="block w-full ps-10 pe-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+              className="block w-full ps-10 pe-3 py-3 bg-gray-100/70 dark:bg-slate-950/20 border border-gray-200 rounded-xl transition duration-200 text-sm"
               placeholder={t("auth.register.fullNamePlaceholder")}
               disabled={loading}
             />
@@ -114,12 +114,12 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-2">
+            className="block text-xs font-bold tracking-wider uppercase text-gray-500 mb-2">
             {t("auth.register.emailLabel")}
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
-              <Mail className="h-5 w-5 text-gray-400" />
+            <div className="absolute inset-y-0 start-0 ps-3.5 flex items-center pointer-events-none">
+              <Mail className="h-4.5 w-4.5 text-gray-400" />
             </div>
             <input
               id="email"
@@ -127,7 +127,7 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
               type="email"
               value={formData.email}
               onChange={handleChange}
-              className="block w-full ps-10 pe-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+              className="block w-full ps-10 pe-3 py-3 bg-gray-100/70 dark:bg-slate-950/20 border border-gray-200 rounded-xl transition duration-200 text-sm"
               placeholder={t("auth.register.emailPlaceholder")}
               disabled={loading}
             />
@@ -138,12 +138,12 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
         <div>
           <label
             htmlFor="university"
-            className="block text-sm font-medium text-gray-700 mb-2">
+            className="block text-xs font-bold tracking-wider uppercase text-gray-500 mb-2">
             {t("auth.register.universityLabel")}
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
-              <GraduationCap className="h-5 w-5 text-gray-400" />
+            <div className="absolute inset-y-0 start-0 ps-3.5 flex items-center pointer-events-none">
+              <GraduationCap className="h-4.5 w-4.5 text-gray-400" />
             </div>
             <input
               id="university"
@@ -151,7 +151,7 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
               type="text"
               value={formData.university}
               onChange={handleChange}
-              className="block w-full ps-10 pe-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+              className="block w-full ps-10 pe-3 py-3 bg-gray-100/70 dark:bg-slate-950/20 border border-gray-200 rounded-xl transition duration-200 text-sm"
               placeholder={t("auth.register.universityPlaceholder")}
               disabled={loading}
             />
@@ -162,12 +162,12 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
         <div>
           <label
             htmlFor="password"
-            className="block text-sm font-medium text-gray-700 mb-2">
+            className="block text-xs font-bold tracking-wider uppercase text-gray-500 mb-2">
             {t("auth.register.passwordLabel")}
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
-              <Lock className="h-5 w-5 text-gray-400" />
+            <div className="absolute inset-y-0 start-0 ps-3.5 flex items-center pointer-events-none">
+              <Lock className="h-4.5 w-4.5 text-gray-400" />
             </div>
             <input
               id="password"
@@ -175,19 +175,19 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
               type={showPassword ? "text" : "password"}
               value={formData.password}
               onChange={handleChange}
-              className="block w-full ps-10 pe-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+              className="block w-full ps-10 pe-12 py-3 bg-gray-100/70 dark:bg-slate-950/20 border border-gray-200 rounded-xl transition duration-200 text-sm"
               placeholder={t("auth.register.passwordPlaceholder")}
               disabled={loading}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 end-0 pe-3 flex items-center"
+              className="absolute inset-y-0 end-0 pe-3.5 flex items-center"
               disabled={loading}>
               {showPassword ? (
-                <EyeOff className="h-5 w-5 text-gray-400" />
+                <EyeOff className="h-4.5 w-4.5 text-gray-400 hover:text-gray-600" />
               ) : (
-                <Eye className="h-5 w-5 text-gray-400" />
+                <Eye className="h-4.5 w-4.5 text-gray-400 hover:text-gray-600" />
               )}
             </button>
           </div>
@@ -197,12 +197,12 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
         <div>
           <label
             htmlFor="confirmPassword"
-            className="block text-sm font-medium text-gray-700 mb-2">
+            className="block text-xs font-bold tracking-wider uppercase text-gray-500 mb-2">
             {t("auth.register.confirmPasswordLabel")}
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
-              <Lock className="h-5 w-5 text-gray-400" />
+            <div className="absolute inset-y-0 start-0 ps-3.5 flex items-center pointer-events-none">
+              <Lock className="h-4.5 w-4.5 text-gray-400" />
             </div>
             <input
               id="confirmPassword"
@@ -210,25 +210,25 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
               type={showConfirmPassword ? "text" : "password"}
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="block w-full ps-10 pe-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+              className="block w-full ps-10 pe-12 py-3 bg-gray-100/70 dark:bg-slate-950/20 border border-gray-200 rounded-xl transition duration-200 text-sm"
               placeholder={t("auth.register.confirmPasswordPlaceholder")}
               disabled={loading}
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute inset-y-0 end-0 pe-3 flex items-center"
+              className="absolute inset-y-0 end-0 pe-3.5 flex items-center"
               disabled={loading}>
               {showConfirmPassword ? (
-                <EyeOff className="h-5 w-5 text-gray-400" />
+                <EyeOff className="h-4.5 w-4.5 text-gray-400 hover:text-gray-600" />
               ) : (
-                <Eye className="h-5 w-5 text-gray-400" />
+                <Eye className="h-4.5 w-4.5 text-gray-400 hover:text-gray-600" />
               )}
             </button>
           </div>
         </div>
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+          <div className="bg-red-500/10 border border-red-500/20 text-red-600 px-4 py-3 rounded-xl text-sm font-medium">
             {error}
           </div>
         )}
@@ -237,7 +237,7 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-gradient-to-r from-[#54B3A4] to-[#163C60] text-white py-3 rounded-lg font-semibold hover:from-[#48a094] hover:to-[#0f2a45] focus:outline-none focus:ring-2 focus:ring-[#54B3A4] focus:ring-offset-2 transition cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+          className="w-full btn-primary py-3.5 text-sm font-bold mt-4">
           {loading
             ? t("auth.register.creatingAccount")
             : t("auth.register.signUp")}
@@ -245,23 +245,18 @@ export function RegisterForm({ onSwitchToLogin, onRegisterSuccess }) {
       </form>
 
       {/* Divider */}
-      <div className="mt-6 relative">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-200"></div>
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-4 bg-white text-gray-500">
-            {t("auth.register.alreadyHaveAccount")}
-          </span>
-        </div>
+      <div className="mt-6 text-center">
+        <span className="text-[10px] font-bold tracking-widest uppercase text-gray-400">
+          {t("auth.register.alreadyHaveAccount")}
+        </span>
       </div>
 
       {/* Login Link */}
-      <div className="mt-6 text-center">
+      <div className="mt-4">
         <button
           type="button"
           onClick={onSwitchToLogin}
-          className="text-primary-600 hover:text-primary-800 font-semibold cursor-pointer hover:underline transition-colors duration-200">
+          className="w-full btn-secondary py-3.5 text-sm font-bold">
           {t("auth.register.signIn")}
         </button>
       </div>
