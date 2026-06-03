@@ -192,6 +192,7 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
             {t("courseDetails.assessments.typeLabel")}
           </label>
           <CustomSelect
+            name="type"
             value={formData.type}
             onChange={handleChange}
             options={ASSESSMENT_TYPES}

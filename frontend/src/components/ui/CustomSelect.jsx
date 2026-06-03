@@ -1,5 +1,11 @@
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback, useId } from "react";
+import { createPortal } from "react-dom";
 import { ChevronDown } from "lucide-react";
+import {
+  dropdownItemClass,
+  dropdownItemSelectedClass,
+  dropdownTriggerBaseClass,
+} from "./dropdownStyles";
 
 export function CustomSelect({
   value,
@@ -14,6 +20,11 @@ export function CustomSelect({
   buttonClassName = "",
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [menuRect, setMenuRect] = useState(null);
+  const rootRef = useRef(null);
+  const triggerRef = useRef(null);
+  const menuRef = useRef(null);
+  const instanceId = useId();
 
   const selectedOption = options.find((opt) => opt.value === value);
   const selectedLabel = selectedOption?.label || placeholder;
@@ -21,12 +32,12 @@ export function CustomSelect({
   const defaultColorClass = (val) => {
     const index = options.findIndex((opt) => opt.value === val);
     const colors = [
-      "bg-blue-50 border-blue-200 hover:bg-blue-100",
-      "bg-orange-50 border-orange-200 hover:bg-orange-100",
-      "bg-green-50 border-green-200 hover:bg-green-100",
-      "bg-red-50 border-red-200 hover:bg-red-100",
-      "bg-purple-50 border-purple-200 hover:bg-purple-100",
-      "bg-pink-50 border-pink-200 hover:bg-pink-100",
+      "bg-blue-50/80 border-blue-200 hover:bg-blue-100/80",
+      "bg-orange-50/80 border-orange-200 hover:bg-orange-100/80",
+      "bg-green-50/80 border-green-200 hover:bg-green-100/80",
+      "bg-red-50/80 border-red-200 hover:bg-red-100/80",
+      "bg-purple-50/80 border-purple-200 hover:bg-purple-100/80",
+      "bg-pink-50/80 border-pink-200 hover:bg-pink-100/80",
     ];
     return colors[index % colors.length];
   };
@@ -38,83 +49,154 @@ export function CustomSelect({
     setIsOpen(false);
   };
 
+  const updateMenuPosition = useCallback(() => {
+    const trigger = triggerRef.current;
+    if (!trigger) return;
+    const rect = trigger.getBoundingClientRect();
+    setMenuRect({
+      top: rect.bottom + 8,
+      left: rect.left,
+      width: rect.width,
+    });
+  }, []);
+
+  const openDropdown = () => {
+    const trigger = triggerRef.current;
+    if (trigger) {
+      const rect = trigger.getBoundingClientRect();
+      setMenuRect({
+        top: rect.bottom + 8,
+        left: rect.left,
+        width: rect.width,
+      });
+    }
+    setIsOpen(true);
+  };
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handlePointerDown = (event) => {
+      const target = event.target;
+      if (
+        rootRef.current?.contains(target) ||
+        menuRef.current?.contains(target)
+      ) {
+        return;
+      }
+      setIsOpen(false);
+    };
+
+    const handleReposition = () => updateMenuPosition();
+
+    document.addEventListener("mousedown", handlePointerDown);
+    window.addEventListener("resize", handleReposition);
+    window.addEventListener("scroll", handleReposition, true);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      window.removeEventListener("resize", handleReposition);
+      window.removeEventListener("scroll", handleReposition, true);
+    };
+  }, [isOpen, updateMenuPosition]);
+
+  const triggerStateClass = isOpen
+    ? "border-teal-500 bg-white ring-2 ring-teal-500/20"
+    : resolveColorClass(value) ||
+      "border-slate-300 bg-white hover:bg-slate-50";
+
+  const menuId = `custom-select-menu-${name || instanceId}`;
+
+  const menuContent =
+    isOpen && !disabled && menuRect ? (
+      <ul
+        ref={menuRef}
+        id={menuId}
+        role="listbox"
+        aria-label={label || placeholder}
+        style={{
+          position: "fixed",
+          top: menuRect.top,
+          left: menuRect.left,
+          width: menuRect.width,
+          zIndex: 9999,
+        }}
+        className="p-2 bg-white border border-slate-300 rounded-md shadow-lg max-h-60 overflow-y-auto space-y-0.5">
+        {options.map((option) => {
+          const isSelected = value === option.value;
+          return (
+            <li key={option.value} role="none">
+              <button
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => handleSelect(option.value)}
+                className={`${dropdownItemClass} ${
+                  isSelected ? dropdownItemSelectedClass : ""
+                }`}>
+                <div className="min-w-0">
+                  <p className="font-semibold text-slate-900">{option.label}</p>
+                  {getDescription && (
+                    <p className="text-xs text-slate-500 mt-0.5 font-normal">
+                      {getDescription(option.value)}
+                    </p>
+                  )}
+                </div>
+                {isSelected && (
+                  <span
+                    className="w-2 h-2 rounded-full bg-teal-500 shrink-0"
+                    aria-hidden="true"
+                  />
+                )}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    ) : null;
+
   return (
-    <>
-      {/* Backdrop - captures outside clicks, only renders when open */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setIsOpen(false)}
-          aria-hidden="true"
-        />
+    <div ref={rootRef} className="flex flex-col gap-2">
+      {label && (
+        <span className="text-sm font-medium text-slate-700">{label}</span>
       )}
 
-      {/* Parent wrapper - elevated z-index when dropdown is open */}
-      <div className={`flex flex-col gap-2 ${isOpen ? "z-50 relative" : ""}`}>
-        {label && (
-          <span className="text-sm font-medium text-gray-700">{label}</span>
-        )}
-
-        {/* Relative container for absolute dropdown positioning */}
-        <div className="relative">
-          <button
-            onClick={() => !disabled && setIsOpen(!isOpen)}
-            type="button"
-            disabled={disabled}
-            className={`w-full px-4 py-2.5 border-2 rounded-lg font-medium transition-all flex items-center justify-between ${
-              disabled ? "opacity-50 cursor-not-allowed" : ""
-            } ${
-              isOpen
-                ? `border-teal-500 ${resolveColorClass(value).split(" ")[0]} ${
-                    resolveColorClass(value).split(" ")[2]
-                  }`
-                : `border-gray-300 ${resolveColorClass(value)}`
-            } ${buttonClassName}`}>
-            <div className="text-left">
-              <p className="font-semibold text-gray-900">{selectedLabel}</p>
-              {getDescription && value && (
-                <p className="text-xs text-gray-600">{getDescription(value)}</p>
-              )}
-            </div>
-            <ChevronDown
-              className={`w-5 h-5 text-gray-600 transition-transform flex-shrink-0 ${
-                isOpen ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-
-          {/* Dropdown Menu - absolutely positioned with strict max-height scrolling */}
-          {isOpen && !disabled && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-lg z-50">
-              <div className="max-h-60 overflow-y-auto">
-                {options.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => handleSelect(option.value)}
-                    type="button"
-                    className={`w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors border-b last:border-b-0 text-left ${
-                      value === option.value ? "bg-teal-50" : ""
-                    }`}>
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        {option.label}
-                      </p>
-                      {getDescription && (
-                        <p className="text-xs text-gray-600">
-                          {getDescription(option.value)}
-                        </p>
-                      )}
-                    </div>
-                    {value === option.value && (
-                      <div className="w-2 h-2 rounded-full bg-teal-500 flex-shrink-0"></div>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+      <div className="relative">
+        <button
+          ref={triggerRef}
+          type="button"
+          disabled={disabled}
+          aria-haspopup="listbox"
+          aria-expanded={isOpen}
+          onClick={() => {
+            if (disabled) return;
+            if (isOpen) setIsOpen(false);
+            else openDropdown();
+          }}
+          className={`${dropdownTriggerBaseClass} ${
+            disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+          } ${triggerStateClass} ${buttonClassName}`}>
+          <div className="min-w-0">
+            <p className="font-semibold text-slate-900 truncate">
+              {selectedLabel}
+            </p>
+            {getDescription && value && (
+              <p className="text-xs text-slate-500 mt-0.5 truncate">
+                {getDescription(value)}
+              </p>
+            )}
+          </div>
+          <ChevronDown
+            className={`w-4 h-4 text-slate-500 shrink-0 transition-transform ${
+              isOpen ? "rotate-180" : ""
+            }`}
+            aria-hidden="true"
+          />
+        </button>
       </div>
-    </>
+
+      {menuContent && createPortal(menuContent, document.body)}
+    </div>
   );
 }

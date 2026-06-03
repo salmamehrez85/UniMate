@@ -14,6 +14,10 @@ import {
   updateCourse,
 } from "../../services/courseService";
 import { useTranslation } from "react-i18next";
+import {
+  dropdownMenuClass,
+  dropdownItemClass,
+} from "../ui/dropdownStyles";
 
 // Highlight capitalized phrases and abbreviations within a single line
 function BoldedText({ text }) {
@@ -453,21 +457,32 @@ export function SummaryResult({ summaryData, courses = [] }) {
           </button>
 
           {saveOpen && activeCourses.length > 0 && (
-            <div className="absolute left-0 mt-1 z-20 bg-white border border-gray-200 rounded-xl shadow-lg min-w-50 py-1 overflow-hidden">
-              <p className="px-3 py-1.5 text-xs text-gray-400 font-medium uppercase tracking-wide border-b border-gray-100">
-                {t("summarizer.result.chooseCourse")}
-              </p>
+            <ul
+              className={`${dropdownMenuClass} left-0 right-auto min-w-56 mt-1.5 z-20 space-y-0.5`}
+              role="listbox"
+              aria-label={t("summarizer.result.chooseCourse")}>
+              <li role="presentation" className="px-2 pb-1">
+                <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">
+                  {t("summarizer.result.chooseCourse")}
+                </p>
+              </li>
               {activeCourses.map((c) => (
-                <button
-                  key={c._id}
-                  type="button"
-                  onClick={() => handleSaveToCourse(c)}
-                  className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 text-gray-700 transition-colors">
-                  <span className="font-semibold">{c.code}</span>
-                  <span className="ml-1 text-gray-500 truncate">{c.name}</span>
-                </button>
+                <li key={c._id} role="none">
+                  <button
+                    type="button"
+                    role="option"
+                    onClick={() => handleSaveToCourse(c)}
+                    className={`${dropdownItemClass} text-xs font-normal`}>
+                    <span className="min-w-0 truncate">
+                      <span className="font-semibold text-slate-900">
+                        {c.code}
+                      </span>
+                      <span className="ml-1 text-slate-500">{c.name}</span>
+                    </span>
+                  </button>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
         </div>
 
