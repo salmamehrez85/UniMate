@@ -9,6 +9,7 @@ import {
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
+import { CustomSelect } from "../ui/CustomSelect";
 
 const MAX_VISIBLE_TOPICS = 8;
 
@@ -43,7 +44,7 @@ export function AvailableQuizzes({
   }, [confirmDeleteId]);
 
   return (
-    <section className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+    <section className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-visible">
       <div className="px-6 py-5 border-b border-gray-100">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
@@ -58,21 +59,23 @@ export function AvailableQuizzes({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               {t("quizzes.available.courseLabel")}
             </label>
-            <select
+            <CustomSelect
               value={selectedCourseId}
               onChange={(event) => onSelectCourse(event.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition">
-              {courses.length === 0 && (
-                <option value="">
-                  {t("quizzes.available.noCoursesFound")}
-                </option>
-              )}
-              {courses.map((course) => (
-                <option key={course._id} value={course._id}>
-                  {formatCourseLabel(course)}
-                </option>
-              ))}
-            </select>
+              options={
+                courses.length === 0
+                  ? [
+                      {
+                        value: "",
+                        label: t("quizzes.available.noCoursesFound"),
+                      },
+                    ]
+                  : courses.map((course) => ({
+                      value: course._id,
+                      label: formatCourseLabel(course),
+                    }))
+              }
+            />
           </div>
         </div>
       </div>

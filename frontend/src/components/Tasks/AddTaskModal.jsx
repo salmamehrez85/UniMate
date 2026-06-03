@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { CustomSelect } from "../ui/CustomSelect";
 
 export function AddTaskModal({ courses, onClose, onAdd }) {
   const { t } = useTranslation();
@@ -89,10 +90,10 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 overflow-y-auto">
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-xl shadow-lg max-w-md lg:max-w-lg w-full p-6 md:p-8 space-y-5 max-h-[85vh] overflow-y-auto scrollbar-default">
+        className="bg-white rounded-xl shadow-lg max-w-md lg:max-w-lg w-full p-6 md:p-8 space-y-5 my-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-primary-900">
@@ -146,17 +147,16 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {t("tasks.addModal.courseLabel")}
           </label>
-          <select
+          <CustomSelect
             name="courseId"
             value={form.courseId}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer">
-            {courses.map((c) => (
-              <option key={c._id} value={c._id}>
-                {c.code ? `${c.code} – ${c.name}` : c.name}
-              </option>
-            ))}
-          </select>
+            options={courses.map((c) => ({
+              value: c._id,
+              label: c.code ? `${c.code} – ${c.name}` : c.name,
+            }))}
+            buttonClassName="h-[58px]"
+          />
         </div>
 
         {/* Due Date + Due Time */}
@@ -193,33 +193,33 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t("tasks.addModal.statusLabel")}
             </label>
-            <select
+            <CustomSelect
               name="status"
               value={form.status}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer">
-              {STATUS_OPTIONS.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
+              options={STATUS_OPTIONS}
+              buttonClassName="h-[58px]"
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t("tasks.addModal.priorityLabel")}
             </label>
-            <select
+            <CustomSelect
               name="priority"
               value={form.priority}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer">
-              {PRIORITY_OPTIONS.map((p) => (
-                <option key={p.value} value={p.value}>
-                  {p.label}
-                </option>
-              ))}
-            </select>
+              options={PRIORITY_OPTIONS}
+              getDescription={(value) => {
+                const descriptions = {
+                  high: "Urgent, do first",
+                  medium: "Normal priority",
+                  low: "Can wait",
+                };
+                return descriptions[value] || "";
+              }}
+              buttonClassName="h-[58px]"
+            />
           </div>
         </div>
 

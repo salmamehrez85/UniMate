@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Trash2, X, CheckCircle, Circle } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { CustomSelect } from "../ui/CustomSelect";
 
 function AddTaskModal({ isOpen, onClose, onAdd }) {
   const { t } = useTranslation();
@@ -77,10 +78,10 @@ function AddTaskModal({ isOpen, onClose, onAdd }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 overflow-y-auto">
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-xl shadow-lg max-w-sm md:max-w-md w-full p-6 md:p-8 space-y-5 max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
+        className="bg-white rounded-xl shadow-lg max-w-sm md:max-w-md w-full p-6 md:p-8 space-y-5 my-auto">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-primary-900">
             {t("courseDetails.tasks.addTitle")}
@@ -157,34 +158,26 @@ function AddTaskModal({ isOpen, onClose, onAdd }) {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t("courseDetails.tasks.statusLabel")}
             </label>
-            <select
+            <CustomSelect
               name="status"
               value={formData.status}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-              {TASK_STATUS.map((status) => (
-                <option key={status.value} value={status.value}>
-                  {status.label}
-                </option>
-              ))}
-            </select>
+              options={TASK_STATUS}
+              buttonClassName="h-[58px]"
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t("courseDetails.tasks.priorityLabel")}
             </label>
-            <select
+            <CustomSelect
               name="priority"
               value={formData.priority}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-              {TASK_PRIORITY.map((priority) => (
-                <option key={priority.value} value={priority.value}>
-                  {priority.label}
-                </option>
-              ))}
-            </select>
+              options={TASK_PRIORITY}
+              buttonClassName="h-[58px]"
+            />
           </div>
         </div>
 

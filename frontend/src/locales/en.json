@@ -430,6 +430,7 @@
     "status": {
       "all": "All",
       "todo": "To Do",
+      "doing": "In Progress",
       "done": "Done"
     },
     "priority": {

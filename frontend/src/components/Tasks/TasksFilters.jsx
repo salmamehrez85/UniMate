@@ -1,5 +1,6 @@
 import { Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { CustomSelect } from "../ui/CustomSelect";
 
 export function TasksFilters({
   statusOptions,
@@ -40,16 +41,13 @@ export function TasksFilters({
             className="w-full sm:w-64 ps-10 pe-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
         </div>
-        <select
-          value={priorityFilter}
-          onChange={(event) => onPriorityChange(event.target.value)}
-          className="w-full sm:w-48 px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-          {priorityOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+        <div className="w-full sm:w-48">
+          <CustomSelect
+            value={priorityFilter}
+            onChange={(event) => onPriorityChange(event.target.value)}
+            options={priorityOptions}
+          />
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { CustomSelect } from "../ui/CustomSelect";
 
 // Helper function to get current semester based on date
 const getCurrentSemester = () => {
@@ -278,22 +279,16 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
                 {t("courses.addModal.codeRequired")}
               </span>
             </label>
-            <select
-              id="semester"
+            <CustomSelect
               name="semester"
               value={formData.semester}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-              disabled={loading}>
-              <option value="" disabled>
-                {t("courses.addModal.semesterPlaceholder")}
-              </option>
-              {semesterOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {translateSemester(option.value)}
-                </option>
-              ))}
-            </select>
+              options={semesterOptions.map((option) => ({
+                value: option.value,
+                label: translateSemester(option.value),
+              }))}
+              disabled={loading}
+            />
             <p className="text-xs text-gray-500 mt-1">
               {t("courses.addModal.semesterDefault", {
                 semester: translateSemester(currentSemester),

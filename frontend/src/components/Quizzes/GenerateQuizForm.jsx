@@ -1,6 +1,7 @@
 import { LoaderCircle, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { CustomSelect } from "../ui/CustomSelect";
 import { getLanguagePrefs } from "../../hooks/useLanguage";
 
 const getDefaultFormValues = (courseId) => ({
@@ -56,7 +57,7 @@ export function GenerateQuizForm({
   const canGenerate = hasOutline || hasLectures;
 
   return (
-    <section className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+    <section className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-visible">
       <div className="px-6 py-5 border-b border-gray-100">
         <h2 className="text-xl font-bold text-primary-900">
           {t("quizzes.generateForm.title")}
@@ -67,40 +68,43 @@ export function GenerateQuizForm({
           <label className="block text-sm font-medium text-gray-700 mb-2">
             {t("quizzes.generateForm.courseLabel")}
           </label>
-          <select
+          <CustomSelect
             name="courseId"
             value={formValues.courseId}
             onChange={handleChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-            disabled={isGenerating}>
-            {courses.length === 0 && (
-              <option value="">
-                {t("quizzes.generateForm.noCoursesFound")}
-              </option>
-            )}
-            {courses.map((course) => (
-              <option key={course._id} value={course._id}>
-                {course.code} - {course.name}
-              </option>
-            ))}
-          </select>
+            options={
+              courses.length === 0
+                ? [
+                    {
+                      value: "",
+                      label: t("quizzes.generateForm.noCoursesFound"),
+                    },
+                  ]
+                : courses.map((course) => ({
+                    value: course._id,
+                    label: `${course.code} - ${course.name}`,
+                  }))
+            }
+            disabled={isGenerating}
+          />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             {t("quizzes.generateForm.questionTypeLabel")}
           </label>
-          <select
+          <CustomSelect
             name="questionType"
             value={formValues.questionType}
             onChange={handleChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-            disabled={isGenerating}>
-            <option value="all">{t("quizzes.generateForm.allTypes")}</option>
-            <option value="mcq">MCQ</option>
-            <option value="complete">Written</option>
-            <option value="truefalse">True/False</option>
-          </select>
+            options={[
+              { value: "all", label: t("quizzes.generateForm.allTypes") },
+              { value: "mcq", label: "MCQ" },
+              { value: "complete", label: "Written" },
+              { value: "truefalse", label: "True/False" },
+            ]}
+            disabled={isGenerating}
+          />
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
@@ -123,16 +127,17 @@ export function GenerateQuizForm({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               {t("quizzes.generateForm.difficultyLabel")}
             </label>
-            <select
+            <CustomSelect
               name="difficulty"
               value={formValues.difficulty}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-              disabled={isGenerating}>
-              <option value="easy">{t("quizzes.generateForm.easy")}</option>
-              <option value="medium">{t("quizzes.generateForm.medium")}</option>
-              <option value="hard">{t("quizzes.generateForm.hard")}</option>
-            </select>
+              options={[
+                { value: "easy", label: t("quizzes.generateForm.easy") },
+                { value: "medium", label: t("quizzes.generateForm.medium") },
+                { value: "hard", label: t("quizzes.generateForm.hard") },
+              ]}
+              disabled={isGenerating}
+            />
           </div>
         </div>
 

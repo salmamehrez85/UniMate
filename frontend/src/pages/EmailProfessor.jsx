@@ -23,6 +23,7 @@ import {
 } from "../components/Courses/GenerateEmailModal";
 import { formalizeEmailWithAI } from "../services/emailService";
 import { useTranslation } from "react-i18next";
+import { CustomSelect } from "../components/ui/CustomSelect";
 
 const getHistoryKey = () => {
   const user = getUserData();
@@ -224,19 +225,14 @@ function Composer({
                   {t("emailProfessor.noActiveCourses")}
                 </p>
               ) : (
-                <select
+                <CustomSelect
                   value={courseId}
                   onChange={(e) => setCourseId(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent">
-                  {availableCourses.map((course) => (
-                    <option key={course._id} value={course._id}>
-                      {course.code} – {course.name || course.title} (
-                      {course.instructor ||
-                        t("emailProfessor.professorFallback")}
-                      )
-                    </option>
-                  ))}
-                </select>
+                  options={availableCourses.map((course) => ({
+                    value: course._id,
+                    label: `${course.code} – ${course.name || course.title} (${course.instructor || t("emailProfessor.professorFallback")})`,
+                  }))}
+                />
               )}
             </div>
 

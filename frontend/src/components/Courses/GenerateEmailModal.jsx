@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { X, Mail, Sparkles, Copy, Send, Loader } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { CustomSelect } from "../ui/CustomSelect";
 import { formalizeEmailWithAI } from "../../services/emailService";
 import { getUserData } from "../../services/authService";
 
@@ -305,16 +306,14 @@ export function GenerateEmailModal({
                 <label className="block text-sm font-semibold text-gray-800 mb-2">
                   {t("courses.emailModal.courseLabel")}
                 </label>
-                <select
+                <CustomSelect
                   value={courseId}
                   onChange={(event) => setCourseId(event.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent">
-                  {availableCourses.map((course) => (
-                    <option key={course._id} value={course._id}>
-                      {getCourseLabel(course)}
-                    </option>
-                  ))}
-                </select>
+                  options={availableCourses.map((course) => ({
+                    value: course._id,
+                    label: getCourseLabel(course),
+                  }))}
+                />
               </div>
 
               <div>

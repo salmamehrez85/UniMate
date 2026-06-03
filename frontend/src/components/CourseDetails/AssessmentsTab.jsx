@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Plus, Edit2, Trash2, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { CustomSelect } from "../ui/CustomSelect";
 
 const defaultFormData = {
   title: "",
@@ -177,20 +178,23 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             {t("courseDetails.assessments.typeLabel")}
           </label>
-          <select
-            name="type"
+          <CustomSelect
             value={formData.type}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-            {ASSESSMENT_TYPES.map((type) => (
-              <option key={type.value} value={type.value}>
-                {type.label}
-              </option>
-            ))}
-          </select>
+            options={ASSESSMENT_TYPES}
+            getDescription={(type) => {
+              const descriptions = {
+                quiz: "Short assessment",
+                midterm: "Mid-semester exam",
+                final: "Final exam",
+                assignment: "Homework/Project",
+              };
+              return descriptions[type] || "";
+            }}
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-4">

@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { CustomSelect } from "../ui/CustomSelect";
 
 const LANGUAGE_OPTIONS = [
   { value: "en", label: "English" },
@@ -48,40 +49,29 @@ export function SummarizerForm({
       onSubmit={onSubmit}
       className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-5">
       <div className="grid md:grid-cols-2 gap-4">
-        <label className="flex flex-col gap-2">
-          <span className="text-sm font-medium text-gray-700">
-            {t("summarizer.form.sourceLabel")}
-          </span>
-          <select
-            value={form.sourceType}
-            onChange={(event) => onChange("sourceType", event.target.value)}
-            className="px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400">
-            <option value="text">{t("summarizer.form.pasteText")}</option>
-            <option value="courseOutline">
-              {t("summarizer.form.courseOutline")}
-            </option>
-            <option value="file">{t("summarizer.form.uploadFile")}</option>
-            <option value="handwritten">
-              {t("summarizer.form.handwritten")}
-            </option>
-          </select>
-        </label>
+        <CustomSelect
+          name="sourceType"
+          label={t("summarizer.form.sourceLabel")}
+          value={form.sourceType}
+          onChange={(event) => onChange("sourceType", event.target.value)}
+          options={[
+            { value: "text", label: t("summarizer.form.pasteText") },
+            {
+              value: "courseOutline",
+              label: t("summarizer.form.courseOutline"),
+            },
+            { value: "file", label: t("summarizer.form.uploadFile") },
+            { value: "handwritten", label: t("summarizer.form.handwritten") },
+          ]}
+        />
 
-        <label className="flex flex-col gap-2">
-          <span className="text-sm font-medium text-gray-700">
-            {t("summarizer.form.modeLabel")}
-          </span>
-          <select
-            value={form.mode}
-            onChange={(event) => onChange("mode", event.target.value)}
-            className="px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400">
-            {SUMMARY_MODES.map((modeOption) => (
-              <option key={modeOption.value} value={modeOption.value}>
-                {modeOption.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        <CustomSelect
+          name="mode"
+          label={t("summarizer.form.modeLabel")}
+          value={form.mode}
+          onChange={(event) => onChange("mode", event.target.value)}
+          options={SUMMARY_MODES}
+        />
       </div>
 
       <div className="space-y-2">
@@ -99,77 +89,52 @@ export function SummarizerForm({
       </div>
 
       <div className="grid md:grid-cols-3 gap-4">
-        <label className="flex flex-col gap-2">
-          <span className="text-sm font-medium text-gray-700">
-            {t("summarizer.form.languageLabel")}
-          </span>
-          <select
-            value={form.language}
-            onChange={(event) => onChange("language", event.target.value)}
-            className="px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400">
-            {LANGUAGE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        <CustomSelect
+          name="language"
+          label={t("summarizer.form.languageLabel")}
+          value={form.language}
+          onChange={(event) => onChange("language", event.target.value)}
+          options={LANGUAGE_OPTIONS}
+        />
       </div>
 
       <div
         className={`overflow-hidden transition-all duration-300 ease-in-out ${isAdvancedOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}>
         <div className="grid md:grid-cols-2 gap-4 pt-1">
-          <label className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-gray-700">
-              {t("summarizer.form.lengthLabel")}
-            </span>
-            <select
-              value={form.length}
-              onChange={(event) => onChange("length", event.target.value)}
-              className="px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400">
-              {LENGTH_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <CustomSelect
+            name="length"
+            label={t("summarizer.form.lengthLabel")}
+            value={form.length}
+            onChange={(event) => onChange("length", event.target.value)}
+            options={LENGTH_OPTIONS}
+          />
 
-          <label className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-gray-700">
-              {t("summarizer.form.focusLabel")}
-            </span>
-            <select
-              value={form.focus}
-              onChange={(event) => onChange("focus", event.target.value)}
-              className="px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400">
-              {FOCUS_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <CustomSelect
+            name="focus"
+            label={t("summarizer.form.focusLabel")}
+            value={form.focus}
+            onChange={(event) => onChange("focus", event.target.value)}
+            options={FOCUS_OPTIONS}
+          />
         </div>
       </div>
 
       {form.sourceType === "courseOutline" ? (
-        <label className="flex flex-col gap-2">
-          <span className="text-sm font-medium text-gray-700">
-            {t("summarizer.form.selectCourseLabel")}
-          </span>
-          <select
+        <div className="flex flex-col gap-2">
+          <CustomSelect
+            name="courseId"
+            label={t("summarizer.form.selectCourseLabel")}
             value={form.courseId}
             onChange={(event) => onChange("courseId", event.target.value)}
+            options={[
+              { value: "", label: t("summarizer.form.chooseCourse") },
+              ...activeCourses.map((course) => ({
+                value: course._id,
+                label: `${course.code} - ${course.name}`,
+              })),
+            ]}
             disabled={loadingCourses}
-            className="px-3 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400 disabled:opacity-60">
-            <option value="">{t("summarizer.form.chooseCourse")}</option>
-            {activeCourses.map((course) => (
-              <option key={course._id} value={course._id}>
-                {course.code} - {course.name}
-              </option>
-            ))}
-          </select>
+          />
           <span className="text-xs text-gray-500">
             {loadingCourses
               ? t("summarizer.form.loadingCourses")
@@ -177,7 +142,7 @@ export function SummarizerForm({
                 ? t("summarizer.form.outlineHint")
                 : t("summarizer.form.noCoursesHint")}
           </span>
-        </label>
+        </div>
       ) : form.sourceType === "file" ? (
         <label className="flex flex-col gap-2">
           <span className="text-sm font-medium text-gray-700">
