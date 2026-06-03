@@ -40,7 +40,7 @@ function PreviewModal({ lecture, onClose }) {
   const isPdf = lecture.mimeType === "application/pdf";
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div
         className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl lg:max-w-6xl flex flex-col overflow-hidden"
         style={{ height: "80vh", aspectRatio: "1 / 1" }}>
@@ -118,6 +118,16 @@ export function LecturesTab({ course, onCourseUpdate }) {
       };
     }
   }, [deleteConfirm]);
+
+  // Disable body scroll when preview modal is open
+  useEffect(() => {
+    if (previewLecture) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+  }, [previewLecture]);
 
   const lectures = course.lectures || [];
 

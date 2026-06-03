@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { CustomSelect } from "../ui/CustomSelect";
@@ -88,6 +89,16 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+  }, [isOpen]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -131,7 +142,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-sm md:max-w-md w-full max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
         {/* Header */}
@@ -345,6 +356,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

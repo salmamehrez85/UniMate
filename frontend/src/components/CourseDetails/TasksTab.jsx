@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Plus, Trash2, X, CheckCircle, Circle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { CustomSelect } from "../ui/CustomSelect";
@@ -36,6 +37,16 @@ function AddTaskModal({ isOpen, onClose, onAdd }) {
     priority: "medium",
   });
   const [error, setError] = useState("");
+
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+  }, [isOpen]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -77,7 +88,7 @@ function AddTaskModal({ isOpen, onClose, onAdd }) {
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 overflow-y-auto">
       <form
         onSubmit={handleSubmit}
@@ -195,7 +206,8 @@ function AddTaskModal({ isOpen, onClose, onAdd }) {
           </button>
         </div>
       </form>
-    </div>
+    </div>,
+    document.body
   );
 }
 

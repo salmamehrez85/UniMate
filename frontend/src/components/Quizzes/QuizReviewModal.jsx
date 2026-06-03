@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   CheckCircle,
   XCircle,
@@ -17,6 +19,16 @@ import {
  *  - onClose     : () => void
  */
 export function QuizReviewModal({ quiz, quizResult, weakAreas = [], onClose }) {
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (quiz && quizResult) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+  }, [quiz, quizResult]);
+
   if (!quiz || !quizResult) return null;
 
   const {
@@ -71,7 +83,7 @@ export function QuizReviewModal({ quiz, quizResult, weakAreas = [], onClose }) {
     return resolveOptionText(question, answerKey);
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
@@ -207,6 +219,7 @@ export function QuizReviewModal({ quiz, quizResult, weakAreas = [], onClose }) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

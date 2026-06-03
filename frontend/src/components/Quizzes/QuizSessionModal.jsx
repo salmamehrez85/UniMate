@@ -1,5 +1,6 @@
 import { LoaderCircle, Send, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 
 const createInitialAnswers = (quiz) => {
@@ -35,6 +36,16 @@ export function QuizSessionModal({
     setAnswers(createInitialAnswers(quiz));
   }, [quiz]);
 
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (quiz) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+  }, [quiz]);
+
   if (!quiz) {
     return null;
   }
@@ -57,7 +68,7 @@ export function QuizSessionModal({
     await onSubmit(quiz._id, userAnswers);
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex items-start justify-between px-6 py-5 border-b border-gray-100">
@@ -225,6 +236,7 @@ export function QuizSessionModal({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -13,10 +13,10 @@ function TaskItem({ task, t }) {
       : "border-l-4 border-amber-500";
 
   return (
-    <div className={`flex items-start gap-4 p-4.5 rounded-xl bg-white/40 dark:bg-slate-900/20 transition-all border border-gray-100 hover:border-primary-100 hover:shadow-xs hover:-translate-y-0.5 duration-200 ${borderClass}`}>
+    <div className={`flex items-start gap-4 p-4.5 rounded-xl bg-white dark:bg-slate-900 transition-all border border-slate-200 dark:border-slate-800/80 hover:border-primary-100 hover:shadow-xs hover:-translate-y-0.5 duration-200 ${borderClass}`}>
       <div className="flex-1 min-w-0">
-        <h4 className="font-bold text-gray-900 text-sm leading-tight">{task.title}</h4>
-        <p className="text-[10px] text-gray-400 mt-1 font-bold tracking-widest uppercase">{task.course}</p>
+        <h4 className="font-bold text-slate-900 dark:text-white text-sm leading-tight">{task.title}</h4>
+        <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-bold tracking-widest uppercase">{task.course}</p>
         <div className="flex items-center gap-2 mt-3 flex-wrap">
           <span
             className={`text-[9px] px-2 py-0.5 rounded font-bold uppercase tracking-wider transition-colors ${
@@ -28,8 +28,8 @@ function TaskItem({ task, t }) {
               ? t("dashboard.upcomingTasks.priorityHigh")
               : t("dashboard.upcomingTasks.priorityMedium")}
           </span>
-          <span className="text-xs text-gray-300">•</span>
-          <span className="text-xs text-gray-500 font-medium">
+          <span className="text-xs text-slate-400 dark:text-slate-600">•</span>
+          <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">
             {getDaysLeftText(task.daysLeft, t)}
           </span>
         </div>

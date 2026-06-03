@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, Mail, Sparkles, Copy, Send, Loader } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { CustomSelect } from "../ui/CustomSelect";
@@ -149,6 +150,16 @@ export function GenerateEmailModal({
   const [copied, setCopied] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState("");
+  
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -237,7 +248,7 @@ export function GenerateEmailModal({
     window.location.href = mailto;
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-sm md:max-w-xl lg:max-w-3xl w-full max-h-[95vh] md:max-h-[92vh] overflow-y-auto border border-gray-100">
         <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-5 border-b border-gray-100">
@@ -385,6 +396,7 @@ export function GenerateEmailModal({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

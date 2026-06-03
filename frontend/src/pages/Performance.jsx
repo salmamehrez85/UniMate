@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { PerformanceHeader } from "../components/Performance/PerformanceHeader";
 import { AIRecommendations } from "../components/Performance/AIRecommendations";
 import { GPATrendChart } from "../components/Performance/GPATrendChart";
@@ -200,9 +201,20 @@ function AIInsightsModal({
   prediction,
 }) {
   const { t } = useTranslation();
+
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="bg-white rounded-xl shadow-xl max-w-sm md:max-w-lg lg:max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
         {/* Header */}
@@ -339,7 +351,8 @@ function AIInsightsModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

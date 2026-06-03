@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   Plus,
   Trash2,
@@ -18,6 +19,16 @@ function AddPhaseModal({ isOpen, onClose, onAdd }) {
     requirements: [""],
   });
   const [error, setError] = useState("");
+
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+  }, [isOpen]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -86,7 +97,7 @@ function AddPhaseModal({ isOpen, onClose, onAdd }) {
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <form
         onSubmit={handleSubmit}
@@ -186,7 +197,8 @@ function AddPhaseModal({ isOpen, onClose, onAdd }) {
           </button>
         </div>
       </form>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -195,6 +207,16 @@ export function ProjectPhasesTab({ course, onCourseUpdate }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [expandedPhase, setExpandedPhase] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+
+  // Disable body scroll when delete confirmation is open
+  useEffect(() => {
+    if (deleteConfirm !== null) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+  }, [deleteConfirm]);
 
   const phases = course.phases || [];
 
@@ -351,30 +373,32 @@ export function ProjectPhasesTab({ course, onCourseUpdate }) {
       )}
 
       {/* Delete Confirmation Dialog */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-xl shadow-lg max-w-sm md:max-w-md w-full p-6 md:p-8">
-            <h3 className="text-lg font-bold text-primary-900 mb-2">
-              {t("courseDetails.projectPhases.deleteTitle")}
-            </h3>
-            <p className="text-gray-600 mb-4">
-              {t("courseDetails.projectPhases.deleteConfirm")}
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => handleDeletePhase(deleteConfirm)}
-                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition">
-                {t("courseDetails.projectPhases.deleteButton")}
-              </button>
-              <button
-                onClick={() => setDeleteConfirm(null)}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
-                {t("courseDetails.projectPhases.cancel")}
-              </button>
+      {deleteConfirm &&
+        createPortal(
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div className="bg-white rounded-xl shadow-lg max-w-sm md:max-w-md w-full p-6 md:p-8">
+              <h3 className="text-lg font-bold text-primary-900 mb-2">
+                {t("courseDetails.projectPhases.deleteTitle")}
+              </h3>
+              <p className="text-gray-600 mb-4">
+                {t("courseDetails.projectPhases.deleteConfirm")}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => handleDeletePhase(deleteConfirm)}
+                  className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition">
+                  {t("courseDetails.projectPhases.deleteButton")}
+                </button>
+                <button
+                  onClick={() => setDeleteConfirm(null)}
+                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
+                  {t("courseDetails.projectPhases.cancel")}
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
 
       <AddPhaseModal
         isOpen={isModalOpen}

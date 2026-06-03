@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { CustomSelect } from "../ui/CustomSelect";
@@ -34,6 +35,14 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
 
   useEffect(() => {
     titleRef.current?.focus();
+  }, []);
+
+  // Disable body scroll when modal is open (mounted)
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, []);
 
   useEffect(() => {
@@ -89,7 +98,7 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
     }
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 overflow-y-auto">
       <form
         onSubmit={handleSubmit}
@@ -241,6 +250,7 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
           </button>
         </div>
       </form>
-    </div>
+    </div>,
+    document.body
   );
 }

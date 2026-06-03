@@ -67,6 +67,16 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
     setError("");
   }, [initialData, isOpen]);
 
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+  }, [isOpen]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -139,7 +149,7 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <form
         onSubmit={handleSubmit}
@@ -305,7 +315,8 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
           </div>,
           document.body,
         )}
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -320,6 +331,17 @@ export function AssessmentsTab({ course, onCourseUpdate }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAssessment, setEditingAssessment] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+
+  // Disable body scroll when delete confirmation is open
+  useEffect(() => {
+    if (deleteConfirm !== null) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+  }, [deleteConfirm]);
+
   const assessments = course.assessments || [];
 
   const handleAddAssessment = (newAssessment) => {
@@ -459,30 +481,32 @@ export function AssessmentsTab({ course, onCourseUpdate }) {
       )}
 
       {/* Delete Confirmation Dialog */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-xl shadow-lg max-w-sm md:max-w-md w-full p-6 md:p-8">
-            <h3 className="text-lg font-bold text-primary-900 mb-2">
-              {t("courseDetails.assessments.deleteTitle")}
-            </h3>
-            <p className="text-gray-600 mb-4">
-              {t("courseDetails.assessments.deleteConfirm")}
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => handleDeleteAssessment(deleteConfirm)}
-                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition">
-                {t("courseDetails.assessments.deleteButton")}
-              </button>
-              <button
-                onClick={() => setDeleteConfirm(null)}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
-                {t("courseDetails.assessments.cancel")}
-              </button>
+      {deleteConfirm &&
+        createPortal(
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div className="bg-white rounded-xl shadow-lg max-w-sm md:max-w-md w-full p-6 md:p-8">
+              <h3 className="text-lg font-bold text-primary-900 mb-2">
+                {t("courseDetails.assessments.deleteTitle")}
+              </h3>
+              <p className="text-gray-600 mb-4">
+                {t("courseDetails.assessments.deleteConfirm")}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => handleDeleteAssessment(deleteConfirm)}
+                  className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition">
+                  {t("courseDetails.assessments.deleteButton")}
+                </button>
+                <button
+                  onClick={() => setDeleteConfirm(null)}
+                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
+                  {t("courseDetails.assessments.cancel")}
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
 
       <AssessmentModal
         isOpen={isModalOpen}

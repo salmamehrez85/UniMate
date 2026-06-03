@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import {
   Mail,
   Sparkles,
@@ -316,6 +317,17 @@ function EmailDetail({ entry, onBack, onStatusChange, onDelete }) {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
+
+  // Disable body scroll when delete confirmation is open
+  useEffect(() => {
+    if (deleteConfirm) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+  }, [deleteConfirm]);
+
   const cfg = STATUS_CONFIG[entry.status] || STATUS_CONFIG.pending;
 
   const handleCopy = async () => {
@@ -430,33 +442,35 @@ function EmailDetail({ entry, onBack, onStatusChange, onDelete }) {
       </div>
 
       {/* Delete Confirmation Dialog */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6">
-            <h3 className="text-lg font-bold text-primary-900 mb-2">
-              {t("emailProfessor.deleteTitle")}
-            </h3>
-            <p className="text-gray-600 mb-4">
-              {t("emailProfessor.deleteConfirm")}
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  onDelete(entry.id);
-                  setDeleteConfirm(false);
-                }}
-                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition">
-                {t("emailProfessor.deleteButton")}
-              </button>
-              <button
-                onClick={() => setDeleteConfirm(false)}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
-                {t("emailProfessor.cancel")}
-              </button>
+      {deleteConfirm &&
+        createPortal(
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div className="bg-white rounded-xl shadow-lg max-w-sm w-full p-6">
+              <h3 className="text-lg font-bold text-primary-900 mb-2">
+                {t("emailProfessor.deleteTitle")}
+              </h3>
+              <p className="text-gray-600 mb-4">
+                {t("emailProfessor.deleteConfirm")}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    onDelete(entry.id);
+                    setDeleteConfirm(false);
+                  }}
+                  className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition">
+                  {t("emailProfessor.deleteButton")}
+                </button>
+                <button
+                  onClick={() => setDeleteConfirm(false)}
+                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
+                  {t("emailProfessor.cancel")}
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
