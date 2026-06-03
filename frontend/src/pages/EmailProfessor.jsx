@@ -12,6 +12,7 @@ import {
   Hourglass,
   FileText,
   ChevronRight,
+  Loader,
 } from "lucide-react";
 import { getCourses } from "../services/courseService";
 import { getUserData } from "../services/authService";
@@ -20,6 +21,7 @@ import {
   EMAIL_PURPOSE_KEYS,
   buildEmailDraft,
 } from "../components/Courses/GenerateEmailModal";
+import { formalizeEmailWithAI } from "../services/emailService";
 import { useTranslation } from "react-i18next";
 
 const getHistoryKey = () => {
@@ -81,21 +83,55 @@ function Composer({
   const [draft, setDraft] = useState("");
   const [copied, setCopied] = useState(false);
   const [savedEntryId, setSavedEntryId] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState("");
 
   const selectedCourse =
     availableCourses.find((c) => c._id === courseId) || null;
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!selectedCourse) return;
-    const generated = buildEmailDraft({
-      purpose,
-      course: selectedCourse,
-      additionalContext,
-      studentName,
-    });
-    setDraft(generated);
-    const newId = onSaved(generated, selectedCourse, purpose);
-    setSavedEntryId(newId);
+
+    // If additional context is provided, use AI formalization
+    if (additionalContext?.trim()) {
+      setIsGenerating(true);
+      setError("");
+      try {
+        const userData = getUserData();
+        const realStudentName =
+          userData?.fullName || userData?.name || studentName || "Student";
+
+        const formalizedEmail = await formalizeEmailWithAI({
+          purpose,
+          courseName: selectedCourse?.name || selectedCourse?.title || "",
+          courseCode: selectedCourse?.code || "",
+          professor: selectedCourse?.instructor || "Professor",
+          studentName: realStudentName,
+          additionalContext,
+        });
+        setDraft(formalizedEmail);
+        const newId = onSaved(formalizedEmail, selectedCourse, purpose);
+        setSavedEntryId(newId);
+      } catch (err) {
+        setError(
+          err.message || "Failed to generate formal email. Please try again.",
+        );
+        console.error("Email generation error:", err);
+      } finally {
+        setIsGenerating(false);
+      }
+    } else {
+      // Use template-based generation without additional context
+      const generated = buildEmailDraft({
+        purpose,
+        course: selectedCourse,
+        additionalContext: "",
+        studentName,
+      });
+      setDraft(generated);
+      const newId = onSaved(generated, selectedCourse, purpose);
+      setSavedEntryId(newId);
+    }
   };
 
   const handleCopy = async () => {
@@ -234,20 +270,39 @@ function Composer({
               </label>
               <textarea
                 value={additionalContext}
-                onChange={(e) => setAdditionalContext(e.target.value)}
+                onChange={(e) => {
+                  setAdditionalContext(e.target.value);
+                  setError("");
+                }}
                 placeholder={t("emailProfessor.additionalContextPlaceholder")}
                 rows={4}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
+                disabled={isGenerating}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none disabled:bg-gray-50 disabled:opacity-60"
               />
             </div>
+
+            {error && (
+              <div className="rounded-xl border border-red-200 bg-red-50 text-red-700 px-4 py-3 text-sm">
+                {error}
+              </div>
+            )}
 
             <button
               type="button"
               onClick={handleGenerate}
-              disabled={!selectedCourse}
+              disabled={!selectedCourse || isGenerating}
               className="w-full px-4 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold transition inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-              <Sparkles className="w-4 h-4" />
-              {t("emailProfessor.generateEmail")}
+              {isGenerating ? (
+                <>
+                  <Loader className="w-4 h-4 animate-spin" />
+                  {t("emailProfessor.generatingEmail") || "Generating..."}
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  {t("emailProfessor.generateEmail")}
+                </>
+              )}
             </button>
           </>
         )}

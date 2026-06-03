@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
-import { X, Mail, Sparkles, Copy, Send } from "lucide-react";
+import { X, Mail, Sparkles, Copy, Send, Loader } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { formalizeEmailWithAI } from "../../services/emailService";
+import { getUserData } from "../../services/authService";
 
 export const EMAIL_PURPOSES = [
   "Request Deadline Extension",
@@ -144,6 +146,8 @@ export function GenerateEmailModal({
   const [additionalContext, setAdditionalContext] = useState("");
   const [draft, setDraft] = useState("");
   const [copied, setCopied] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState("");
 
   if (!isOpen) return null;
 
@@ -152,15 +156,45 @@ export function GenerateEmailModal({
     selectedCourse ||
     null;
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!selected) return;
-    const generated = buildEmailDraft({
-      purpose,
-      course: selected,
-      additionalContext,
-      studentName,
-    });
-    setDraft(generated);
+
+    // If additional context is provided, use AI formalization
+    if (additionalContext?.trim()) {
+      setIsGenerating(true);
+      setError("");
+      try {
+        const userData = getUserData();
+        const realStudentName =
+          userData?.fullName || userData?.name || studentName || "Student";
+
+        const formalizedEmail = await formalizeEmailWithAI({
+          purpose,
+          courseName: selected?.name || selected?.title || "",
+          courseCode: selected?.code || "",
+          professor: selected?.instructor || "Professor",
+          studentName: realStudentName,
+          additionalContext,
+        });
+        setDraft(formalizedEmail);
+      } catch (err) {
+        setError(
+          err.message || "Failed to generate formal email. Please try again.",
+        );
+        console.error("Email generation error:", err);
+      } finally {
+        setIsGenerating(false);
+      }
+    } else {
+      // Use template-based generation without additional context
+      const generated = buildEmailDraft({
+        purpose,
+        course: selected,
+        additionalContext: "",
+        studentName,
+      });
+      setDraft(generated);
+    }
   };
 
   const handleCopy = async () => {
@@ -313,27 +347,43 @@ export function GenerateEmailModal({
                 </label>
                 <textarea
                   value={additionalContext}
-                  onChange={(event) => setAdditionalContext(event.target.value)}
+                  onChange={(event) => {
+                    setAdditionalContext(event.target.value);
+                    setError("");
+                  }}
                   placeholder={t("courses.emailModal.contextPlaceholder")}
                   rows={5}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
+                  disabled={isGenerating}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none disabled:bg-gray-50 disabled:opacity-60"
                 />
               </div>
+
+              {error && (
+                <div className="rounded-xl border border-red-200 bg-red-50 text-red-700 px-4 py-3 text-sm">
+                  {error}
+                </div>
+              )}
 
               <button
                 type="button"
                 onClick={handleGenerate}
-                disabled={!selected}
+                disabled={!selected || isGenerating}
                 className="w-full px-4 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold transition inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                <Sparkles className="w-4 h-4" />
-                {t("courses.emailModal.generateButton")}
+                {isGenerating ? (
+                  <>
+                    <Loader className="w-4 h-4 animate-spin" />
+                    {t("courses.emailModal.generatingButton") ||
+                      "Generating..."}
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4" />
+                    {t("courses.emailModal.generateButton")}
+                  </>
+                )}
               </button>
             </>
           )}
-
-          <p className="text-sm text-gray-500">
-            {t("courses.emailModal.disclaimer")}
-          </p>
         </div>
       </div>
     </div>

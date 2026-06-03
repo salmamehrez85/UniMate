@@ -24,12 +24,14 @@ const quizRoutes = require("./routes/quizRoutes");
 const summarizeRoutes = require("./routes/summarizeRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
+const emailRoutes = require("./routes/emailRoutes");
 app.use("/api/auth", authRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/quizzes", quizRoutes);
 app.use("/api/summarize", summarizeRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/email", emailRoutes);
 
 // Health check endpoint
 app.get("/health", (req, res) => {

@@ -219,7 +219,7 @@
       "contextLabel": "Additional Context (Optional)",
       "contextPlaceholder": "Add any extra details, specific dates, or context that might help...",
       "generateButton": "Generate Email Draft",
-      "disclaimer": "AI-generated draft — review and personalise before sending.",
+      "generatingButton": "Generating with AI...",
       "aiDraftNote": "AI-generated draft — review before sending.",
       "draftLabel": "Email Draft",
       "backButton": "Back",
@@ -861,6 +861,7 @@
     "additionalContext": "Additional Context (Optional)",
     "additionalContextPlaceholder": "Add any specific details you want included in the email...",
     "generateEmail": "Generate Email",
+    "generatingEmail": "Generating with AI...",
     "disclaimer": "Always review AI-generated content for accuracy and appropriate tone.",
     "professorFallback": "Professor",
     "status": {
