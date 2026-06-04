@@ -228,10 +228,6 @@ const readLectureFilesAsInlineParts = (lectures = []) => {
   const MAX_LECTURE_FILES = 5;
   const parts = [];
 
-  console.log(
-    `\n[📚 DEBUG] readLectureFilesAsInlineParts - ${lectures?.length || 0} lecture(s) provided`,
-  );
-
   for (const lecture of lectures.slice(0, MAX_LECTURE_FILES)) {
     try {
       const filePath = path.join(
@@ -239,8 +235,6 @@ const readLectureFilesAsInlineParts = (lectures = []) => {
         "../uploads/lectures",
         lecture.filename,
       );
-
-      console.log(`[📚 DEBUG] Checking file: ${lecture.filename}`);
 
       const fileExists = fs.existsSync(filePath);
       if (!fileExists) {
@@ -250,9 +244,6 @@ const readLectureFilesAsInlineParts = (lectures = []) => {
       const data = fs.readFileSync(filePath).toString("base64");
       const sizeKB = Math.round((data.length * 3) / 4 / 1024);
 
-      console.log(
-        `[✅ FILE READ] ${lecture.filename} (${sizeKB}KB, ${lecture.mimeType})`,
-      );
       parts.push({ inlineData: { mimeType: lecture.mimeType, data } });
     } catch (err) {
       console.error(
@@ -261,7 +252,6 @@ const readLectureFilesAsInlineParts = (lectures = []) => {
     }
   }
 
-  console.log(`[📚 DEBUG] Loaded ${parts.length} lecture file(s)\n`);
   return parts;
 };
 
@@ -271,15 +261,7 @@ const readLectureFilesAsInlineParts = (lectures = []) => {
 const extractLectureContent = async (inlineParts) => {
   const apiKey = process.env.GEMINI_API_KEY;
 
-  console.log(
-    `[🔍 EXTRACTION] Starting extraction of ${inlineParts.length} file(s)`,
-  );
-  console.log(
-    `[🔍 EXTRACTION] API Key available: ${apiKey ? "✅ YES" : "❌ NO"}`,
-  );
-
   if (!apiKey || inlineParts.length === 0) {
-    console.log(`[⚠️  EXTRACTION SKIPPED] No API key or files\n`);
     return null;
   }
 
@@ -301,7 +283,6 @@ A student must be able to answer an exam solely from what you extract.`;
 
   for (const modelId of GEMINI_MODEL_CANDIDATES) {
     const attemptStart = Date.now();
-    console.log(`[🤖 EXTRACTION] Trying model: ${modelId}`);
     try {
       const model = genAI.getGenerativeModel({ model: modelId });
       const response = await withTimeout(
@@ -322,10 +303,6 @@ A student must be able to answer an exam solely from what you extract.`;
       const elapsed = Date.now() - attemptStart;
       const extracted = response.response.text();
 
-      console.log(
-        `[✅ EXTRACTED] ${modelId} got ${extracted?.length || 0} chars in ${elapsed}ms`,
-      );
-
       if (extracted && extracted.trim().length > 100) {
         // Truncate to avoid exceeding token limits in the subsequent quiz call
         const text = extracted.trim();
@@ -335,12 +312,8 @@ A student must be able to answer an exam solely from what you extract.`;
               "\n\n[Content truncated for length]"
             : text;
 
-        console.log(
-          `[✅ SUCCESS] Content prepared: ${result.length} chars (truncated: ${text.length > DEFAULT_GENERATION_CONFIG.maxLectureContentChars ? "YES" : "NO"})\n`,
-        );
         return result;
       }
-      console.log(`[⚠️  RETRY] Content too small, trying next model`);
     } catch (err) {
       const elapsed = Date.now() - attemptStart;
       console.error(
@@ -801,17 +774,6 @@ const generatePracticeQuiz = async ({
   timeoutMs,
   language,
 }) => {
-  console.log(`\n${"=".repeat(80)}`);
-  console.log("🎯 QUIZ GENERATION STARTED");
-  console.log(`${"=".repeat(80)}`);
-  console.log(`[INPUT] useMock: ${useMock}`);
-  console.log(`[INPUT] difficulty: ${difficulty}`);
-  console.log(`[INPUT] questionType: ${questionType}`);
-  console.log(`[INPUT] numberOfQuestions: ${numberOfQuestions}`);
-  console.log(
-    `[INPUT] GEMINI_API_KEY exists: ${process.env.GEMINI_API_KEY ? "✅ YES" : "❌ NO"}\n`,
-  );
-
   const normalizedDifficulty = normalizeDifficulty(difficulty);
   const normalizedQuestionType = normalizeQuestionType(questionType);
   const normalizedQuestionCount = normalizeQuestionCount(numberOfQuestions);
@@ -823,9 +785,6 @@ const generatePracticeQuiz = async ({
     throw error;
   }
 
-  console.log(`[COURSE] ${course.code} - ${course.name}`);
-  console.log(`[COURSE] Uploaded lectures: ${course.lectures?.length || 0}\n`);
-
   // Two-step lecture flow:
   // Step 1 — extract full text from PDFs/images without JSON-mode constraint
   //           (Gemini ignores inline data when responseMimeType:"application/json" is set)
@@ -833,11 +792,6 @@ const generatePracticeQuiz = async ({
   const lectureParts = readLectureFilesAsInlineParts(course.lectures || []);
   const lectureContent =
     lectureParts.length > 0 ? await extractLectureContent(lectureParts) : null;
-
-  console.log(`[EXTRACTION RESULT] Files read: ${lectureParts.length}`);
-  console.log(
-    `[EXTRACTION RESULT] Content extracted: ${lectureContent ? `✅ YES (${lectureContent.length} chars)` : "❌ NO"}\n`,
-  );
 
   const courseContext = await getCourseContext(
     courseId,
@@ -857,20 +811,10 @@ const generatePracticeQuiz = async ({
   let parsedQuizPayload;
 
   try {
-    console.log(`[🔴 DECISION POINT] Mock or Live?`);
-    console.log(
-      `  - useMock flag: ${useMock ? "✅ FORCE MOCK" : "❌ Try Live"}`,
-    );
-    console.log(
-      `  - GEMINI_API_KEY: ${process.env.GEMINI_API_KEY ? "✅ Available" : "❌ Missing"}\n`,
-    );
-
     if (useMock || !process.env.GEMINI_API_KEY) {
-      console.log(`[🎲 OPTION B] USING MOCK GENERATOR`);
       const reason = useMock
         ? "useMock flag is true"
         : "GEMINI_API_KEY is missing";
-      console.log(`  Reason: ${reason}`);
 
       parsedQuizPayload = buildMockQuizPayload({
         course,
@@ -878,18 +822,10 @@ const generatePracticeQuiz = async ({
         difficulty: normalizedDifficulty,
         questionType: normalizedQuestionType,
       });
-      console.log(
-        `  ✅ Generated ${parsedQuizPayload.questions.length} mock questions\n`,
-      );
     } else {
-      console.log(`[🤖 OPTION A] USING LIVE GEMINI API`);
-      console.log(
-        `  With lecture content: ${lectureContent ? "✅ YES" : "❌ NO"}`,
-      );
       const timeoutVal = lectureContent
         ? DEFAULT_GENERATION_CONFIG.lectureQuizTimeoutMs
         : DEFAULT_GENERATION_CONFIG.timeoutMs;
-      console.log(`  Timeout: ${timeoutVal}ms\n`);
 
       const rawResponse = await callGeminiForQuiz({
         systemPrompt: QUIZ_GENERATION_SYSTEM_PROMPT,
@@ -901,15 +837,6 @@ const generatePracticeQuiz = async ({
         // passing inline parts here would conflict with JSON mode.
         inlineParts: [],
       });
-
-      console.log(`  ✅ Gemini API call successful`);
-      parsedQuizPayload = parseQuizGenerationResponse(
-        rawResponse,
-        normalizedDifficulty,
-      );
-      console.log(
-        `  ✅ Parsed ${parsedQuizPayload.questions.length} questions\n`,
-      );
     }
   } catch (error) {
     if (shouldFallbackToMock(error)) {
@@ -917,16 +844,12 @@ const generatePracticeQuiz = async ({
         `[⚠️  FALLBACK] Live generation failed, falling back to MOCK\n  Error: ${error.message}\n`,
       );
 
-      console.log(`[🎲 OPTION B] USING MOCK (FALLBACK)`);
       parsedQuizPayload = buildMockQuizPayload({
         course,
         numberOfQuestions: normalizedQuestionCount,
         difficulty: normalizedDifficulty,
         questionType: normalizedQuestionType,
       });
-      console.log(
-        `  ✅ Generated ${parsedQuizPayload.questions.length} fallback mock questions\n`,
-      );
     } else {
       if (!error.code) {
         error.code = "QUIZ_GENERATION_FAILED";
@@ -951,8 +874,6 @@ const generatePracticeQuiz = async ({
     new Set(questions.flatMap((question) => question.subTopicTags)),
   );
 
-  console.log(`[SAVED] Saving ${questions.length} questions to database...`);
-
   const quiz = await Quiz.create({
     userId,
     courseId,
@@ -975,9 +896,6 @@ const generatePracticeQuiz = async ({
       generatedAt: new Date(),
     },
   });
-
-  console.log(`[✅ COMPLETE] Quiz created and saved successfully`);
-  console.log(`${"=".repeat(80)}\n`);
 
   return {
     quiz,

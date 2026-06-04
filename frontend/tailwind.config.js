@@ -18,10 +18,11 @@ export default {
           900: "#0c3d63",
         },
         // Accent colors for academic context
+        app: "#f9f7ff",
         accent: {
           teal: "#0d9488",
           slate: "#1e293b",
-          cream: "#faf9f6",
+          cream: "#f9f7ff",
           ivory: "#f5f3f0",
         },
       },

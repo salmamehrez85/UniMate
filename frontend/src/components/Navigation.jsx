@@ -114,7 +114,7 @@ export function Navigation({ activeView, setActiveView }) {
         </nav>
 
         {/* Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100 bg-gradient-to-b from-transparent to-gray-50/50">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100 bg-gradient-to-b from-transparent to-app/50">
           <p className="text-xs text-gray-400 text-center">
             <span className="font-bold text-gray-600">UniMate</span> •{" "}
             {t("nav.footer").split("UniMate • ")[1] || t("nav.footer")}

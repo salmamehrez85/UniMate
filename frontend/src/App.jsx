@@ -160,7 +160,7 @@ export default function App() {
 
   return (
     <ToastProvider>
-      <div className="flex h-screen w-full overflow-hidden bg-gray-50">
+      <div className="flex h-screen w-full overflow-hidden bg-app">
         <Navigation activeView={activeView} setActiveView={setActiveView} />
         <div className="flex flex-col flex-1 w-full md:ms-64 overflow-hidden">
           <Header activeView={activeView} onLogout={handleLogout} />

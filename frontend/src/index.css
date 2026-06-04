@@ -2,6 +2,10 @@
 
 @import "tailwindcss";
 
+@theme {
+  --color-app: #f9f7ff;
+}
+
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 html {
@@ -29,7 +33,6 @@ body {
     "Droid Sans",
     "Helvetica Neue",
     sans-serif;
-  background-color: #faf9f6;
   font-size: var(--app-font-size, 16px);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -41,7 +44,7 @@ body {
 /* ── Themes ─────────────────────────────────────────────── */
 :root[data-theme="light"],
 :root:not([data-theme]) {
-  --bg-app: #f9fafb;
+  --bg-app: #f9f7ff;
   --bg-card: #ffffff;
   --bg-input: #f3f4f6;
   --text-primary: #111827;
@@ -66,6 +69,10 @@ body {
 body {
   background-color: var(--bg-app);
   color: var(--text-primary);
+}
+
+.bg-app {
+  background-color: var(--bg-app);
 }
 
 /* ═══════════════════════════════════════════════════════

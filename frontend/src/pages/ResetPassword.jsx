@@ -46,7 +46,7 @@ export function ResetPassword({ resetToken, onBackToLogin }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-teal-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-app flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="flex justify-end mb-4">
           <LanguageSwitcher />
