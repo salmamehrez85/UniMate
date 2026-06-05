@@ -125,13 +125,48 @@ const extractJsonObject = (responseText) => {
 
   const withoutFences = trimmed.replace(/```json|```/gi, "").trim();
   const firstBraceIndex = withoutFences.indexOf("{");
-  const lastBraceIndex = withoutFences.lastIndexOf("}");
 
-  if (firstBraceIndex === -1 || lastBraceIndex === -1) {
+  if (firstBraceIndex === -1) {
     throw new Error("The AI response did not contain valid JSON");
   }
 
-  return withoutFences.slice(firstBraceIndex, lastBraceIndex + 1);
+  // Walk forward counting brace depth so we find the *matching* closing brace
+  // instead of the last `}` in the string (which may include trailing text).
+  let depth = 0;
+  let inString = false;
+  let escape = false;
+
+  for (let i = firstBraceIndex; i < withoutFences.length; i++) {
+    const char = withoutFences[i];
+
+    if (escape) {
+      escape = false;
+      continue;
+    }
+
+    if (char === "\\") {
+      escape = true;
+      continue;
+    }
+
+    if (char === '"') {
+      inString = !inString;
+      continue;
+    }
+
+    if (inString) continue;
+
+    if (char === "{") {
+      depth++;
+    } else if (char === "}") {
+      depth--;
+      if (depth === 0) {
+        return withoutFences.slice(firstBraceIndex, i + 1);
+      }
+    }
+  }
+
+  throw new Error("The AI response did not contain valid JSON");
 };
 
 const normalizeTag = (tag) =>
@@ -574,6 +609,7 @@ const buildMockQuizPayload = ({
 
 const shouldFallbackToMock = (error) => {
   const errorMessage = String(error?.message || "").toLowerCase();
+  const status = error?.status;
 
   return (
     error?.code === "MISSING_API_KEY" ||
@@ -587,7 +623,16 @@ const shouldFallbackToMock = (error) => {
     errorMessage.includes("failed to parse quiz json") ||
     errorMessage.includes("too many requests") ||
     errorMessage.includes("quota") ||
-    error?.status === 429
+    errorMessage.includes("service unavailable") ||
+    errorMessage.includes("high demand") ||
+    errorMessage.includes("overloaded") ||
+    errorMessage.includes("internal server error") ||
+    // Transient HTTP status codes from Google API
+    status === 429 ||
+    status === 500 ||
+    status === 502 ||
+    status === 503 ||
+    status === 504
   );
 };
 
@@ -837,6 +882,11 @@ const generatePracticeQuiz = async ({
         // passing inline parts here would conflict with JSON mode.
         inlineParts: [],
       });
+
+      parsedQuizPayload = parseQuizGenerationResponse(
+        rawResponse,
+        normalizedDifficulty,
+      );
     }
   } catch (error) {
     if (shouldFallbackToMock(error)) {
