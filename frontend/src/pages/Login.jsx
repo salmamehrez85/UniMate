@@ -5,11 +5,19 @@ import { LanguageSwitcher } from "../components/LanguageSwitcher";
 
 export function Login({ onSwitchToRegister, onLoginSuccess }) {
   return (
-    <div className="min-h-screen bg-app flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="flex justify-end mb-4">
-          <LanguageSwitcher />
-        </div>
+    <div className="login-scene">
+      {/* Animated blobs */}
+      <div className="login-scene-blob login-scene-blob-1" />
+      <div className="login-scene-blob login-scene-blob-2" />
+      <div className="login-scene-blob login-scene-blob-3" />
+
+      {/* Language switcher top-right */}
+      <div className="absolute top-4 right-4 z-10">
+        <LanguageSwitcher />
+      </div>
+
+      {/* Login card */}
+      <div className="login-card">
         <LoginHeader />
         <LoginForm
           onSwitchToRegister={onSwitchToRegister}

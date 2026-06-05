@@ -272,7 +272,7 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
         <div className="flex gap-3 pt-4">
           <button
             type="submit"
-            className="flex-1 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
+            className="flex-1 px-4 py-2 bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer text-white rounded-lg font-semibold transition">
             {initialData
               ? t("courseDetails.assessments.save")
               : t("courseDetails.assessments.add")}
@@ -280,7 +280,7 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
+            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition cursor-pointer">
             {t("courseDetails.assessments.cancel")}
           </button>
         </div>
@@ -300,7 +300,7 @@ function AssessmentModal({ isOpen, onClose, onSubmit, initialData }) {
               <div className="flex gap-3">
                 <button
                   onClick={handleConfirmFinal}
-                  className="flex-1 px-4 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-semibold transition cursor-pointer">
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer  cursor-pointer text-white rounded-lg font-semibold transition cursor-pointer">
                   {t("courseDetails.assessments.finalWarningConfirm")}
                 </button>
                 <button
@@ -398,7 +398,7 @@ export function AssessmentsTab({ course, onCourseUpdate }) {
       <div className="flex justify-end">
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
+          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer text-white rounded-lg font-semibold transition">
           <Plus className="w-5 h-5" />
           {t("courseDetails.assessments.add")}
         </button>
@@ -411,31 +411,31 @@ export function AssessmentsTab({ course, onCourseUpdate }) {
           </p>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
+            className="px-6 py-3 bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer text-white rounded-lg font-semibold transition">
             {t("courseDetails.assessments.addFirst")}
           </button>
         </div>
       ) : (
-        <div className="overflow-x-auto border border-slate-100 rounded-2xl">
+        <div className="overflow-x-auto border border-slate-100 dark:border-gray-800 rounded-2xl">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/70">
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+              <tr className="border-b border-slate-100 dark:border-gray-800 bg-slate-50/70 dark:bg-gray-800/40">
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-200">
                   {t("courseDetails.assessments.titleHeader")}
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-200">
                   {t("courseDetails.assessments.typeHeader")}
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-200">
                   {t("courseDetails.assessments.scoreHeader")}
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-200">
                   {t("courseDetails.assessments.dateHeader")}
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-200">
                   {t("courseDetails.assessments.weightHeader")}
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-200">
                   {t("courseDetails.assessments.actionsHeader")}
                 </th>
               </tr>
@@ -444,7 +444,7 @@ export function AssessmentsTab({ course, onCourseUpdate }) {
               {assessments.map((assessment) => (
                 <tr
                   key={assessment.id}
-                  className="border-b border-slate-100 hover:bg-slate-50/40 transition-colors">
+                  className="border-b border-slate-100 dark:border-gray-800 hover:bg-slate-50/40 dark:hover:bg-gray-800/20 transition-colors">
                   <td className="px-6 py-4 font-medium text-primary-900">
                     {assessment.title}
                   </td>

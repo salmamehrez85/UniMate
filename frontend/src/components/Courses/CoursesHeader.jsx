@@ -1,4 +1,4 @@
-import { Calendar, Plus } from "lucide-react";
+import { Calendar, Plus, BookOpen } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 export function CoursesHeader({ totalCourses, coursesLabel, onAddCourse }) {
@@ -20,19 +20,28 @@ export function CoursesHeader({ totalCourses, coursesLabel, onAddCourse }) {
   const labelText = coursesLabel || t("courses.header.activeLabel");
 
   return (
-    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-700">{currentSemester}</h1>
-        <p className="text-gray-600 mt-1 flex items-center gap-1">
-          <Calendar className="w-4 h-4" />
-          {totalCourses} {labelText}
-        </p>
-      </div>
-      <div className="flex gap-3">
-        <button
-          onClick={onAddCourse}
-          className="flex items-center gap-2 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-all font-semibold">
-          <Plus className="w-5 h-5" />
+    <div className="page-hero">
+      {/* Blobs */}
+      <div className="page-hero-blob page-hero-blob-1" />
+      <div className="page-hero-blob page-hero-blob-2" />
+      <div className="page-hero-blob page-hero-blob-3" />
+
+      <div className="page-hero-content flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="page-hero-label">
+            <span className="page-hero-label-dot" />
+            <BookOpen style={{ width: "0.85rem", height: "0.85rem" }} />
+            {t("nav.courses")}
+          </div>
+          <h1 className="page-hero-title">{currentSemester}</h1>
+          <p className="page-hero-subtitle flex items-center gap-1.5">
+            <Calendar className="w-4 h-4 shrink-0 text-black/70" />
+            {totalCourses} {labelText}
+          </p>
+        </div>
+
+        <button onClick={onAddCourse} className="btn-hero self-start shrink-0">
+          <Plus style={{ width: "1rem", height: "1rem" }} />
           {t("courses.header.addCourse")}
         </button>
       </div>

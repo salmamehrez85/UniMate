@@ -13,7 +13,7 @@ export function CoursePerformanceCard({ course }) {
   };
 
   const getProgressBarColor = (grade) => {
-    if (grade >= 85) return "bg-teal-500";
+    if (grade >= 85) return "bg-gradient-to-br from-indigo-600/60 via-purple-500/60 to-blue-500/60";
     if (grade >= 70) return "bg-yellow-500";
     return "bg-red-500";
   };

@@ -5,7 +5,7 @@ import { CheckCircle2, BookOpen, FileText, TrendingUp } from "lucide-react";
 
 const COURSE_COLORS = [
   "bg-blue-500",
-  "bg-teal-500",
+  "bg-gradient-to-br from-indigo-600/60 via-purple-500/60 to-blue-500/60",
   "bg-purple-500",
   "bg-orange-500",
   "bg-pink-500",

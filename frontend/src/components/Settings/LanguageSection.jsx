@@ -28,7 +28,7 @@ export function LanguageSection() {
             onClick={() => setLanguage(lang.code)}
             className={`px-4 py-1.5 rounded-lg text-sm font-medium border transition cursor-pointer ${
               prefs.language === lang.code
-                ? "bg-teal-500 text-white border-teal-500"
+                ? "bg-gradient-to-br from-indigo-600/60 via-purple-500/60 to-blue-500/60 text-white border-teal-500"
                 : "bg-white text-gray-600 border-gray-200 hover:border-teal-400"
             }`}>
             {lang.label}

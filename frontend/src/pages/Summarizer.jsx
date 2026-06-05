@@ -527,7 +527,7 @@ export function Summarizer({ onNavigate }) {
           type="button"
           onClick={handleGenerateClick}
           disabled={isSubmitting || isPreparingOCR}
-          className="w-full inline-flex items-center justify-center px-5 py-3 rounded-lg bg-teal-500 hover:bg-teal-600 text-white font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+          className="w-full inline-flex items-center justify-center px-5 py-3 rounded-lg bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer text-white font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed">
           {isPreparingOCR
             ? t("summarizer.ocrInProgress")
             : isSubmitting

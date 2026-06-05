@@ -331,7 +331,7 @@ export function AIPracticeTab({ course }) {
 
       {!hasResults ? (
         /* empty state */
-        <div className="bg-linear-to-br from-teal-50 to-cyan-50 border border-teal-200 rounded-2xl p-10 text-center">
+        <div className="text-center mt-20">
           <Zap className="w-12 h-12 text-teal-400 mx-auto mb-3" />
           <h3 className="text-lg font-bold text-teal-800 mb-2">
             {t("courseDetails.aiPractice.noQuizzesYet")}

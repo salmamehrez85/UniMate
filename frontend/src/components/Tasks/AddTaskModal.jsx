@@ -237,7 +237,7 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
           <button
             type="submit"
             disabled={submitting}
-            className="flex-1 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+            className="flex-1 px-4 py-2 bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer text-white rounded-lg font-semibold transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
             {submitting
               ? t("tasks.addModal.adding")
               : t("tasks.addModal.addButton")}
@@ -245,7 +245,7 @@ export function AddTaskModal({ courses, onClose, onAdd }) {
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition cursor-pointer">
+            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition cursor-pointer cursor-pointer">
             {t("tasks.addModal.cancelButton")}
           </button>
         </div>

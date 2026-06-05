@@ -208,7 +208,7 @@ function Composer({
             <button
               type="button"
               onClick={handleOpenEmailApp}
-              className="w-full px-4 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold transition inline-flex items-center justify-center gap-2">
+              className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer  cursor-pointer text-white font-bold transition inline-flex items-center justify-center gap-2">
               <Send className="w-4 h-4" />
               {t("emailProfessor.openInEmailApp")}
             </button>
@@ -288,7 +288,7 @@ function Composer({
               type="button"
               onClick={handleGenerate}
               disabled={!selectedCourse || isGenerating}
-              className="w-full px-4 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold transition inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+              className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer  cursor-pointer text-white font-bold transition inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
               {isGenerating ? (
                 <>
                   <Loader className="w-4 h-4 animate-spin" />
@@ -407,7 +407,7 @@ function EmailDetail({ entry, onBack, onStatusChange, onDelete }) {
             <button
               type="button"
               onClick={handleOpenEmailApp}
-              className="px-4 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold transition inline-flex items-center justify-center gap-2">
+              className="px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer  cursor-pointer text-white font-bold transition inline-flex items-center justify-center gap-2">
               <Send className="w-4 h-4" />
               {t("emailProfessor.openInEmailApp")}
             </button>
@@ -599,7 +599,7 @@ export function EmailProfessor() {
         <button
           type="button"
           onClick={() => setView("compose")}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-semibold transition text-sm">
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer  cursor-pointer text-white rounded-lg font-semibold transition text-sm">
           <Plus className="w-4 h-4" />
           {t("emailProfessor.composeNew")}
         </button>

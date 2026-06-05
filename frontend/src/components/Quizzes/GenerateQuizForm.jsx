@@ -155,7 +155,7 @@ export function GenerateQuizForm({
 
         <button
           type="submit"
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer text-white rounded-lg font-semibold transition disabled:opacity-60 disabled:cursor-not-allowed"
           disabled={isGenerating || !formValues.courseId || !canGenerate}>
           {isGenerating ? (
             <>

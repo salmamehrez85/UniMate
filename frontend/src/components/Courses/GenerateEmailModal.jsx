@@ -306,7 +306,7 @@ export function GenerateEmailModal({
               <button
                 type="button"
                 onClick={handleOpenEmailApp}
-                className="w-full px-4 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold transition inline-flex items-center justify-center gap-2">
+                className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer  cursor-pointer text-white font-bold transition inline-flex items-center justify-center gap-2">
                 <Send className="w-4 h-4" />
                 {t("courses.emailModal.openEmailApp")}
               </button>
@@ -378,7 +378,7 @@ export function GenerateEmailModal({
                 type="button"
                 onClick={handleGenerate}
                 disabled={!selected || isGenerating}
-                className="w-full px-4 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold transition inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer  cursor-pointer text-white font-bold transition inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                 {isGenerating ? (
                   <>
                     <Loader className="w-4 h-4 animate-spin" />

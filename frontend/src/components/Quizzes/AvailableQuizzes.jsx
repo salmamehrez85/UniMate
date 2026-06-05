@@ -81,8 +81,8 @@ export function AvailableQuizzes({
       </div>
 
       {targetTopics.length > 0 && (
-        <div className="px-6 py-4 bg-amber-50 border-b border-amber-100">
-          <p className="text-sm font-semibold text-amber-900">
+        <div className="px-6 py-4 bg-amber-50 dark:bg-amber-950/20 border-b border-amber-100 dark:border-amber-900/30">
+          <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">
             Current Study Targets for{" "}
             {selectedCourse ? selectedCourse.code : "this course"}
           </p>
@@ -93,7 +93,7 @@ export function AvailableQuizzes({
             ).map((topic) => (
               <span
                 key={topic.tag}
-                className="text-xs text-amber-800 bg-white border border-amber-200 px-2 py-1 rounded-md">
+                className="text-xs text-amber-800 dark:text-amber-300 bg-white dark:bg-[#161b22] border border-amber-200 dark:border-amber-900/40 px-2 py-1 rounded-md">
                 {topic.tag.replace(/_/g, " ")}
               </span>
             ))}
@@ -101,7 +101,7 @@ export function AvailableQuizzes({
               <button
                 type="button"
                 onClick={() => setShowAllTopics((v) => !v)}
-                className="text-xs text-amber-700 underline underline-offset-2 px-1">
+                className="text-xs text-amber-700 dark:text-amber-400 underline underline-offset-2 px-1 cursor-pointer">
                 {showAllTopics
                   ? "Show less"
                   : `+${targetTopics.length - MAX_VISIBLE_TOPICS} more`}
@@ -178,7 +178,7 @@ export function AvailableQuizzes({
                 </button>
                 <button
                   onClick={() => onStartQuiz(quiz)}
-                  className="flex items-center gap-2 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition cursor-pointer">
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer text-white rounded-lg font-semibold transition cursor-pointer">
                   <Play className="w-4 h-4" />
                   {t("quizzes.available.startButton")}
                 </button>

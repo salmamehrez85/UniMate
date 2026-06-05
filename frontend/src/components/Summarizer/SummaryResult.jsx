@@ -184,7 +184,7 @@ export function SummaryResult({ summaryData, courses = [] }) {
     },
     custom: {
       label: t("summarizer.modes.custom"),
-      badgeClass: "bg-teal-600 text-white",
+      badgeClass: "bg-gradient-to-br from-indigo-600/60 via-purple-500/60 to-blue-500/60 hover:from-indigo-600/85 hover:via-purple-500/85 hover:to-blue-500/85 text-white",
       accentClass: "text-teal-700",
       dividerClass: "border-teal-100",
       type: "prose",

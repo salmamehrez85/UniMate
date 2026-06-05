@@ -145,7 +145,7 @@ export function CustomSelect({
                 </div>
                 {isSelected && (
                   <span
-                    className="w-2 h-2 rounded-full bg-teal-500 shrink-0"
+                    className="w-2 h-2 rounded-full bg-gradient-to-br from-indigo-600/60 via-purple-500/60 to-blue-500/60 shrink-0"
                     aria-hidden="true"
                   />
                 )}

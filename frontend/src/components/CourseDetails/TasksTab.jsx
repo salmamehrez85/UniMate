@@ -195,13 +195,13 @@ function AddTaskModal({ isOpen, onClose, onAdd }) {
         <div className="flex gap-3 pt-4">
           <button
             type="submit"
-            className="flex-1 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
+            className="flex-1 px-4 py-2 bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer text-white rounded-lg font-semibold transition">
             {t("courseDetails.tasks.addButton")}
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
+            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition cursor-pointer">
             {t("courseDetails.tasks.cancel")}
           </button>
         </div>
@@ -305,7 +305,7 @@ export function TasksTab({ course, onCourseUpdate }) {
             onClick={() => setFilterStatus("all")}
             className={`px-4 py-2 rounded-lg font-medium transition ${
               filterStatus === "all"
-                ? "bg-teal-500 text-white"
+                ? "bg-gradient-to-br from-indigo-600/60 via-purple-500/60 to-blue-500/60 text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}>
             {t("courseDetails.tasks.all")}
@@ -316,7 +316,7 @@ export function TasksTab({ course, onCourseUpdate }) {
               onClick={() => setFilterStatus(status.value)}
               className={`px-4 py-2 rounded-lg font-medium transition ${
                 filterStatus === status.value
-                  ? "bg-teal-500 text-white"
+                  ? "bg-gradient-to-br from-indigo-600/60 via-purple-500/60 to-blue-500/60 text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}>
               {status.label}
@@ -326,7 +326,7 @@ export function TasksTab({ course, onCourseUpdate }) {
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition whitespace-nowrap">
+          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer text-white rounded-lg font-semibold transition whitespace-nowrap">
           <Plus className="w-5 h-5" />
           {t("courseDetails.tasks.addButton")}
         </button>
@@ -343,7 +343,7 @@ export function TasksTab({ course, onCourseUpdate }) {
           </p>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
+            className="px-6 py-3 bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer text-white rounded-lg font-semibold transition">
             {t("courseDetails.tasks.addFirstTask")}
           </button>
         </div>

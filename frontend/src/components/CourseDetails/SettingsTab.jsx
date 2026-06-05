@@ -83,7 +83,7 @@ export function SettingsTab({
           {!isEditing && (
             <button
               onClick={() => setIsEditing(true)}
-              className="px-6 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
+              className="px-6 py-2 bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer text-white rounded-lg font-semibold transition">
               {t("courseDetails.settingsTab.editButton")}
             </button>
           )}
@@ -218,7 +218,7 @@ export function SettingsTab({
             <div className="flex gap-3 pt-4">
               <button
                 type="submit"
-                className="flex items-center gap-2 px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer text-white rounded-lg font-semibold transition">
                 <Save className="w-5 h-5" />
                 {t("courseDetails.settingsTab.save")}
               </button>
@@ -315,7 +315,7 @@ export function SettingsTab({
                 {t("courseDetails.settingsTab.outlineLabel")}
               </p>
               {course.outlineText ? (
-                <div className="bg-slate-50/50 p-4.5 rounded-xl border border-slate-100 max-h-64 overflow-y-auto">
+                <div className="bg-slate-50/50 dark:bg-gray-800/20 p-4.5 rounded-xl border border-slate-100 dark:border-gray-800 max-h-64 overflow-y-auto">
                   <p className="text-gray-700 whitespace-pre-wrap text-sm leading-relaxed">
                     {course.outlineText}
                   </p>
@@ -331,17 +331,17 @@ export function SettingsTab({
       </div>
 
       {/* Delete Course Section - Danger Zone */}
-      <div className="bg-red-50/50 rounded-2xl p-8 border border-red-100 shadow-xs">
-        <h2 className="text-2xl font-bold text-red-900 mb-2">
+      <div className="bg-red-50/50 dark:bg-red-950/20 rounded-2xl p-8 border border-red-100 dark:border-red-900/50 shadow-xs">
+        <h2 className="text-2xl font-bold text-red-900 dark:text-red-200 mb-2">
           {t("courseDetails.settingsTab.dangerZone")}
         </h2>
-        <p className="text-red-700 mb-6">
+        <p className="text-red-700 dark:text-red-400 mb-6">
           {t("courseDetails.settingsTab.dangerWarning")}
         </p>
 
         <button
           onClick={() => setDeleteConfirm(true)}
-          className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition">
+          className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition cursor-pointer">
           {t("courseDetails.settingsTab.deleteCourse")}
         </button>
       </div>

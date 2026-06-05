@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Calendar, Plus } from "lucide-react";
 import { CoursesHeader } from "../components/Courses/CoursesHeader";
 import { CourseCard } from "../components/Courses/CourseCard";
 import { AddCourseModal } from "../components/Courses/AddCourseModal";
@@ -107,7 +108,7 @@ export function Courses({ onSelectCourse }) {
     return (
       <div className="space-y-6 px-6 pb-6">
         <div className="flex items-center justify-center py-12">
-          <div className="text-gray-600">{t("courses.loading")}</div>
+          <div className="text-gray-600 dark:text-gray-400">{t("courses.loading")}</div>
         </div>
       </div>
     );
@@ -131,31 +132,35 @@ export function Courses({ onSelectCourse }) {
         </div>
       )}
 
-      <div className="inline-flex p-1 bg-slate-100/80 rounded-xl">
+      {/* Glassy Tab Switcher */}
+      <div className="glass-card p-1 rounded-2xl flex gap-1 w-fit border border-white/20 dark:border-white/5 shadow-xs">
         <button
           onClick={() => setViewMode("active")}
-          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
+          className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 cursor-pointer ${
             viewMode === "active"
-              ? "bg-white text-teal-600 shadow-sm"
-              : "text-gray-700 hover:text-gray-900"
+              ? "bg-gradient-to-r from-indigo-400 to-violet-500 text-white shadow-md shadow-indigo-200/50 dark:shadow-none"
+              : "text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5"
           }`}>
           {t("courses.active", { count: activeCourses.length })}
         </button>
         <button
           onClick={() => setViewMode("completed")}
-          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
+          className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 cursor-pointer ${
             viewMode === "completed"
-              ? "bg-white text-teal-600 shadow-sm"
-              : "text-gray-700 hover:text-gray-900"
+              ? "bg-gradient-to-r from-indigo-400 to-violet-500 text-white shadow-md shadow-indigo-200/50 dark:shadow-none"
+              : "text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5"
           }`}>
           {t("courses.completed", { count: completedCourses.length })}
         </button>
       </div>
 
-      {/* Courses Grid */}
+      {/* Courses Grid / Empty State */}
       {displayedCourses.length === 0 ? (
-        <div className="bg-white rounded-xl p-12 text-center border border-gray-100">
-          <p className="text-gray-600 mb-4">
+        <div className="glass-card rounded-2xl p-16 text-center border border-white/20 dark:border-white/5 shadow-md">
+          <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-950/30 rounded-2xl flex items-center justify-center text-indigo-500 dark:text-indigo-400 mx-auto mb-4 border border-indigo-100/30">
+            <Calendar className="w-8 h-8" />
+          </div>
+          <p className="text-gray-600 dark:text-gray-400 mb-6 font-medium">
             {viewMode === "completed"
               ? t("courses.noCompleted")
               : t("courses.noActive")}
@@ -163,13 +168,14 @@ export function Courses({ onSelectCourse }) {
           {viewMode === "active" && (
             <button
               onClick={() => setIsModalOpen(true)}
-              className="px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition font-semibold">
+              className="btn-hero cursor-pointer inline-flex items-center gap-2">
+              <Plus className="w-4 h-4" />
               {t("courses.addFirst")}
             </button>
           )}
         </div>
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-10">
           {semesterGroups.map(([semester, semesterCourses]) => {
             const semesterMatch = String(semester).match(
               /(Winter|Spring|Summer|Fall)\s+(\d{4})/i,
@@ -190,12 +196,13 @@ export function Courses({ onSelectCourse }) {
                 })
               : semester;
             return (
-              <section key={semester} className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-800">
-                    {translatedSemester}
-                  </h2>
-                  <span className="text-sm text-gray-500">
+              <section key={semester} className="space-y-6">
+                <div className="section-title">
+                  <div className="section-title-icon">
+                    <Calendar className="w-4 h-4 text-white" />
+                  </div>
+                  <h2 className="text-gradient-brand font-extrabold tracking-tight">{translatedSemester}</h2>
+                  <span className="ml-auto text-xs font-bold px-3 py-1 rounded-full bg-indigo-50/50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100/40 dark:border-indigo-900/30 shadow-xs">
                     {t("courses.groupCount", { count: semesterCourses.length })}
                   </span>
                 </div>

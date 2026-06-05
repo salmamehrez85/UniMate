@@ -1,5 +1,5 @@
-import logoLight from "../assets/logo.png";
-import logoDark from "../assets/Logo_dark_mode.png";
+import logoLight from "../assets/logo-removebg-preview.png";
+import logoDark from "../assets/logo-removebg-preview.png";
 import { useEffect, useState } from "react";
 
 function getCurrentTheme() {

@@ -214,7 +214,7 @@ export function QuizReviewModal({ quiz, quizResult, weakAreas = [], onClose }) {
         <div className="px-6 py-4 border-t border-gray-100 bg-white flex justify-end">
           <button
             onClick={onClose}
-            className="px-5 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
+            className="px-5 py-2 bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer text-white rounded-lg font-semibold transition">
             Done
           </button>
         </div>

@@ -186,7 +186,8 @@
       "tasks_other": "{{count}} مهام",
       "notSpecified": "غير محدد",
       "manage": "إدارة المقرر",
-      "generateEmail": "إنشاء رسالة للأستاذ"
+      "generateEmail": "إنشاء رسالة للأستاذ",
+      "instructor": "المحاضر"
     },
     "addModal": {
       "title": "إضافة مقرر جديد",

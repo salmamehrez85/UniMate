@@ -347,7 +347,7 @@ export function AddCourseModal({ isOpen, onClose, onAdd }) {
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-3 bg-gradient-to-br from-indigo-600/85 via-purple-500/85 to-blue-500/85 hover:from-indigo-600/60 hover:via-purple-500/60 hover:to-blue-500/60 text-white rounded-lg transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={loading}>
               {loading
                 ? t("courses.addModal.addingButton")

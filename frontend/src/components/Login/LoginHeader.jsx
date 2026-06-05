@@ -8,10 +8,19 @@ export function LoginHeader() {
       <div className="flex justify-center mb-4">
         <Logo size="large" />
       </div>
-      <h1 className="text-3xl font-bold text-primary-900 mb-2">
+      <h1
+        className="text-3xl font-extrabold mb-2 tracking-tight"
+        style={{
+          background:
+            "linear-gradient(135deg,#4f46e5 0%,#7c3aed 40%,#a855f7 70%,#3b82f6 100%)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundClip: "text",
+        }}
+      >
         {t("auth.login.title")}
       </h1>
-      <p className="text-gray-600">{t("auth.login.subtitle")}</p>
+      <p className="text-gray-500 text-sm">{t("auth.login.subtitle")}</p>
     </div>
   );
 }

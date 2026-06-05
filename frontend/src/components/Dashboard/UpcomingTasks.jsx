@@ -1,36 +1,39 @@
 import { ListTodo } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-function getDaysLeftText(daysLeft, t) {
-  if (daysLeft === 0) return t("dashboard.upcomingTasks.dueToday");
-  return t("dashboard.upcomingTasks.daysLeft", { count: daysLeft });
-}
-
 function TaskItem({ task, t }) {
-  const borderClass =
-    task.priority === "high"
-      ? "border-l-4 border-red-500"
-      : "border-l-4 border-amber-500";
+  const isHigh = task.priority === "high";
+  const priorityGlow = isHigh
+    ? "border-l-4 border-red-500 shadow-red-100"
+    : "border-l-4 border-amber-400 shadow-amber-100";
 
   return (
-    <div className={`flex items-start gap-4 p-4.5 rounded-xl bg-white dark:bg-slate-900 transition-all border border-slate-200 dark:border-slate-800/80 hover:border-primary-100 hover:shadow-xs hover:-translate-y-0.5 duration-200 ${borderClass}`}>
+    <div
+      className={`flex items-start gap-4 p-4 rounded-xl transition-all duration-200 border border-gray-100/80 hover:border-indigo-100 hover:shadow-md hover:-translate-y-0.5 shadow-sm ${priorityGlow}`}
+      style={{ background: "var(--card-glass-bg)", backdropFilter: "blur(8px)" }}
+    >
       <div className="flex-1 min-w-0">
-        <h4 className="font-bold text-slate-900 dark:text-white text-sm leading-tight">{task.title}</h4>
-        <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-bold tracking-widest uppercase">{task.course}</p>
+        <h4 className="font-bold text-gray-800 dark:text-gray-200 text-sm leading-tight">{task.title}</h4>
+        <p className="text-[10px] text-gray-400 mt-1 font-bold tracking-widest uppercase">
+          {task.course}
+        </p>
         <div className="flex items-center gap-2 mt-3 flex-wrap">
           <span
-            className={`text-[9px] px-2 py-0.5 rounded font-bold uppercase tracking-wider transition-colors ${
-              task.priority === "high"
-                ? "bg-red-500/10 text-red-500 border border-red-500/20"
-                : "bg-amber-500/10 text-amber-500 border border-amber-500/20"
-            }`}>
-            {task.priority === "high"
+            className={`text-[9px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${
+              isHigh
+                ? "bg-red-500/10 text-red-500 border border-red-400/20"
+                : "bg-amber-400/10 text-amber-600 border border-amber-400/20"
+            }`}
+          >
+            {isHigh
               ? t("dashboard.upcomingTasks.priorityHigh")
               : t("dashboard.upcomingTasks.priorityMedium")}
           </span>
-          <span className="text-xs text-slate-400 dark:text-slate-600">•</span>
-          <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">
-            {getDaysLeftText(task.daysLeft, t)}
+          <span className="text-xs text-gray-300 dark:text-gray-600">•</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+            {task.daysLeft === 0
+              ? t("dashboard.upcomingTasks.dueToday")
+              : t("dashboard.upcomingTasks.daysLeft", { count: task.daysLeft })}
           </span>
         </div>
       </div>
@@ -42,19 +45,20 @@ export function UpcomingTasks({ tasks = [], loading = false }) {
   const { t } = useTranslation();
   return (
     <div className="glass-card rounded-2xl p-6 shadow-xs">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-display font-extrabold text-primary-900 flex items-center gap-2">
-          <ListTodo className="w-5 h-5 text-primary-600" />
+      {/* Section title */}
+      <div className="section-title">
+        <div className="section-title-icon">
+          <ListTodo />
+        </div>
+        <span className="text-gradient-brand">
           {t("dashboard.upcomingTasks.title")}
-        </h3>
+        </span>
       </div>
-      <div className="space-y-3.5">
+
+      <div className="space-y-3">
         {loading ? (
           [1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="h-20 bg-gray-100/50 rounded-xl animate-pulse"
-            />
+            <div key={i} className="h-20 bg-indigo-50/40 rounded-xl animate-pulse" />
           ))
         ) : tasks.length === 0 ? (
           <p className="text-sm text-gray-400 text-center py-6">

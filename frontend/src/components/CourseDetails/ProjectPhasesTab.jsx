@@ -186,13 +186,13 @@ function AddPhaseModal({ isOpen, onClose, onAdd }) {
         <div className="flex gap-3 pt-4">
           <button
             type="submit"
-            className="flex-1 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
+            className="flex-1 px-4 py-2 bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer text-white rounded-lg font-semibold transition">
             {t("courseDetails.projectPhases.addButton")}
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition">
+            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-semibold transition cursor-pointer">
             {t("courseDetails.projectPhases.cancel")}
           </button>
         </div>
@@ -262,7 +262,7 @@ export function ProjectPhasesTab({ course, onCourseUpdate }) {
       <div className="flex justify-end">
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
+          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer text-white rounded-lg font-semibold transition">
           <Plus className="w-5 h-5" />
           {t("courseDetails.projectPhases.addButton")}
         </button>
@@ -275,7 +275,7 @@ export function ProjectPhasesTab({ course, onCourseUpdate }) {
           </p>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-semibold transition">
+            className="px-6 py-3 bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer text-white rounded-lg font-semibold transition">
             {t("courseDetails.projectPhases.addFirst")}
           </button>
         </div>

@@ -96,44 +96,57 @@ export function CourseDetails({
   };
 
   return (
-    <div className="flex flex-col flex-1 min-h-full space-y-4 md:space-y-6 px-3 md:px-6 pb-6">
+    <div className="flex flex-col flex-1 min-h-full space-y-6 px-6 pb-6">
       {/* Header with Breadcrumb */}
-      <div className="flex items-center gap-2 md:gap-4 mb-4 md:mb-6">
+      <div className="flex items-center mb-2">
         <button
           onClick={onBack}
-          className="flex items-center gap-1 md:gap-2 text-primary-600 hover:text-primary-700 transition font-medium text-sm md:text-base">
-          <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
+          className="group flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-all font-bold text-sm bg-white dark:bg-gray-800/80 px-3.5 py-2 rounded-xl shadow-xs border border-gray-100 dark:border-gray-800 cursor-pointer">
+          <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
           {t("courseDetails.backToCourses")}
         </button>
       </div>
 
-      <div className="bg-white rounded-xl p-3 md:p-6 border border-gray-100 shadow-sm">
-        <div className="flex items-center justify-between mb-4 md:mb-6">
+      {/* Course Hero Banner */}
+      <div className="page-hero">
+        {/* Blobs */}
+        <div className="page-hero-blob page-hero-blob-1" />
+        <div className="page-hero-blob page-hero-blob-2" />
+        <div className="page-hero-blob page-hero-blob-3" />
+
+        <div className="page-hero-content space-y-4">
           <div>
-            <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-primary-900 mb-1 md:mb-2">
+            <div className="page-hero-label">
+              <span className="page-hero-label-dot" />
+              {courseData.code}
+            </div>
+            <h1 className="page-hero-title text-2xl md:text-3.5xl font-extrabold leading-tight">
               {courseData.name || courseData.title}
             </h1>
-            <p className="text-gray-600 text-sm md:text-base">
-              {t("courseDetails.courseCode", { code: courseData.code })}
-            </p>
+            {courseData.instructor && (
+              <p className="page-hero-subtitle mt-2 flex items-center gap-1.5 text-black/90">
+                <span className="font-semibold text-black/70">{t("courses.card.instructor") || "Instructor"}:</span>
+                {courseData.instructor}
+              </p>
+            )}
           </div>
         </div>
+      </div>
 
-        {/* Tabs Navigation */}
-        <div className="flex flex-wrap gap-1 md:gap-2 border-b border-gray-200 -mx-3 md:-mx-6 px-3 md:px-6">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-2 md:px-4 py-2 md:py-3 font-medium transition text-sm md:text-base whitespace-nowrap ${
-                activeTab === tab.id
-                  ? "text-teal-600 border-b-2 border-teal-600 -mb-1"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}>
-              {tab.label}
-            </button>
-          ))}
-        </div>
+      {/* Tabs Navigation */}
+      <div className="glass-card p-1.5 rounded-2xl flex flex-wrap gap-1.5 border border-white/20 dark:border-white/5 shadow-xs overflow-x-auto">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`px-5 py-2.5 rounded-xl font-bold transition-all duration-300 text-sm whitespace-nowrap cursor-pointer ${
+              activeTab === tab.id
+                ? "bg-gradient-to-r from-indigo-400 to-violet-500 text-white shadow-md shadow-indigo-200/50 dark:shadow-none"
+                : "text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white/50 dark:hover:bg-white/5"
+            }`}>
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {/* Tab Content */}

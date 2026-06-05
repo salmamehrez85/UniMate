@@ -22,7 +22,7 @@ export function TasksFilters({
             onClick={() => onStatusChange(option.value)}
             className={`px-4 py-2 rounded-full text-sm font-semibold transition ${
               statusFilter === option.value
-                ? "bg-teal-500 text-white"
+                ? "bg-gradient-to-br from-indigo-600/60 via-purple-500/60 to-blue-500/60 text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}>
             {option.label}

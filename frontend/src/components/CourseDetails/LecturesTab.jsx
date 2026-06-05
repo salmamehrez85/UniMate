@@ -200,7 +200,7 @@ export function LecturesTab({ course, onCourseUpdate }) {
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
-          className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-semibold text-sm transition disabled:opacity-60 disabled:cursor-not-allowed">
+          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-400 to-violet-500 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer  cursor-pointer text-white rounded-lg font-semibold text-sm transition disabled:opacity-60 disabled:cursor-not-allowed">
           {uploading ? (
             <LoaderCircle className="w-4 h-4 animate-spin" />
           ) : (

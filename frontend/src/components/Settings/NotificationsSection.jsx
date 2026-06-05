@@ -7,7 +7,7 @@ function Toggle({ enabled, onChange, onLabel, offLabel }) {
     <button
       onClick={() => onChange(!enabled)}
       className={`relative inline-flex h-7 w-16 items-center rounded-full transition-colors cursor-pointer focus:outline-none ${
-        enabled ? "bg-teal-500" : "bg-gray-200"
+        enabled ? "bg-gradient-to-br from-indigo-600/60 via-purple-500/60 to-blue-500/60" : "bg-gray-200"
       }`}>
       <span
         className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${

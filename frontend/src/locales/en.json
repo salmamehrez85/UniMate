@@ -170,7 +170,8 @@
       "tasks_other": "{{count}} tasks",
       "notSpecified": "Not specified",
       "manage": "Manage Course",
-      "generateEmail": "Generate email to professor"
+      "generateEmail": "Generate email to professor",
+      "instructor": "Instructor"
     },
     "addModal": {
       "title": "Add New Course",

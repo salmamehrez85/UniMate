@@ -182,7 +182,7 @@ function ActiveCourseCard({
           {course.hasOutline && (
             <button
               onClick={() => onViewInsights(course.id, prediction)}
-              className="w-full mt-3 px-4 py-2 bg-teal-50 hover:bg-teal-100 text-teal-700 rounded-lg font-medium transition text-sm flex items-center justify-center gap-2">
+              className="w-full mt-3 px-4 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:via-purple-500/60 hover:to-blue-500/60 cursor-pointer text-white rounded-lg font-medium transition text-sm flex items-center justify-center gap-2 ">
               <Zap className="w-4 h-4" />
               {t("performance.viewInsights")}
             </button>
@@ -194,7 +194,7 @@ function ActiveCourseCard({
       {!prediction && !isLoading && (
         <button
           onClick={() => onPredictClick(course.id)}
-          className="w-full px-4 py-3 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white rounded-lg font-semibold transition flex items-center justify-center gap-2">
+          className="w-full px-4 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:via-purple-500/60 hover:to-blue-500/60 text-white rounded-lg font-semibold transition flex items-center justify-center gap-2 cursor-pointer">
           <Sparkles className="w-5 h-5" />
           {t("performance.predictFinalGrade")}
         </button>
@@ -323,7 +323,7 @@ function AIInsightsModal({
                       <h4 className="font-semibold text-gray-900">
                         {idx + 1}. {course.name}
                       </h4>
-                      <span className="bg-teal-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                      <span className="bg-gradient-to-br from-indigo-600/60 via-purple-500/60 to-blue-500/60 text-white text-xs font-bold px-3 py-1 rounded-full">
                         {t("performance.aiInsights.similar", {
                           pct: course.similarity,
                         })}
